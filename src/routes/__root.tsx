@@ -88,6 +88,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "TrialFinderUS" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { property: "og:title", content: "TrialFinderUS — Clinical Trials & Research Studies Directory" },
+      { name: "twitter:title", content: "TrialFinderUS — Clinical Trials & Research Studies Directory" },
+      { name: "description", content: "Discover US clinical trials, research studies, and paid opportunities." },
+      { property: "og:description", content: "Discover US clinical trials, research studies, and paid opportunities." },
+      { name: "twitter:description", content: "Discover US clinical trials, research studies, and paid opportunities." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/291ab2c1-b603-4998-90e1-25b8534926a7/id-preview-ebc8c89c--c1fe87b9-fcf0-4e76-b8cc-2d65acf506ba.lovable.app-1782475038070.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/291ab2c1-b603-4998-90e1-25b8534926a7/id-preview-ebc8c89c--c1fe87b9-fcf0-4e76-b8cc-2d65acf506ba.lovable.app-1782475038070.png" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
     scripts: [
