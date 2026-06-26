@@ -9,38 +9,311 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as RecruitingRouteImport } from './routes/recruiting'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StatesIndexRouteImport } from './routes/states.index'
+import { Route as SponsorsIndexRouteImport } from './routes/sponsors.index'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as ConditionsIndexRouteImport } from './routes/conditions.index'
+import { Route as StudiesNctIdRouteImport } from './routes/studies.$nctId'
+import { Route as StatesStateSlugRouteImport } from './routes/states.$stateSlug'
+import { Route as SponsorsSlugRouteImport } from './routes/sponsors.$slug'
+import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
+import { Route as RobotsTxtRouteImport } from './routes/robots.txt'
+import { Route as PhasePhaseRouteImport } from './routes/phase.$phase'
+import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
+import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
+import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecruitingRoute = RecruitingRouteImport.update({
+  id: '/recruiting',
+  path: '/recruiting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StatesIndexRoute = StatesIndexRouteImport.update({
+  id: '/states/',
+  path: '/states/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorsIndexRoute = SponsorsIndexRouteImport.update({
+  id: '/sponsors/',
+  path: '/sponsors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/learn/',
+  path: '/learn/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsIndexRoute = ConditionsIndexRouteImport.update({
+  id: '/conditions/',
+  path: '/conditions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudiesNctIdRoute = StudiesNctIdRouteImport.update({
+  id: '/studies/$nctId',
+  path: '/studies/$nctId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatesStateSlugRoute = StatesStateSlugRouteImport.update({
+  id: '/states/$stateSlug',
+  path: '/states/$stateSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorsSlugRoute = SponsorsSlugRouteImport.update({
+  id: '/sponsors/$slug',
+  path: '/sponsors/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapXmlRoute = SitemapXmlRouteImport.update({
+  id: '/sitemap/xml',
+  path: '/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsTxtRoute = RobotsTxtRouteImport.update({
+  id: '/robots/txt',
+  path: '/robots/txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhasePhaseRoute = PhasePhaseRouteImport.update({
+  id: '/phase/$phase',
+  path: '/phase/$phase',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnSlugRoute = LearnSlugRouteImport.update({
+  id: '/learn/$slug',
+  path: '/learn/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
+  id: '/conditions/$slug',
+  path: '/conditions/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitiesCitySlugRoute = CitiesCitySlugRouteImport.update({
+  id: '/cities/$citySlug',
+  path: '/cities/$citySlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
+  id: '/api/public/seed-admin',
+  path: '/api/public/seed-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/recruiting': typeof RecruitingRoute
+  '/search': typeof SearchRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/cities/$citySlug': typeof CitiesCitySlugRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
+  '/learn/$slug': typeof LearnSlugRoute
+  '/phase/$phase': typeof PhasePhaseRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
+  '/sponsors/$slug': typeof SponsorsSlugRoute
+  '/states/$stateSlug': typeof StatesStateSlugRoute
+  '/studies/$nctId': typeof StudiesNctIdRoute
+  '/conditions/': typeof ConditionsIndexRoute
+  '/learn/': typeof LearnIndexRoute
+  '/sponsors/': typeof SponsorsIndexRoute
+  '/states/': typeof StatesIndexRoute
+  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/recruiting': typeof RecruitingRoute
+  '/search': typeof SearchRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/cities/$citySlug': typeof CitiesCitySlugRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
+  '/learn/$slug': typeof LearnSlugRoute
+  '/phase/$phase': typeof PhasePhaseRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
+  '/sponsors/$slug': typeof SponsorsSlugRoute
+  '/states/$stateSlug': typeof StatesStateSlugRoute
+  '/studies/$nctId': typeof StudiesNctIdRoute
+  '/conditions': typeof ConditionsIndexRoute
+  '/learn': typeof LearnIndexRoute
+  '/sponsors': typeof SponsorsIndexRoute
+  '/states': typeof StatesIndexRoute
+  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/recruiting': typeof RecruitingRoute
+  '/search': typeof SearchRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/cities/$citySlug': typeof CitiesCitySlugRoute
+  '/conditions/$slug': typeof ConditionsSlugRoute
+  '/learn/$slug': typeof LearnSlugRoute
+  '/phase/$phase': typeof PhasePhaseRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
+  '/sponsors/$slug': typeof SponsorsSlugRoute
+  '/states/$stateSlug': typeof StatesStateSlugRoute
+  '/studies/$nctId': typeof StudiesNctIdRoute
+  '/conditions/': typeof ConditionsIndexRoute
+  '/learn/': typeof LearnIndexRoute
+  '/sponsors/': typeof SponsorsIndexRoute
+  '/states/': typeof StatesIndexRoute
+  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/recruiting'
+    | '/search'
+    | '/admin'
+    | '/cities/$citySlug'
+    | '/conditions/$slug'
+    | '/learn/$slug'
+    | '/phase/$phase'
+    | '/robots/txt'
+    | '/sitemap/xml'
+    | '/sponsors/$slug'
+    | '/states/$stateSlug'
+    | '/studies/$nctId'
+    | '/conditions/'
+    | '/learn/'
+    | '/sponsors/'
+    | '/states/'
+    | '/api/public/seed-admin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/recruiting'
+    | '/search'
+    | '/admin'
+    | '/cities/$citySlug'
+    | '/conditions/$slug'
+    | '/learn/$slug'
+    | '/phase/$phase'
+    | '/robots/txt'
+    | '/sitemap/xml'
+    | '/sponsors/$slug'
+    | '/states/$stateSlug'
+    | '/studies/$nctId'
+    | '/conditions'
+    | '/learn'
+    | '/sponsors'
+    | '/states'
+    | '/api/public/seed-admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/recruiting'
+    | '/search'
+    | '/_authenticated/admin'
+    | '/cities/$citySlug'
+    | '/conditions/$slug'
+    | '/learn/$slug'
+    | '/phase/$phase'
+    | '/robots/txt'
+    | '/sitemap/xml'
+    | '/sponsors/$slug'
+    | '/states/$stateSlug'
+    | '/studies/$nctId'
+    | '/conditions/'
+    | '/learn/'
+    | '/sponsors/'
+    | '/states/'
+    | '/api/public/seed-admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  RecruitingRoute: typeof RecruitingRoute
+  SearchRoute: typeof SearchRoute
+  CitiesCitySlugRoute: typeof CitiesCitySlugRoute
+  ConditionsSlugRoute: typeof ConditionsSlugRoute
+  LearnSlugRoute: typeof LearnSlugRoute
+  PhasePhaseRoute: typeof PhasePhaseRoute
+  RobotsTxtRoute: typeof RobotsTxtRoute
+  SitemapXmlRoute: typeof SitemapXmlRoute
+  SponsorsSlugRoute: typeof SponsorsSlugRoute
+  StatesStateSlugRoute: typeof StatesStateSlugRoute
+  StudiesNctIdRoute: typeof StudiesNctIdRoute
+  ConditionsIndexRoute: typeof ConditionsIndexRoute
+  LearnIndexRoute: typeof LearnIndexRoute
+  SponsorsIndexRoute: typeof SponsorsIndexRoute
+  StatesIndexRoute: typeof StatesIndexRoute
+  ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recruiting': {
+      id: '/recruiting'
+      path: '/recruiting'
+      fullPath: '/recruiting'
+      preLoaderRoute: typeof RecruitingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +321,147 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/states/': {
+      id: '/states/'
+      path: '/states'
+      fullPath: '/states/'
+      preLoaderRoute: typeof StatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sponsors/': {
+      id: '/sponsors/'
+      path: '/sponsors'
+      fullPath: '/sponsors/'
+      preLoaderRoute: typeof SponsorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/': {
+      id: '/learn/'
+      path: '/learn'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions/': {
+      id: '/conditions/'
+      path: '/conditions'
+      fullPath: '/conditions/'
+      preLoaderRoute: typeof ConditionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studies/$nctId': {
+      id: '/studies/$nctId'
+      path: '/studies/$nctId'
+      fullPath: '/studies/$nctId'
+      preLoaderRoute: typeof StudiesNctIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/states/$stateSlug': {
+      id: '/states/$stateSlug'
+      path: '/states/$stateSlug'
+      fullPath: '/states/$stateSlug'
+      preLoaderRoute: typeof StatesStateSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sponsors/$slug': {
+      id: '/sponsors/$slug'
+      path: '/sponsors/$slug'
+      fullPath: '/sponsors/$slug'
+      preLoaderRoute: typeof SponsorsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap/xml': {
+      id: '/sitemap/xml'
+      path: '/sitemap/xml'
+      fullPath: '/sitemap/xml'
+      preLoaderRoute: typeof SitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots/txt': {
+      id: '/robots/txt'
+      path: '/robots/txt'
+      fullPath: '/robots/txt'
+      preLoaderRoute: typeof RobotsTxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/phase/$phase': {
+      id: '/phase/$phase'
+      path: '/phase/$phase'
+      fullPath: '/phase/$phase'
+      preLoaderRoute: typeof PhasePhaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/$slug': {
+      id: '/learn/$slug'
+      path: '/learn/$slug'
+      fullPath: '/learn/$slug'
+      preLoaderRoute: typeof LearnSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions/$slug': {
+      id: '/conditions/$slug'
+      path: '/conditions/$slug'
+      fullPath: '/conditions/$slug'
+      preLoaderRoute: typeof ConditionsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cities/$citySlug': {
+      id: '/cities/$citySlug'
+      path: '/cities/$citySlug'
+      fullPath: '/cities/$citySlug'
+      preLoaderRoute: typeof CitiesCitySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/public/seed-admin': {
+      id: '/api/public/seed-admin'
+      path: '/api/public/seed-admin'
+      fullPath: '/api/public/seed-admin'
+      preLoaderRoute: typeof ApiPublicSeedAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AuthRoute: AuthRoute,
+  RecruitingRoute: RecruitingRoute,
+  SearchRoute: SearchRoute,
+  CitiesCitySlugRoute: CitiesCitySlugRoute,
+  ConditionsSlugRoute: ConditionsSlugRoute,
+  LearnSlugRoute: LearnSlugRoute,
+  PhasePhaseRoute: PhasePhaseRoute,
+  RobotsTxtRoute: RobotsTxtRoute,
+  SitemapXmlRoute: SitemapXmlRoute,
+  SponsorsSlugRoute: SponsorsSlugRoute,
+  StatesStateSlugRoute: StatesStateSlugRoute,
+  StudiesNctIdRoute: StudiesNctIdRoute,
+  ConditionsIndexRoute: ConditionsIndexRoute,
+  LearnIndexRoute: LearnIndexRoute,
+  SponsorsIndexRoute: SponsorsIndexRoute,
+  StatesIndexRoute: StatesIndexRoute,
+  ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
