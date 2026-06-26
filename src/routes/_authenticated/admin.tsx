@@ -81,7 +81,7 @@ function AdminPage() {
       <section className="mt-8 rounded-xl border border-border bg-card p-6">
         <h2 className="text-lg font-semibold">Recent import runs</h2>
         <ul className="mt-3 space-y-2 text-sm">
-          {stats.runs.map((r) => (
+          {(stats.runs as Array<{ id: string; started_at: string; status: string; inserted: number; updated: number }>).map((r) => (
             <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2 last:border-0">
               <span>{new Date(r.started_at).toLocaleString()}</span>
               <span className="text-muted-foreground">{r.status}</span>
