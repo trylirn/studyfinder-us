@@ -24,7 +24,7 @@ function AdminPage() {
     setBusy(true);
     try {
       const res = await runStudyImport({ data: { pages, pageSize: 100, recruitingOnly } });
-      setLog((l) => [`Imported ${res.inserted} new, updated ${res.updated} (${res.fetched} fetched)`, ...l]);
+      setLog((l) => [`Imported ${res.inserted} new, updated ${res.updated} (over ${res.pages} pages)`, ...l]);
     } catch (e) {
       setLog((l) => [`Error: ${(e as Error).message}`, ...l]);
     } finally {
