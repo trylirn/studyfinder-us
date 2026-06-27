@@ -1,14 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { getHomeData } from "@/lib/directory.functions";
+import { getTrendingConditions } from "@/lib/trending.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { StudyCard } from "@/components/StudyCard";
 import { Activity, FlaskConical, MapPin, Stethoscope, Building2, FileText } from "lucide-react";
 
-const homeQuery = queryOptions({
-  queryKey: ["home"],
-  queryFn: () => getHomeData(),
-});
+const homeQuery = queryOptions({ queryKey: ["home"], queryFn: () => getHomeData() });
+const trendingQuery = queryOptions({ queryKey: ["trending-conditions"], queryFn: () => getTrendingConditions() });
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,15 +24,19 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(homeQuery),
+      context.queryClient.ensureQueryData(trendingQuery),
+    ]),
   component: HomePage,
 });
 
 function HomePage() {
   const { data } = useSuspenseQuery(homeQuery);
+  const { data: trending } = useSuspenseQuery(trendingQuery);
   return (
     <div>
-      {/* Hero */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-accent/40 via-background to-background">
         <div className="container mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
           <div className="mx-auto max-w-3xl text-center">
@@ -51,19 +54,25 @@ function HomePage() {
             <div className="mx-auto mt-7 max-w-2xl">
               <SearchBar large />
             </div>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
-              <span>Popular:</span>
-              {["Diabetes", "Breast Cancer", "Alzheimer's", "Obesity", "ADHD", "Depression"].map((t) => (
-                <Link key={t} to="/search" search={{ q: t }} className="underline-offset-4 hover:text-primary hover:underline">
-                  {t}
-                </Link>
-              ))}
-            </div>
+            {trending.length > 0 && (
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
+                <span>Trending:</span>
+                {trending.map((t) => (
+                  <Link
+                    key={t.slug}
+                    to="/conditions/$slug"
+                    params={{ slug: t.slug }}
+                    className="underline-offset-4 hover:text-primary hover:underline"
+                  >
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Featured conditions */}
       <Section icon={<Stethoscope className="h-5 w-5" />} title="Browse by condition" cta={{ label: "All conditions", to: "/conditions" }}>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {data.topConditions.slice(0, 18).map((c) => (
@@ -80,7 +89,6 @@ function HomePage() {
         </div>
       </Section>
 
-      {/* By state */}
       <Section icon={<MapPin className="h-5 w-5" />} title="Browse by state" cta={{ label: "All states", to: "/states" }}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {data.topStates.map((s) => (
@@ -97,7 +105,6 @@ function HomePage() {
         </div>
       </Section>
 
-      {/* Recently added */}
       <Section icon={<FlaskConical className="h-5 w-5" />} title="Recently updated studies" cta={{ label: "Search all", to: "/search" }}>
         <div className="grid gap-4 md:grid-cols-2">
           {data.recent.map((s) => (
@@ -106,7 +113,6 @@ function HomePage() {
         </div>
       </Section>
 
-      {/* Sponsors */}
       <Section icon={<Building2 className="h-5 w-5" />} title="Top sponsors" cta={{ label: "All sponsors", to: "/sponsors" }}>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {data.topSponsors.map((s) => (
@@ -123,7 +129,6 @@ function HomePage() {
         </div>
       </Section>
 
-      {/* Learn */}
       <section className="container mx-auto px-4 pb-20 pt-6">
         <div className="rounded-2xl border border-border bg-accent/30 p-6 md:p-10">
           <div className="flex items-start gap-3">

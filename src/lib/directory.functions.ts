@@ -103,6 +103,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       .from("studies")
       .select("nct_id,title,overall_status,phase,sponsor_name,conditions")
       .order("last_update_posted", { ascending: false, nullsFirst: false })
+      .order("nct_id", { ascending: false })
       .limit(8),
     sb.from("studies").select("nct_id", { count: "exact", head: true }),
   ]);

@@ -1,15 +1,27 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useState } from "react";
 import { getStudy } from "@/lib/directory.functions";
 import { Badge } from "@/components/ui/badge";
 import { phaseLabel, statusLabel } from "@/lib/slug";
-import { Building2, Calendar, MapPin, Users, ExternalLink } from "lucide-react";
+import { Building2, Calendar, Users, ExternalLink, ClipboardCheck, FlaskConical, Hospital } from "lucide-react";
+import { EligibilityModal } from "@/components/EligibilityModal";
+import { AiSimplify } from "@/components/AiSimplify";
+import { LocationsList } from "@/components/LocationsList";
+import { LegalDisclaimer } from "@/components/LegalDisclaimer";
 
 const studyQuery = (nctId: string) =>
   queryOptions({
     queryKey: ["study", nctId],
     queryFn: () => getStudy({ data: { nctId } }),
   });
+
+function isPhaseShown(phase?: string | null): phase is string {
+  if (!phase) return false;
+  const p = phase.toUpperCase();
+  if (p === "NA" || p === "N/A" || p === "NOT_APPLICABLE" || p === "NOT APPLICABLE") return false;
+  return p.includes("PHASE");
+}
 
 export const Route = createFileRoute("/studies/$nctId")({
   loader: async ({ context, params }) => {
@@ -38,9 +50,11 @@ export const Route = createFileRoute("/studies/$nctId")({
 function StudyPage() {
   const { nctId } = Route.useParams();
   const { data } = useSuspenseQuery(studyQuery(nctId));
+  const [modalOpen, setModalOpen] = useState(false);
   if (!data) return null;
   const { study, locations, related } = data;
   const isRecruiting = study.overall_status === "RECRUITING";
+  const showPhase = isPhaseShown(study.phase);
   const eligibility = (study.eligibility ?? {}) as { criteria?: string; healthyVolunteers?: string };
 
   const ld = {
@@ -67,26 +81,83 @@ function StudyPage() {
         <span className="text-foreground">{study.nct_id}</span>
       </nav>
 
+      {/* Header */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <Badge variant="outline" className={isRecruiting ? "border-success/40 bg-success/10 text-success" : ""}>
           {statusLabel(study.overall_status)}
         </Badge>
-        {study.phase && <Badge variant="secondary">{phaseLabel(study.phase)}</Badge>}
+        {showPhase && <Badge variant="secondary">{phaseLabel(study.phase)}</Badge>}
         {study.study_type && <Badge variant="outline">{study.study_type}</Badge>}
         <span className="text-muted-foreground">{study.nct_id}</span>
       </div>
       <h1 className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">{study.title}</h1>
+
+      {/* High-contrast CTA */}
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setModalOpen(true)}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+        >
+          <ClipboardCheck className="h-4 w-4" />
+          Check My Eligibility
+        </button>
+        <a
+          href={`https://clinicaltrials.gov/study/${study.nct_id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
+        >
+          View on ClinicalTrials.gov <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      </div>
+
+      {/* Sponsor vs Research Sites — clearly separated */}
+      <div className="mt-6 grid gap-3 md:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Building2 className="h-3.5 w-3.5" /> Sponsor (funding institution)
+          </p>
+          <p className="mt-2 text-sm">
+            {study.sponsor_slug && study.sponsor_name ? (
+              <Link to="/sponsors/$slug" params={{ slug: study.sponsor_slug }} className="font-medium text-primary hover:underline">
+                {study.sponsor_name}
+              </Link>
+            ) : (
+              <span className="font-medium">{study.sponsor_name ?? "Not provided"}</span>
+            )}
+          </p>
+          {study.collaborators && study.collaborators.length > 0 && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Collaborators: {study.collaborators.slice(0, 3).join(", ")}
+            </p>
+          )}
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Hospital className="h-3.5 w-3.5" /> Research sites (where patients go)
+          </p>
+          <p className="mt-2 text-sm">
+            <span className="font-medium">{locations.length}</span> physical clinic{locations.length === 1 ? "" : "s"} listed
+            {locations.length > 0 && (
+              <a href="#research-locations" className="ml-2 text-xs text-primary hover:underline">See list ↓</a>
+            )}
+          </p>
+        </div>
+      </div>
 
       <div className="mt-6 grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-8">
           {study.brief_summary && (
             <Card title="Brief summary">
               <p className="whitespace-pre-line text-sm leading-6 text-foreground/90">{study.brief_summary}</p>
+              <AiSimplify nctId={study.nct_id} section="summary" text={study.brief_summary} />
             </Card>
           )}
           {study.detailed_description && (
             <Card title="Detailed description">
               <p className="whitespace-pre-line text-sm leading-6 text-foreground/90">{study.detailed_description}</p>
+              <AiSimplify nctId={study.nct_id} section="description" text={study.detailed_description} />
             </Card>
           )}
           <Card title="Eligibility">
@@ -105,48 +176,28 @@ function StudyPage() {
               )}
             </dl>
             {eligibility.criteria && (
-              <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-3 font-sans text-xs leading-5 text-foreground/90">
-                {eligibility.criteria}
-              </pre>
+              <>
+                <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-3 font-sans text-xs leading-5 text-foreground/90">
+                  {eligibility.criteria}
+                </pre>
+                <AiSimplify nctId={study.nct_id} section="eligibility" text={eligibility.criteria} />
+              </>
             )}
           </Card>
 
-          <Card title="Locations">
-            {locations.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No specific locations listed.</p>
-            ) : (
-              <ul className="divide-y divide-border">
-                {locations.slice(0, 25).map((l) => (
-                  <li key={l.id} className="flex items-start gap-3 py-3 text-sm">
-                    <MapPin className="mt-0.5 h-4 w-4 text-primary" />
-                    <div>
-                      <p className="font-medium">{l.facility || "Research site"}</p>
-                      <p className="text-muted-foreground">
-                        {[l.city, l.state, l.zip, l.country].filter(Boolean).join(", ")}
-                      </p>
-                      {l.status && <p className="mt-0.5 text-xs text-muted-foreground">Status: {l.status}</p>}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
+          <section id="research-locations" className="rounded-xl border border-border bg-card p-5">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              <Hospital className="h-4 w-4" /> Research locations
+            </h2>
+            <LocationsList locations={locations} />
+          </section>
+
+          <LegalDisclaimer />
         </div>
 
         <aside className="space-y-5">
           <Card title="At a glance">
             <ul className="space-y-3 text-sm">
-              {study.sponsor_name && (
-                <SideItem icon={<Building2 className="h-4 w-4" />} label="Sponsor">
-                  {study.sponsor_slug ? (
-                    <Link to="/sponsors/$slug" params={{ slug: study.sponsor_slug }} className="text-primary hover:underline">
-                      {study.sponsor_name}
-                    </Link>
-                  ) : (
-                    study.sponsor_name
-                  )}
-                </SideItem>
-              )}
               <SideItem icon={<Users className="h-4 w-4" />} label="Enrollment">
                 {study.enrollment ? `${study.enrollment.toLocaleString()} participants` : "Not provided"}
               </SideItem>
@@ -156,15 +207,17 @@ function StudyPage() {
               <SideItem icon={<Calendar className="h-4 w-4" />} label="Completion">
                 {study.completion_date ?? "—"}
               </SideItem>
+              <SideItem icon={<FlaskConical className="h-4 w-4" />} label="Study type">
+                {study.study_type ?? "—"}
+              </SideItem>
             </ul>
-            <a
-              href={`https://clinicaltrials.gov/study/${study.nct_id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
             >
-              View on ClinicalTrials.gov <ExternalLink className="h-3.5 w-3.5" />
-            </a>
+              <ClipboardCheck className="h-4 w-4" /> Check eligibility
+            </button>
           </Card>
 
           {(study.conditions ?? []).length > 0 && (
@@ -192,7 +245,7 @@ function StudyPage() {
                     <Link to="/studies/$nctId" params={{ nctId: r.nct_id }} className="line-clamp-2 hover:text-primary">
                       {r.title}
                     </Link>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{statusLabel(r.overall_status)} · {phaseLabel(r.phase)}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{statusLabel(r.overall_status)}{isPhaseShown(r.phase) ? ` · ${phaseLabel(r.phase)}` : ""}</p>
                   </li>
                 ))}
               </ul>
@@ -200,6 +253,15 @@ function StudyPage() {
           )}
         </aside>
       </div>
+
+      <EligibilityModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        nctId={study.nct_id}
+        trialTitle={study.title}
+        conditions={study.conditions ?? []}
+        eligibilitySnippet={eligibility.criteria}
+      />
     </article>
   );
 }
