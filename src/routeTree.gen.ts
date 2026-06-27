@@ -24,6 +24,9 @@ import { Route as SponsorsSlugRouteImport } from './routes/sponsors.$slug'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as RobotsTxtRouteImport } from './routes/robots.txt'
 import { Route as PhasePhaseRouteImport } from './routes/phase.$phase'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
 import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
@@ -104,6 +107,21 @@ const PhasePhaseRoute = PhasePhaseRouteImport.update({
   path: '/phase/$phase',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/legal/privacy',
+  path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalDisclaimerRoute = LegalDisclaimerRouteImport.update({
+  id: '/legal/disclaimer',
+  path: '/legal/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnSlugRoute = LearnSlugRouteImport.update({
   id: '/learn/$slug',
   path: '/learn/$slug',
@@ -139,6 +157,9 @@ export interface FileRoutesByFullPath {
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
+  '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/phase/$phase': typeof PhasePhaseRoute
   '/robots/txt': typeof RobotsTxtRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -160,6 +181,9 @@ export interface FileRoutesByTo {
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
+  '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/phase/$phase': typeof PhasePhaseRoute
   '/robots/txt': typeof RobotsTxtRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -183,6 +207,9 @@ export interface FileRoutesById {
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
+  '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/phase/$phase': typeof PhasePhaseRoute
   '/robots/txt': typeof RobotsTxtRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -206,6 +233,9 @@ export interface FileRouteTypes {
     | '/cities/$citySlug'
     | '/conditions/$slug'
     | '/learn/$slug'
+    | '/legal/disclaimer'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/phase/$phase'
     | '/robots/txt'
     | '/sitemap/xml'
@@ -227,6 +257,9 @@ export interface FileRouteTypes {
     | '/cities/$citySlug'
     | '/conditions/$slug'
     | '/learn/$slug'
+    | '/legal/disclaimer'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/phase/$phase'
     | '/robots/txt'
     | '/sitemap/xml'
@@ -249,6 +282,9 @@ export interface FileRouteTypes {
     | '/cities/$citySlug'
     | '/conditions/$slug'
     | '/learn/$slug'
+    | '/legal/disclaimer'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/phase/$phase'
     | '/robots/txt'
     | '/sitemap/xml'
@@ -271,6 +307,9 @@ export interface RootRouteChildren {
   CitiesCitySlugRoute: typeof CitiesCitySlugRoute
   ConditionsSlugRoute: typeof ConditionsSlugRoute
   LearnSlugRoute: typeof LearnSlugRoute
+  LegalDisclaimerRoute: typeof LegalDisclaimerRoute
+  LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalTermsRoute: typeof LegalTermsRoute
   PhasePhaseRoute: typeof PhasePhaseRoute
   RobotsTxtRoute: typeof RobotsTxtRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
@@ -391,6 +430,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PhasePhaseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/legal/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/disclaimer': {
+      id: '/legal/disclaimer'
+      path: '/legal/disclaimer'
+      fullPath: '/legal/disclaimer'
+      preLoaderRoute: typeof LegalDisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn/$slug': {
       id: '/learn/$slug'
       path: '/learn/$slug'
@@ -450,6 +510,9 @@ const rootRouteChildren: RootRouteChildren = {
   CitiesCitySlugRoute: CitiesCitySlugRoute,
   ConditionsSlugRoute: ConditionsSlugRoute,
   LearnSlugRoute: LearnSlugRoute,
+  LegalDisclaimerRoute: LegalDisclaimerRoute,
+  LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalTermsRoute: LegalTermsRoute,
   PhasePhaseRoute: PhasePhaseRoute,
   RobotsTxtRoute: RobotsTxtRoute,
   SitemapXmlRoute: SitemapXmlRoute,

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { MapPin, Search } from "lucide-react";
 
 type Location = {
-  id: string;
+  id: string | number;
   facility: string | null;
   city: string | null;
   state: string | null;
