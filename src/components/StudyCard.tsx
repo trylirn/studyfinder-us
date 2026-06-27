@@ -12,8 +12,16 @@ type Study = {
   conditions?: string[] | null;
 };
 
+function isPhaseShown(phase?: string | null): phase is string {
+  if (!phase) return false;
+  const p = phase.toUpperCase();
+  if (p === "NA" || p === "N/A" || p === "NOT_APPLICABLE" || p === "NOT APPLICABLE") return false;
+  return p.includes("PHASE");
+}
+
 export function StudyCard({ study }: { study: Study }) {
   const isRecruiting = study.overall_status === "RECRUITING";
+  const showPhase = isPhaseShown(study.phase);
   return (
     <Link
       to="/studies/$nctId"
@@ -27,7 +35,7 @@ export function StudyCard({ study }: { study: Study }) {
         >
           {statusLabel(study.overall_status)}
         </Badge>
-        {study.phase && <Badge variant="secondary">{phaseLabel(study.phase)}</Badge>}
+        {showPhase && <Badge variant="secondary">{phaseLabel(study.phase)}</Badge>}
         <span className="text-muted-foreground">{study.nct_id}</span>
       </div>
       <h3 className="mt-3 line-clamp-2 text-base font-semibold leading-snug group-hover:text-primary">
