@@ -43,6 +43,134 @@ export type Database = {
           },
         ]
       }
+      clinic_images: {
+        Row: {
+          alt: string | null
+          clinic_id: string
+          created_at: string
+          id: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          alt?: string | null
+          clinic_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          alt?: string | null
+          clinic_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_images_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinics: {
+        Row: {
+          address: string | null
+          city: string | null
+          claimed_by: string | null
+          created_at: string
+          equipment: string[]
+          featured_until: string | null
+          hero_image: string | null
+          id: string
+          intake_email: string | null
+          intake_webhook_url: string | null
+          lat: number | null
+          lng: number | null
+          name: string
+          phone: string | null
+          plan: string
+          published: boolean
+          slug: string
+          specialties: string[]
+          state: string | null
+          updated_at: string
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          equipment?: string[]
+          featured_until?: string | null
+          hero_image?: string | null
+          id?: string
+          intake_email?: string | null
+          intake_webhook_url?: string | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          phone?: string | null
+          plan?: string
+          published?: boolean
+          slug: string
+          specialties?: string[]
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          equipment?: string[]
+          featured_until?: string | null
+          hero_image?: string | null
+          id?: string
+          intake_email?: string | null
+          intake_webhook_url?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          phone?: string | null
+          plan?: string
+          published?: boolean
+          slug?: string
+          specialties?: string[]
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Relationships: []
+      }
+      condition_views: {
+        Row: {
+          condition_slug: string
+          count: number
+          day: string
+        }
+        Insert: {
+          condition_slug: string
+          count?: number
+          day?: string
+        }
+        Update: {
+          condition_slug?: string
+          count?: number
+          day?: string
+        }
+        Relationships: []
+      }
       conditions: {
         Row: {
           name: string
@@ -100,6 +228,44 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_delivery_log: {
+        Row: {
+          channel: string
+          clinic_id: string | null
+          delivered_at: string
+          error: string | null
+          id: string
+          nct_id: string
+          status: string
+        }
+        Insert: {
+          channel: string
+          clinic_id?: string | null
+          delivered_at?: string
+          error?: string | null
+          id?: string
+          nct_id: string
+          status: string
+        }
+        Update: {
+          channel?: string
+          clinic_id?: string | null
+          delivered_at?: string
+          error?: string | null
+          id?: string
+          nct_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_delivery_log_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           city: string | null
@@ -107,6 +273,8 @@ export type Database = {
           country: string | null
           facility: string | null
           id: number
+          lat: number | null
+          lng: number | null
           nct_id: string
           state: string | null
           state_slug: string | null
@@ -119,6 +287,8 @@ export type Database = {
           country?: string | null
           facility?: string | null
           id?: number
+          lat?: number | null
+          lng?: number | null
           nct_id: string
           state?: string | null
           state_slug?: string | null
@@ -131,6 +301,8 @@ export type Database = {
           country?: string | null
           facility?: string | null
           id?: number
+          lat?: number | null
+          lng?: number | null
           nct_id?: string
           state?: string | null
           state_slug?: string | null
@@ -273,6 +445,33 @@ export type Database = {
         }
         Relationships: []
       }
+      study_simplifications: {
+        Row: {
+          created_at: string
+          id: string
+          model: string
+          nct_id: string
+          section: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          model: string
+          nct_id: string
+          section: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          model?: string
+          nct_id?: string
+          section?: string
+          text?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -299,6 +498,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bump_condition_view: { Args: { _slug: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -308,7 +508,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin"
+      app_role: "admin" | "clinic_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -436,7 +636,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin"],
+      app_role: ["admin", "clinic_admin"],
     },
   },
 } as const
