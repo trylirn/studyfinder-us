@@ -4,7 +4,7 @@ import { getHomeData } from "@/lib/directory.functions";
 import { getTrendingConditions } from "@/lib/trending.functions";
 import { SearchBar } from "@/components/SearchBar";
 import { StudyCard } from "@/components/StudyCard";
-import { Activity, FlaskConical, MapPin, Stethoscope, Building2, FileText } from "lucide-react";
+import { Activity, FlaskConical, MapPin, Stethoscope, Building2, FileText, Hospital } from "lucide-react";
 
 const homeQuery = queryOptions({ queryKey: ["home"], queryFn: () => getHomeData() });
 const trendingQuery = queryOptions({ queryKey: ["trending-conditions"], queryFn: () => getTrendingConditions() });
@@ -128,6 +128,25 @@ function HomePage() {
           ))}
         </div>
       </Section>
+
+      {data.topClinics.length > 0 && (
+        <Section icon={<Hospital className="h-5 w-5" />} title="Browse by clinic" cta={{ label: "All clinics", to: "/clinics" }}>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            {data.topClinics.map((c: any) => (
+              <Link
+                key={c.slug}
+                to="/clinics/$slug"
+                params={{ slug: c.slug }}
+                className="rounded-lg border border-border bg-card p-3 hover:border-primary/60"
+              >
+                <p className="line-clamp-2 text-sm font-medium leading-tight">{c.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{[c.city, c.state].filter(Boolean).join(", ")}</p>
+                <p className="mt-1 text-xs text-success">{c.recruiting_count} recruiting</p>
+              </Link>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <section className="container mx-auto px-4 pb-20 pt-6">
         <div className="rounded-2xl border border-border bg-accent/30 p-6 md:p-10">

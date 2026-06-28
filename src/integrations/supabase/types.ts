@@ -43,6 +43,53 @@ export type Database = {
           },
         ]
       }
+      clinic_claims: {
+        Row: {
+          clinic_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          note: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clinic_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clinic_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_claims_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinic_images: {
         Row: {
           alt: string | null
@@ -82,10 +129,13 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          claim_status: string
           claimed_by: string | null
           created_at: string
+          description: string | null
           equipment: string[]
           featured_until: string | null
+          gallery_images: string[]
           hero_image: string | null
           id: string
           intake_email: string | null
@@ -96,6 +146,7 @@ export type Database = {
           phone: string | null
           plan: string
           published: boolean
+          recruiting_count: number
           slug: string
           specialties: string[]
           state: string | null
@@ -106,10 +157,13 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          claim_status?: string
           claimed_by?: string | null
           created_at?: string
+          description?: string | null
           equipment?: string[]
           featured_until?: string | null
+          gallery_images?: string[]
           hero_image?: string | null
           id?: string
           intake_email?: string | null
@@ -120,6 +174,7 @@ export type Database = {
           phone?: string | null
           plan?: string
           published?: boolean
+          recruiting_count?: number
           slug: string
           specialties?: string[]
           state?: string | null
@@ -130,10 +185,13 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          claim_status?: string
           claimed_by?: string | null
           created_at?: string
+          description?: string | null
           equipment?: string[]
           featured_until?: string | null
+          gallery_images?: string[]
           hero_image?: string | null
           id?: string
           intake_email?: string | null
@@ -144,6 +202,7 @@ export type Database = {
           phone?: string | null
           plan?: string
           published?: boolean
+          recruiting_count?: number
           slug?: string
           specialties?: string[]
           state?: string | null
@@ -270,6 +329,7 @@ export type Database = {
         Row: {
           city: string | null
           city_slug: string | null
+          clinic_id: string | null
           country: string | null
           facility: string | null
           id: number
@@ -284,6 +344,7 @@ export type Database = {
         Insert: {
           city?: string | null
           city_slug?: string | null
+          clinic_id?: string | null
           country?: string | null
           facility?: string | null
           id?: number
@@ -298,6 +359,7 @@ export type Database = {
         Update: {
           city?: string | null
           city_slug?: string | null
+          clinic_id?: string | null
           country?: string | null
           facility?: string | null
           id?: number
@@ -310,6 +372,13 @@ export type Database = {
           zip?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "locations_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "locations_nct_id_fkey"
             columns: ["nct_id"]
@@ -499,6 +568,13 @@ export type Database = {
     }
     Functions: {
       bump_condition_view: { Args: { _slug: string }; Returns: undefined }
+      generate_clinics_from_locations: {
+        Args: never
+        Returns: {
+          inserted_count: number
+          linked_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -506,6 +582,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      nearby_sites: {
+        Args: {
+          _lat: number
+          _lng: number
+          _nct_id?: string
+          _radius_mi: number
+        }
+        Returns: {
+          city: string
+          clinic_id: string
+          distance_mi: number
+          facility: string
+          id: number
+          lat: number
+          lng: number
+          nct_id: string
+          state: string
+          status: string
+          zip: string
+        }[]
+      }
+      refresh_directory_counts: { Args: never; Returns: undefined }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "clinic_admin"

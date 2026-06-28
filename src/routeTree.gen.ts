@@ -18,6 +18,7 @@ import { Route as StatesIndexRouteImport } from './routes/states.index'
 import { Route as SponsorsIndexRouteImport } from './routes/sponsors.index'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as ConditionsIndexRouteImport } from './routes/conditions.index'
+import { Route as ClinicsIndexRouteImport } from './routes/clinics.index'
 import { Route as StudiesNctIdRouteImport } from './routes/studies.$nctId'
 import { Route as StatesStateSlugRouteImport } from './routes/states.$stateSlug'
 import { Route as SponsorsSlugRouteImport } from './routes/sponsors.$slug'
@@ -29,6 +30,7 @@ import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
 import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
+import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
 import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
@@ -75,6 +77,11 @@ const LearnIndexRoute = LearnIndexRouteImport.update({
 const ConditionsIndexRoute = ConditionsIndexRouteImport.update({
   id: '/conditions/',
   path: '/conditions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicsIndexRoute = ClinicsIndexRouteImport.update({
+  id: '/clinics/',
+  path: '/clinics/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudiesNctIdRoute = StudiesNctIdRouteImport.update({
@@ -132,6 +139,11 @@ const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
   path: '/conditions/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicsSlugRoute = ClinicsSlugRouteImport.update({
+  id: '/clinics/$slug',
+  path: '/clinics/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CitiesCitySlugRoute = CitiesCitySlugRouteImport.update({
   id: '/cities/$citySlug',
   path: '/cities/$citySlug',
@@ -155,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
+  '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -166,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
+  '/clinics/': typeof ClinicsIndexRoute
   '/conditions/': typeof ConditionsIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
@@ -179,6 +193,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
+  '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -190,6 +205,7 @@ export interface FileRoutesByTo {
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
+  '/clinics': typeof ClinicsIndexRoute
   '/conditions': typeof ConditionsIndexRoute
   '/learn': typeof LearnIndexRoute
   '/sponsors': typeof SponsorsIndexRoute
@@ -205,6 +221,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
+  '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -216,6 +233,7 @@ export interface FileRoutesById {
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
+  '/clinics/': typeof ClinicsIndexRoute
   '/conditions/': typeof ConditionsIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
@@ -231,6 +249,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/admin'
     | '/cities/$citySlug'
+    | '/clinics/$slug'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -242,6 +261,7 @@ export interface FileRouteTypes {
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
+    | '/clinics/'
     | '/conditions/'
     | '/learn/'
     | '/sponsors/'
@@ -255,6 +275,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/admin'
     | '/cities/$citySlug'
+    | '/clinics/$slug'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -266,6 +287,7 @@ export interface FileRouteTypes {
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
+    | '/clinics'
     | '/conditions'
     | '/learn'
     | '/sponsors'
@@ -280,6 +302,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/_authenticated/admin'
     | '/cities/$citySlug'
+    | '/clinics/$slug'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -291,6 +314,7 @@ export interface FileRouteTypes {
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
+    | '/clinics/'
     | '/conditions/'
     | '/learn/'
     | '/sponsors/'
@@ -305,6 +329,7 @@ export interface RootRouteChildren {
   RecruitingRoute: typeof RecruitingRoute
   SearchRoute: typeof SearchRoute
   CitiesCitySlugRoute: typeof CitiesCitySlugRoute
+  ClinicsSlugRoute: typeof ClinicsSlugRoute
   ConditionsSlugRoute: typeof ConditionsSlugRoute
   LearnSlugRoute: typeof LearnSlugRoute
   LegalDisclaimerRoute: typeof LegalDisclaimerRoute
@@ -316,6 +341,7 @@ export interface RootRouteChildren {
   SponsorsSlugRoute: typeof SponsorsSlugRoute
   StatesStateSlugRoute: typeof StatesStateSlugRoute
   StudiesNctIdRoute: typeof StudiesNctIdRoute
+  ClinicsIndexRoute: typeof ClinicsIndexRoute
   ConditionsIndexRoute: typeof ConditionsIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
   SponsorsIndexRoute: typeof SponsorsIndexRoute
@@ -386,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/conditions'
       fullPath: '/conditions/'
       preLoaderRoute: typeof ConditionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinics/': {
+      id: '/clinics/'
+      path: '/clinics'
+      fullPath: '/clinics/'
+      preLoaderRoute: typeof ClinicsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studies/$nctId': {
@@ -465,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConditionsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clinics/$slug': {
+      id: '/clinics/$slug'
+      path: '/clinics/$slug'
+      fullPath: '/clinics/$slug'
+      preLoaderRoute: typeof ClinicsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cities/$citySlug': {
       id: '/cities/$citySlug'
       path: '/cities/$citySlug'
@@ -508,6 +548,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecruitingRoute: RecruitingRoute,
   SearchRoute: SearchRoute,
   CitiesCitySlugRoute: CitiesCitySlugRoute,
+  ClinicsSlugRoute: ClinicsSlugRoute,
   ConditionsSlugRoute: ConditionsSlugRoute,
   LearnSlugRoute: LearnSlugRoute,
   LegalDisclaimerRoute: LegalDisclaimerRoute,
@@ -519,6 +560,7 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorsSlugRoute: SponsorsSlugRoute,
   StatesStateSlugRoute: StatesStateSlugRoute,
   StudiesNctIdRoute: StudiesNctIdRoute,
+  ClinicsIndexRoute: ClinicsIndexRoute,
   ConditionsIndexRoute: ConditionsIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
   SponsorsIndexRoute: SponsorsIndexRoute,
