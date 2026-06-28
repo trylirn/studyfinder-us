@@ -62,7 +62,7 @@ function SponsorsIndex() {
           page={page}
           total={data.total}
           pageSize={data.pageSize}
-          onChange={(p) => navigate({ search: (s) => ({ ...s, page: p }) })}
+          onChange={(p) => navigate({ search: (s: any) => ({ ...s, page: p }) })}
         />
       )}
     </div>

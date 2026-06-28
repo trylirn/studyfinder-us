@@ -47,12 +47,12 @@ function RecruitingPage() {
           type="search"
           defaultValue={search.q ?? ""}
           placeholder="Search by condition, treatment, or keyword…"
-          onChange={(e) => navigate({ search: (s) => ({ ...s, q: e.target.value || undefined, page: undefined }) })}
+          onChange={(e) => navigate({ search: (s: any) => ({ ...s, q: e.target.value || undefined, page: undefined }) })}
           className="min-w-[240px] flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
         />
         <select
           value={search.state ?? ""}
-          onChange={(e) => navigate({ search: (s) => ({ ...s, state: e.target.value || undefined, page: undefined }) })}
+          onChange={(e) => navigate({ search: (s: any) => ({ ...s, state: e.target.value || undefined, page: undefined }) })}
           className="rounded-md border border-border bg-card px-2 py-2 text-sm"
         >
           <option value="">All states</option>
@@ -62,7 +62,7 @@ function RecruitingPage() {
         </select>
         <select
           value={search.phase ?? ""}
-          onChange={(e) => navigate({ search: (s) => ({ ...s, phase: e.target.value || undefined, page: undefined }) })}
+          onChange={(e) => navigate({ search: (s: any) => ({ ...s, phase: e.target.value || undefined, page: undefined }) })}
           className="rounded-md border border-border bg-card px-2 py-2 text-sm"
         >
           <option value="">All phases</option>
@@ -86,7 +86,7 @@ function RecruitingPage() {
           page={page}
           total={data.total}
           pageSize={data.pageSize}
-          onChange={(p) => navigate({ search: (s) => ({ ...s, page: p }) })}
+          onChange={(p) => navigate({ search: (s: any) => ({ ...s, page: p }) })}
         />
       )}
     </div>
