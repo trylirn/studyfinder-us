@@ -35,6 +35,7 @@ type CTGStudy = {
         country?: string;
         zip?: string;
         status?: string;
+        geoPoint?: { lat?: number; lon?: number };
       }[];
     };
   };
@@ -54,7 +55,6 @@ function ageToYears(input?: string): number | null {
 
 function parseDate(s?: string): string | null {
   if (!s) return null;
-  // ClinicalTrials.gov dates: "2024-01" or "2024-01-15"
   if (/^\d{4}-\d{2}$/.test(s)) return `${s}-01`;
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
   if (/^\d{4}$/.test(s)) return `${s}-01-01`;
@@ -82,29 +82,38 @@ function normalizeState(raw?: string): string | null {
   return STATE_NAME_TO_SLUG[t.toLowerCase()] ?? STATE_ABBR_TO_SLUG[t.toUpperCase()] ?? null;
 }
 
+async function assertAdmin(context: { supabase: any; userId: string }) {
+  const { data: roleRow } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (!roleRow) throw new Error("Forbidden: admin only");
+}
+
 export const runStudyImport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
       .object({
-        maxPages: z.number().int().min(1).max(50).optional().default(15),
+        pages: z.number().int().min(1).max(200).optional().default(15),
         pageSize: z.number().int().min(10).max(1000).optional().default(200),
-        status: z.string().optional().default("RECRUITING"),
+        // legacy compat
+        maxPages: z.number().int().min(1).max(200).optional(),
+        recruitingOnly: z.boolean().optional(),
+        status: z.string().optional(),
       })
       .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
-    // role check
-    const { data: roleRow } = await context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleRow) throw new Error("Forbidden: admin only");
+    await assertAdmin(context);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await ensureStateMaps(supabaseAdmin);
+
+    const maxPages = data.maxPages ?? data.pages;
+    const statusFilter = data.status ?? (data.recruitingOnly === false ? "" : "RECRUITING");
 
     const { data: runRow, error: runErr } = await supabaseAdmin
       .from("import_runs")
@@ -124,16 +133,16 @@ export const runStudyImport = createServerFn({ method: "POST" })
     const sponsorCounter = new Map<string, { name: string; count: number }>();
 
     try {
-      for (let page = 0; page < data.maxPages; page++) {
+      for (let page = 0; page < maxPages; page++) {
         const params = new URLSearchParams({
           format: "json",
           pageSize: String(data.pageSize),
           countTotal: "false",
-          "filter.overallStatus": data.status,
           "query.locn": "United States",
           fields:
             "protocolSection.identificationModule,protocolSection.descriptionModule,protocolSection.conditionsModule,protocolSection.designModule,protocolSection.statusModule,protocolSection.sponsorCollaboratorsModule,protocolSection.armsInterventionsModule,protocolSection.eligibilityModule,protocolSection.contactsLocationsModule",
         });
+        if (statusFilter) params.set("filter.overallStatus", statusFilter);
         if (nextToken) params.set("pageToken", nextToken);
 
         const res = await fetch(`https://clinicaltrials.gov/api/v2/studies?${params}`);
@@ -167,16 +176,7 @@ export const runStudyImport = createServerFn({ method: "POST" })
           const locs = ps.contactsLocationsModule?.locations ?? [];
           const stateSlugSet = new Set<string>();
           const citySlugSet = new Set<string>();
-          const locInsert: {
-            facility: string | null;
-            city: string | null;
-            city_slug: string | null;
-            state: string | null;
-            state_slug: string | null;
-            country: string | null;
-            zip: string | null;
-            status: string | null;
-          }[] = [];
+          const locInsert: any[] = [];
           for (const l of locs) {
             if ((l.country ?? "").trim() !== "United States") continue;
             const stateSlug = normalizeState(l.state);
@@ -201,6 +201,8 @@ export const runStudyImport = createServerFn({ method: "POST" })
               country: l.country ?? null,
               zip: l.zip ?? null,
               status: l.status ?? null,
+              lat: typeof l.geoPoint?.lat === "number" ? l.geoPoint.lat : null,
+              lng: typeof l.geoPoint?.lon === "number" ? l.geoPoint.lon : null,
             });
           }
 
@@ -239,17 +241,14 @@ export const runStudyImport = createServerFn({ method: "POST" })
         }
 
         if (rows.length > 0) {
-          // Check which existed
           const ids = rows.map((r) => r.nct_id);
           const { data: existing } = await supabaseAdmin.from("studies").select("nct_id").in("nct_id", ids);
-          const existingSet = new Set((existing ?? []).map((e) => e.nct_id));
+          const existingSet = new Set((existing ?? []).map((e: any) => e.nct_id));
           inserted += rows.filter((r) => !existingSet.has(r.nct_id)).length;
           updated += rows.filter((r) => existingSet.has(r.nct_id)).length;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { error: upErr } = await supabaseAdmin.from("studies").upsert(rows as any, { onConflict: "nct_id" });
           if (upErr) throw new Error(`studies upsert: ${upErr.message}`);
-          // Replace locations for these ids
           await supabaseAdmin.from("locations").delete().in("nct_id", ids);
           if (locationRows.length > 0) {
             const { error: locErr } = await supabaseAdmin.from("locations").insert(locationRows);
@@ -261,31 +260,20 @@ export const runStudyImport = createServerFn({ method: "POST" })
         if (!nextToken) break;
       }
 
-      // Upsert dimension counts
-      const condUpserts = [...conditionCounter.entries()].map(([slug, v]) => ({
-        slug,
-        name: v.name,
-        study_count: v.count,
-      }));
-      const sponsorUpserts = [...sponsorCounter.entries()].map(([slug, v]) => ({
-        slug,
-        name: v.name,
-        study_count: v.count,
-      }));
-      const cityUpserts = [...cityCounter.entries()].map(([slug, v]) => ({
-        slug,
-        name: v.name,
-        state_slug: v.state_slug,
-        study_count: v.count,
-      }));
+      // Upsert dimension rows. study_count is then refreshed authoritatively below.
+      const condUpserts = [...conditionCounter.entries()].map(([slug, v]) => ({ slug, name: v.name, study_count: v.count }));
+      const sponsorUpserts = [...sponsorCounter.entries()].map(([slug, v]) => ({ slug, name: v.name, study_count: v.count }));
+      const cityUpserts = [...cityCounter.entries()].map(([slug, v]) => ({ slug, name: v.name, state_slug: v.state_slug, study_count: v.count }));
 
       if (condUpserts.length) await supabaseAdmin.from("conditions").upsert(condUpserts, { onConflict: "slug" });
       if (sponsorUpserts.length) await supabaseAdmin.from("sponsors").upsert(sponsorUpserts, { onConflict: "slug" });
       if (cityUpserts.length) await supabaseAdmin.from("cities").upsert(cityUpserts, { onConflict: "slug" });
 
-      for (const [slug, count] of stateCounter.entries()) {
-        await supabaseAdmin.from("states").update({ study_count: count }).eq("slug", slug);
-      }
+      // Generate clinic rows from new locations, then refresh accurate counts.
+      const { error: genErr } = await supabaseAdmin.rpc("generate_clinics_from_locations");
+      if (genErr) console.error("generate_clinics_from_locations:", genErr.message);
+      const { error: refErr } = await supabaseAdmin.rpc("refresh_directory_counts");
+      if (refErr) console.error("refresh_directory_counts:", refErr.message);
 
       await supabaseAdmin
         .from("import_runs")
@@ -303,23 +291,29 @@ export const runStudyImport = createServerFn({ method: "POST" })
     }
   });
 
+export const refreshDirectoryCounts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: g } = await supabaseAdmin.rpc("generate_clinics_from_locations");
+    if (g) throw new Error(g.message);
+    const { error: r } = await supabaseAdmin.rpc("refresh_directory_counts");
+    if (r) throw new Error(r.message);
+    return { ok: true };
+  });
+
 export const getAdminStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: roleRow } = await context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleRow) throw new Error("Forbidden: admin only");
-
+    await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [studies, conditions, sponsors, cities, recruiting, runs] = await Promise.all([
+    const [studies, conditions, sponsors, cities, clinics, recruiting, runs] = await Promise.all([
       supabaseAdmin.from("studies").select("nct_id", { count: "exact", head: true }),
-      supabaseAdmin.from("conditions").select("slug", { count: "exact", head: true }),
-      supabaseAdmin.from("sponsors").select("slug", { count: "exact", head: true }),
-      supabaseAdmin.from("cities").select("slug", { count: "exact", head: true }),
+      supabaseAdmin.from("conditions").select("slug", { count: "exact", head: true }).gt("study_count", 0),
+      supabaseAdmin.from("sponsors").select("slug", { count: "exact", head: true }).gt("study_count", 0),
+      supabaseAdmin.from("cities").select("slug", { count: "exact", head: true }).gt("study_count", 0),
+      supabaseAdmin.from("clinics").select("id", { count: "exact", head: true }).eq("published", true),
       supabaseAdmin.from("studies").select("nct_id", { count: "exact", head: true }).eq("overall_status", "RECRUITING"),
       supabaseAdmin.from("import_runs").select("*").order("started_at", { ascending: false }).limit(10),
     ]);
@@ -328,6 +322,7 @@ export const getAdminStats = createServerFn({ method: "GET" })
       totalConditions: conditions.count ?? 0,
       totalSponsors: sponsors.count ?? 0,
       totalCities: cities.count ?? 0,
+      totalClinics: clinics.count ?? 0,
       totalRecruiting: recruiting.count ?? 0,
       runs: runs.data ?? [],
     };
