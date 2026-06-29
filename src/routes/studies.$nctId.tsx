@@ -9,6 +9,7 @@ import { EligibilityModal } from "@/components/EligibilityModal";
 import { AiSimplify } from "@/components/AiSimplify";
 import { LocationsList } from "@/components/LocationsList";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
+import { TrialMap } from "@/components/TrialMap";
 
 const studyQuery = (nctId: string) =>
   queryOptions({
@@ -53,6 +54,19 @@ function StudyPage() {
   const [modalOpen, setModalOpen] = useState(false);
   if (!data) return null;
   const { study, locations, related } = data;
+  const clinicMap = (data as { clinicMap?: Record<string, { slug: string; name: string }> }).clinicMap ?? {};
+  const mapPins = (locations as Array<{ id: number | string; lat: number | null; lng: number | null; facility: string | null; city: string | null; state: string | null; status: string | null; clinic_id: string | null }>)
+    .filter((l): l is typeof l & { lat: number; lng: number } => typeof l.lat === "number" && typeof l.lng === "number")
+    .map((l) => ({
+      id: l.id,
+      lat: l.lat,
+      lng: l.lng,
+      facility: l.facility,
+      city: l.city,
+      state: l.state,
+      status: l.status,
+      clinicSlug: l.clinic_id ? clinicMap[l.clinic_id]?.slug ?? null : null,
+    }));
   const isRecruiting = study.overall_status === "RECRUITING";
   const showPhase = isPhaseShown(study.phase);
   const eligibility = (study.eligibility ?? {}) as { criteria?: string; healthyVolunteers?: string };
@@ -189,6 +203,11 @@ function StudyPage() {
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               <Hospital className="h-4 w-4" /> Research locations
             </h2>
+            {mapPins.length > 0 && (
+              <div className="mb-4">
+                <TrialMap pins={mapPins} height={320} />
+              </div>
+            )}
             <LocationsList locations={locations} />
           </section>
 

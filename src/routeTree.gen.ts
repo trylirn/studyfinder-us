@@ -32,8 +32,13 @@ import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
 import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
+import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
+import { Route as AuthenticatedPortalClaimRouteImport } from './routes/_authenticated/portal.claim'
+import { Route as AuthenticatedPortalBillingRouteImport } from './routes/_authenticated/portal.billing'
+import { Route as AuthenticatedPortalClinicIdRouteImport } from './routes/_authenticated/portal.clinic.$id'
 
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
@@ -149,16 +154,45 @@ const CitiesCitySlugRoute = CitiesCitySlugRouteImport.update({
   path: '/cities/$citySlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPortalIndexRoute =
+  AuthenticatedPortalIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
   id: '/api/public/seed-admin',
   path: '/api/public/seed-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPortalClaimRoute =
+  AuthenticatedPortalClaimRouteImport.update({
+    id: '/claim',
+    path: '/claim',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalBillingRoute =
+  AuthenticatedPortalBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalClinicIdRoute =
+  AuthenticatedPortalClinicIdRouteImport.update({
+    id: '/clinic/$id',
+    path: '/clinic/$id',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -166,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/recruiting': typeof RecruitingRoute
   '/search': typeof SearchRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -184,7 +219,11 @@ export interface FileRoutesByFullPath {
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
+  '/portal/billing': typeof AuthenticatedPortalBillingRoute
+  '/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
+  '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -210,7 +249,11 @@ export interface FileRoutesByTo {
   '/learn': typeof LearnIndexRoute
   '/sponsors': typeof SponsorsIndexRoute
   '/states': typeof StatesIndexRoute
+  '/portal/billing': typeof AuthenticatedPortalBillingRoute
+  '/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
+  '/portal': typeof AuthenticatedPortalIndexRoute
+  '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -220,6 +263,7 @@ export interface FileRoutesById {
   '/recruiting': typeof RecruitingRoute
   '/search': typeof SearchRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -238,7 +282,11 @@ export interface FileRoutesById {
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
+  '/_authenticated/portal/billing': typeof AuthenticatedPortalBillingRoute
+  '/_authenticated/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
+  '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/_authenticated/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -248,6 +296,7 @@ export interface FileRouteTypes {
     | '/recruiting'
     | '/search'
     | '/admin'
+    | '/portal'
     | '/cities/$citySlug'
     | '/clinics/$slug'
     | '/conditions/$slug'
@@ -266,7 +315,11 @@ export interface FileRouteTypes {
     | '/learn/'
     | '/sponsors/'
     | '/states/'
+    | '/portal/billing'
+    | '/portal/claim'
     | '/api/public/seed-admin'
+    | '/portal/'
+    | '/portal/clinic/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -292,7 +345,11 @@ export interface FileRouteTypes {
     | '/learn'
     | '/sponsors'
     | '/states'
+    | '/portal/billing'
+    | '/portal/claim'
     | '/api/public/seed-admin'
+    | '/portal'
+    | '/portal/clinic/$id'
   id:
     | '__root__'
     | '/'
@@ -301,6 +358,7 @@ export interface FileRouteTypes {
     | '/recruiting'
     | '/search'
     | '/_authenticated/admin'
+    | '/_authenticated/portal'
     | '/cities/$citySlug'
     | '/clinics/$slug'
     | '/conditions/$slug'
@@ -319,7 +377,11 @@ export interface FileRouteTypes {
     | '/learn/'
     | '/sponsors/'
     | '/states/'
+    | '/_authenticated/portal/billing'
+    | '/_authenticated/portal/claim'
     | '/api/public/seed-admin'
+    | '/_authenticated/portal/'
+    | '/_authenticated/portal/clinic/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -512,12 +574,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CitiesCitySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/portal': {
+      id: '/_authenticated/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof AuthenticatedPortalRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/portal/': {
+      id: '/_authenticated/portal/'
+      path: '/'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
     }
     '/api/public/seed-admin': {
       id: '/api/public/seed-admin'
@@ -526,15 +602,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSeedAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/portal/claim': {
+      id: '/_authenticated/portal/claim'
+      path: '/claim'
+      fullPath: '/portal/claim'
+      preLoaderRoute: typeof AuthenticatedPortalClaimRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/billing': {
+      id: '/_authenticated/portal/billing'
+      path: '/billing'
+      fullPath: '/portal/billing'
+      preLoaderRoute: typeof AuthenticatedPortalBillingRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
+    '/_authenticated/portal/clinic/$id': {
+      id: '/_authenticated/portal/clinic/$id'
+      path: '/clinic/$id'
+      fullPath: '/portal/clinic/$id'
+      preLoaderRoute: typeof AuthenticatedPortalClinicIdRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
   }
 }
 
+interface AuthenticatedPortalRouteChildren {
+  AuthenticatedPortalBillingRoute: typeof AuthenticatedPortalBillingRoute
+  AuthenticatedPortalClaimRoute: typeof AuthenticatedPortalClaimRoute
+  AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
+  AuthenticatedPortalClinicIdRoute: typeof AuthenticatedPortalClinicIdRoute
+}
+
+const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
+  AuthenticatedPortalBillingRoute: AuthenticatedPortalBillingRoute,
+  AuthenticatedPortalClaimRoute: AuthenticatedPortalClaimRoute,
+  AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
+  AuthenticatedPortalClinicIdRoute: AuthenticatedPortalClinicIdRoute,
+}
+
+const AuthenticatedPortalRouteWithChildren =
+  AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -570,13 +686,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
