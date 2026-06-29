@@ -1,117 +1,61 @@
-# Phase 2 — Map, Clinics, Portal, Imports & Directory Polish
+## 1. Populate the clinic directory (why /clinics is empty)
 
-## 1. Map View + ZIP radius
+The clinic generation job exists (`generate_clinics_from_locations`) but has never been run against the current location set, so `clinics` is empty and `/clinics` shows the "no clinics yet" message.
 
-- Install `leaflet` + `react-leaflet`; load CSS via `<link>` in `__root.tsx` head (no `@import` in styles.css per Tailwind v4 rules).
-- New `src/components/TrialMap.tsx` (client-only, dynamic import to avoid SSR `window` crash). Pins per location with popup: facility name, city/state, status, link.
-- Bundle US ZIP centroid dataset (`src/data/zip-centroids.json`, ~33k ZIPs lat/lng) — offline lookup, no API.
-- New `nearby_sites(zip, radius_mi, nct_id?)` SQL function (haversine on `locations.lat/lng`) + `nearbySites` server fn.
-- Backfill `lat`/`lng` during import from ClinicalTrials.gov `geoPoint`. Admin one-shot "Geocode backfill" button on `/admin` for existing rows.
-- Wire into:
-  - Study detail page: map under "Research Sites" + ZIP+radius input (default 50mi) that filters both list and map.
-  - `/search`: optional "Map" toggle button.
+- Run `generate_clinics_from_locations()` + `refresh_directory_counts()` as a one-shot migration so the directory populates immediately (covers all ~30k+ existing locations).
+- Add an explicit "Generate clinics + refresh counts" button on `/admin` that re-runs both, so future imports can backfill on demand.
+- Ensure `runStudyImport` always calls both at the tail (it already does — verify and patch if missing).
 
-## 2. Clinic Profiles (public)
+## 2. Leaflet map widget on study detail page
 
-- Derive clinics from existing `locations` (facility + city + state + zip) into the `clinics` table via admin job: dedupe by normalized name+city+state, attach lat/lng, link via new `clinic_id` FK on `locations` (nullable).
-- Routes:
-  - `/clinics` — paginated, filterable list (search by name, filter by state, specialty).
-  - `/clinics/$slug` — hero (name, address, map pin, phone/website if known), photo gallery, specialties, **active recruiting trials at this clinic** list, "Claim this clinic" CTA.
-- Add `clinic_id` to study detail "Research Sites" rows: each site links to clinic profile when matched.
-- Sitemap: include all clinic slugs.
+- New `src/components/TrialMap.client.tsx` (suffix prevents SSR import). Uses `react-leaflet` MapContainer/TileLayer/Marker/Popup with OSM tiles, fits bounds to all pins, popups show facility/city/state/status + link to clinic profile when `clinic_id` is set.
+- Load Leaflet CSS via `<link>` in `src/routes/__root.tsx` head (Tailwind v4 rule — no remote `@import`).
+- In `src/routes/studies.$nctId.tsx`, dynamic-import the map (`React.lazy` + `Suspense`) inside the "Research Locations" section, fed by the same filtered location list (ZIP + radius + state filter already in place).
+- Empty/no-coords fallback: hide the map block when zero locations have `lat`/`lng`.
 
-## 3. Clinic Onboarding Portal
+## 3. Clinic Onboarding Portal UI
 
-- Routes under `/_authenticated/portal/` (gated by `clinic_admin` OR `admin` role):
-  - `/portal` — dashboard (claimed clinics, plan, lead delivery log metadata).
-  - `/portal/claim` — search clinics → submit claim (creates pending row, admin approves).
-  - `/portal/clinic/$id` — edit profile: phone, website, intake_email, intake_webhook_url, specialties, description, hero image, gallery (Lovable Cloud storage bucket `clinic-images`).
-  - `/portal/billing` — Stripe Checkout for `featured` / `premium` plans; sets `plan` + `featured_until`.
-- Admin (`/admin`):
-  - "Approve clinic claims" queue.
-  - "Generate clinics from locations" job.
-- Sign-up: `/auth` gains "Clinic Operator sign up" tab → creates user + assigns `clinic_admin` role. (Patient accounts remain disabled.)
-- New `/api/public/stripe-webhook` verifying signature, updating `plan` + `featured_until`.
-- Premium placement: featured clinics surface first on `/clinics`, condition, state, and city pages (badge + sort boost while `featured_until > now()`).
+Routes under `src/routes/_authenticated/portal.*` (gated by existing `_authenticated` layout; role check inside loaders/components — admin OR clinic_admin):
 
-## 4. More imports (populate the directory)
+- `portal.index.tsx` — dashboard: list of clinics the user owns (via `clinic_claims` where `status='approved'`), claim status, recruiting count, plan badge, lead delivery log count.
+- `portal.claim.tsx` — search clinics (reuses `listClinics`), submit claim (`submitClaim` server fn → inserts `clinic_claims` row with `status='pending'`).
+- `portal.clinic.$id.tsx` — edit profile fields the schema already supports: phone, website, intake_email, description, specialties, hero image (Lovable Cloud `clinic-images` bucket upload).
+- `portal.billing.tsx` — placeholder explaining premium placement; "Coming soon" CTA (no Stripe wiring this phase — flagged for next phase to keep scope tight; will request Stripe enablement then).
+- Admin: new "Clinic claims queue" section in `/admin` to approve/reject pending claims (sets `clinics.claim_status='approved'`, assigns `clinic_admin` role to the claimant on approval).
+- New server fns in `src/lib/clinics.functions.ts`: `submitClaim`, `getMyClinics`, `updateMyClinic`, `uploadClinicImage`, `listPendingClaims` (admin), `decideClaim` (admin).
+- `/auth` page: add a "Clinic operator sign up" tab that creates the user and stores intent; role assignment happens on claim approval (no self-grant).
+- Header: add "Portal" link visible only when signed in.
 
-- Expand `runImport` in `src/lib/import.functions.ts`:
-  - Paginate ClinicalTrials.gov v2 API with `pageToken` until exhausted or admin-set cap (default 50k).
-  - Per-condition seed list (top 60 conditions: cancer, diabetes, depression, obesity, Alzheimer's, ADHD, MS, lupus, etc.) to broaden coverage.
-  - Per-state seed pass to ensure even geographic distribution.
-  - Persist `lat`/`lng` from `geoPoint`.
-- Schedule daily refresh via `pg_cron` → `/api/public/hooks/import-refresh` (pulls trials updated in last 48h).
-- Admin UI shows last run, progress, and "Import next 5k" / "Full sync" buttons.
+## 4. Fix duplicate "Sponsors" link in header
 
-## 5. Directory filters & pagination (the bugs you flagged)
+`src/components/SiteHeader.tsx` has two consecutive `<Link to="/sponsors">Sponsors</Link>` entries — remove the duplicate.
 
-- `/conditions`: search box (client filter on already-loaded list) + sort (A–Z / by count) + pagination (200/page server-side from `conditions` table ordered by `study_count desc`).
-- `/sponsors`: same — search, sort, **server-side pagination** (currently truncated; will list *all* sponsors).
-- `/states`: search box + sort.
-- `/recruiting`: filters for state, phase, condition + pagination (already paginated underneath; surface controls).
-- New `listConditionsPaged`, `listSponsorsPaged` server fns with `q`, `page`, `pageSize`, `sort`.
+## 5. Expand Terms of Service and Privacy Policy
 
-## 6. Fix inaccurate study counts on condition/sponsor cards
+Rewrite `src/routes/legal.terms.tsx` and `src/routes/legal.privacy.tsx` into comprehensive, lawyer-style documents tailored to: **(a) we are an independent informational directory only, (b) we are not a medical provider / not a covered entity / not HIPAA-regulated, (c) we do not store eligibility responses or patient health data — they are forwarded statelessly to the research site, (d) we are not affiliated with ClinicalTrials.gov / NIH / US Government**.
 
-Root cause: `conditions.study_count` and `sponsors.study_count` are snapshot totals (all studies referencing the term), but the detail pages filter to non-broken / displayable studies (have summary, valid status, not WITHDRAWN/TERMINATED) — so the visible list is smaller. Sometimes also larger when default filters exclude a status the count includes.
+Terms sections: Acceptance, Eligibility/Age (18+), Description of service (directory only, no medical advice, no recommendations), Account terms (admin-only), Intellectual property + ClinicalTrials.gov attribution, Acceptable Use Policy (no scraping abuse, no impersonation, no automated submissions, no use by minors without guardian), Eligibility-tool terms (stateless forwarding, consent to share with research site, accuracy warranty by user, indemnity for false submissions), Third-party sites & sponsors (no endorsement, no responsibility for their conduct, separate privacy practices apply once data is forwarded), Lead delivery & paid placement disclosure (we may receive referral fees, paid placement is labeled), AI-generated content disclaimer (may be inaccurate), No warranties (AS IS / AS AVAILABLE, full disclaimer block), Limitation of liability (cap at $100 or fees paid, exclusion of indirect/consequential damages, applies to AI summaries and lead delivery), Indemnification, DMCA notice & takedown procedure with designated agent contact, Termination, Governing law & venue (Delaware), Arbitration & class-action waiver (AAA, individual basis, 30-day opt-out), Changes to terms, Severability, Entire agreement, Contact.
 
-Fix:
-- Recompute `study_count` using the **same predicate** the detail pages use:
-  - `overall_status NOT IN ('WITHDRAWN','TERMINATED')`
-  - `brief_summary IS NOT NULL`
-  - For conditions: array-contains match.
-  - For sponsors: `sponsor_slug = X`.
-- New SQL function `refresh_directory_counts()` run at end of every import + nightly cron.
-- Condition/sponsor detail pages display the same count via `count: 'exact'` on the actual filtered query, so card count === page count by construction.
+Privacy sections: Scope (US users, directory service), Controller identity & contact, What we collect (server logs, cookies, aggregate analytics, admin account credentials only — explicitly NOT patient health data, NOT eligibility responses beyond delivery metadata, NOT diagnoses), Eligibility tool data flow (stateless: assembled in-memory → encrypted payload → delivered to research site → discarded; only delivery metadata `{nct_id, timestamp, delivery_status}` retained, no PII retained server-side), Legal bases (legitimate interest for analytics, consent for eligibility submission), How we use info, Sharing & disclosures (research sites for forwarded eligibility submissions only; service providers; legal compliance; business transfers), No sale of personal information (CCPA/CPRA statement), International transfers (US-only service, do not direct to EEA/UK residents), Children (not directed at <18, COPPA), Retention (logs 90 days, delivery metadata 24 months), Security (TLS, hashed admin credentials, least-privilege backend), Cookies (essential only by default, list categories), Analytics (privacy-preserving, no cross-site tracking), HIPAA notice (we are NOT a covered entity or business associate; if you submit PHI you do so voluntarily and outside HIPAA's scope on our end — once delivered to a research site that entity's own privacy practices apply), State privacy rights (CA, VA, CO, CT, UT, TX disclosures + how to exercise; since we don't retain submissions there is typically no record to access/delete), Do Not Track signal handling, Third-party links, Data breach notification commitment, Changes to policy, Contact / DPO email.
 
-## 7. Homepage "Browse by clinic"
+Both pages: keep within existing `prose` layout, add a clear "Last updated: June 29, 2026", route metadata, and prominent links from the footer.
 
-- New section between "Top sponsors" and "New to clinical trials?":
-  - Heading "Browse research clinics" + "All clinics →".
-  - Grid of 12 top clinics by active recruiting trial count, with name, city/state, recruiting count, featured badge if applicable.
-- Backed by new `getHomeData` field `topClinics` (cached).
+6. **"Browse by clinic"** section on the homepage (data from topClinics, sorted by recruiting volume) should show
 
 ---
 
 ## Technical notes
 
-### New / changed DB
+- New tables: none. Reuses `clinics`, `clinic_claims`, `clinic_images`, `user_roles`.
+- New migrations: (a) DO block that runs `generate_clinics_from_locations()` + `refresh_directory_counts()` once.
+- New deps: none (`leaflet` + `react-leaflet` already installed).
+- Security: keep `clinic_claims` admin-only writes for approval; user can insert their own pending row scoped to `auth.uid()`.
+- Out of scope this phase: Stripe billing wiring (placeholder only), AACT sync, SMS lead delivery.
 
-- `clinics`: add `description`, `hero_image_url`, `claim_status` (`pending|approved|rejected`), `recruiting_count` (denormalized), `updated_at`.
-- `locations`: add `clinic_id uuid references clinics(id)` (nullable, indexed).
-- New storage bucket `clinic-images` (public read, write via portal owner).
-- SQL: `nearby_sites(zip text, radius_mi int, nct_id text default null)`, `refresh_directory_counts()`, trigger to bump `clinics.recruiting_count` on location/study change (or run inside refresh job).
-- New table `clinic_claims(id, user_id, clinic_id, status, note, created_at)`.
+## Order of implementation
 
-### New server fns / routes
-
-- `src/lib/clinics.functions.ts`: `listClinics`, `getClinic`, `submitClaim`, `getMyClinics`, `updateMyClinic`, `uploadClinicImage`, `startPremiumCheckout`.
-- `src/lib/geo.functions.ts`: `nearbySites`, ZIP→lat/lng helper.
-- `src/routes/clinics.index.tsx`, `clinics.$slug.tsx`.
-- `src/routes/_authenticated/portal.tsx` (layout) + children.
-- `src/routes/api/public/stripe-webhook.ts`.
-- `src/routes/api/public/hooks/import-refresh.ts`.
-
-### Integrations
-
-- **Stripe** connector (premium placement) — will request enablement when reaching step 3.
-- **Leaflet + OSM tiles** — no key.
-- ZIP dataset bundled (~1.5 MB JSON; tree-shaken to lat/lng only).
-
-### Out of scope this phase
-
-- AACT Postgres mirror sync (still v3).
-- SMS/Twilio lead delivery.
-- Patient accounts.
-
-### Implementation order
-
-1. DB migrations (clinics/locations/claims/SQL fns) + storage bucket.
-2. Count-accuracy fix + directory filters/pagination (quick wins, ships independently).
-3. Import expansion + lat/lng backfill + daily cron.
-4. Map component + ZIP radius on study detail and `/search`.
-5. Clinic generation job → public `/clinics` + `/clinics/$slug` + homepage section.
-6. Onboarding portal + Stripe premium.
-
-Approve and I'll start at step 1.
+1. Populate clinics (migration) + admin button.
+2. Header duplicate fix.
+3. Leaflet map component + study-detail integration.
+4. Clinic portal routes + server fns + admin claim queue.
+5. Rewrite Terms + Privacy.
