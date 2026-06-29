@@ -16,10 +16,10 @@ export function SiteHeader() {
           <Link to="/conditions" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Conditions</Link>
           <Link to="/states" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>States</Link>
           <Link to="/sponsors" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Sponsors</Link>
-          <Link to="/sponsors" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Sponsors</Link>
           <Link to="/clinics" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Clinics</Link>
           <Link to="/recruiting" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Recruiting</Link>
           <Link to="/learn" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Learn</Link>
+          <Link to="/portal" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>For clinics</Link>
         </nav>
         <Link
           to="/search"
