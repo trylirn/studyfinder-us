@@ -9,6 +9,7 @@ import { EligibilityModal } from "@/components/EligibilityModal";
 import { AiSimplify } from "@/components/AiSimplify";
 import { LocationsList } from "@/components/LocationsList";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
+import { TrialMap } from "@/components/TrialMap";
 
 const studyQuery = (nctId: string) =>
   queryOptions({
@@ -52,7 +53,19 @@ function StudyPage() {
   const { data } = useSuspenseQuery(studyQuery(nctId));
   const [modalOpen, setModalOpen] = useState(false);
   if (!data) return null;
-  const { study, locations, related } = data;
+  const { study, locations, related, clinicMap } = data as any;
+  const mapPins = (locations as any[])
+    .filter((l) => typeof l.lat === "number" && typeof l.lng === "number")
+    .map((l) => ({
+      id: l.id,
+      lat: l.lat,
+      lng: l.lng,
+      facility: l.facility,
+      city: l.city,
+      state: l.state,
+      status: l.status,
+      clinicSlug: l.clinic_id ? clinicMap?.[l.clinic_id]?.slug ?? null : null,
+    }));
   const isRecruiting = study.overall_status === "RECRUITING";
   const showPhase = isPhaseShown(study.phase);
   const eligibility = (study.eligibility ?? {}) as { criteria?: string; healthyVolunteers?: string };
