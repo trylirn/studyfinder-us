@@ -53,9 +53,10 @@ function StudyPage() {
   const { data } = useSuspenseQuery(studyQuery(nctId));
   const [modalOpen, setModalOpen] = useState(false);
   if (!data) return null;
-  const { study, locations, related, clinicMap } = data as any;
-  const mapPins = (locations as any[])
-    .filter((l) => typeof l.lat === "number" && typeof l.lng === "number")
+  const { study, locations, related } = data;
+  const clinicMap = (data as { clinicMap?: Record<string, { slug: string; name: string }> }).clinicMap ?? {};
+  const mapPins = (locations as Array<{ id: number | string; lat: number | null; lng: number | null; facility: string | null; city: string | null; state: string | null; status: string | null; clinic_id: string | null }>)
+    .filter((l): l is typeof l & { lat: number; lng: number } => typeof l.lat === "number" && typeof l.lng === "number")
     .map((l) => ({
       id: l.id,
       lat: l.lat,
@@ -64,7 +65,7 @@ function StudyPage() {
       city: l.city,
       state: l.state,
       status: l.status,
-      clinicSlug: l.clinic_id ? clinicMap?.[l.clinic_id]?.slug ?? null : null,
+      clinicSlug: l.clinic_id ? clinicMap[l.clinic_id]?.slug ?? null : null,
     }));
   const isRecruiting = study.overall_status === "RECRUITING";
   const showPhase = isPhaseShown(study.phase);
