@@ -174,14 +174,14 @@ async function runCronImport(request: Request) {
           study_type: ps.designModule?.studyType ?? null,
           conditions,
           condition_slugs: conditionSlugs,
-          interventions: (ps.armsInterventionsModule?.interventions ?? []) as object,
+          interventions: (ps.armsInterventionsModule?.interventions ?? []) as any,
           eligibility: {
             criteria: ps.eligibilityModule?.eligibilityCriteria ?? null,
             sex: ps.eligibilityModule?.sex ?? null,
             minimumAge: ps.eligibilityModule?.minimumAge ?? null,
             maximumAge: ps.eligibilityModule?.maximumAge ?? null,
             stdAges: ps.eligibilityModule?.stdAges ?? [],
-          } as object,
+          } as any,
           min_age_years: ageToYears(ps.eligibilityModule?.minimumAge),
           max_age_years: ageToYears(ps.eligibilityModule?.maximumAge),
           gender: ps.eligibilityModule?.sex ?? null,
@@ -205,7 +205,7 @@ async function runCronImport(request: Request) {
         inserted += rows.filter((r) => !existingSet.has(r.nct_id)).length;
         updated += rows.filter((r) => existingSet.has(r.nct_id)).length;
 
-        const { error: upErr } = await supabaseAdmin.from("studies").upsert(rows, { onConflict: "nct_id" });
+        const { error: upErr } = await supabaseAdmin.from("studies").upsert(rows as any, { onConflict: "nct_id" });
         if (upErr) throw new Error(`studies upsert: ${upErr.message}`);
         await supabaseAdmin.from("locations").delete().in("nct_id", ids);
         if (locationRows.length) {
