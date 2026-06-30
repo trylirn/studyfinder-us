@@ -1,61 +1,77 @@
-## 1. Populate the clinic directory (why /clinics is empty)
+## Root cause
 
-The clinic generation job exists (`generate_clinics_from_locations`) but has never been run against the current location set, so `clinics` is empty and `/clinics` shows the "no clinics yet" message.
+The `clinics` table (and several other Phase 2/3 tables) were created without `GRANT` statements. Supabase's Data API (PostgREST) does **not** grant default privileges on the `public` schema, so even though the RLS policy *would* let anon read `published = true` clinics, PostgREST blocks the query before RLS ever runs and silently returns 0 rows.
 
-- Run `generate_clinics_from_locations()` + `refresh_directory_counts()` as a one-shot migration so the directory populates immediately (covers all ~30k+ existing locations).
-- Add an explicit "Generate clinics + refresh counts" button on `/admin` that re-runs both, so future imports can backfill on demand.
-- Ensure `runStudyImport` always calls both at the tail (it already does — verify and patch if missing).
+Verified in the database:
+- `public.clinics` has 26,709 rows, 26,709 published, 11,534 with `recruiting_count > 0`.
+- RLS policy `public read published clinics` exists for `anon, authenticated`.
+- `information_schema.role_table_grants` for `public.clinics` returns **zero rows** — no role has any privilege.
+- Same problem on `clinic_claims`, `clinic_images`, `lead_delivery_log`, `study_simplifications`, `condition_views`.
 
-## 2. Leaflet map widget on study detail page
+That's why:
+- `/clinics` shows nothing (anon `SELECT` denied)
+- Clinic owners can't see clinics to claim (same query)
+- Homepage "Browse by clinic" is empty (`getHomeData.topClinics` uses the same anon read)
 
-- New `src/components/TrialMap.client.tsx` (suffix prevents SSR import). Uses `react-leaflet` MapContainer/TileLayer/Marker/Popup with OSM tiles, fits bounds to all pins, popups show facility/city/state/status + link to clinic profile when `clinic_id` is set.
-- Load Leaflet CSS via `<link>` in `src/routes/__root.tsx` head (Tailwind v4 rule — no remote `@import`).
-- In `src/routes/studies.$nctId.tsx`, dynamic-import the map (`React.lazy` + `Suspense`) inside the "Research Locations" section, fed by the same filtered location list (ZIP + radius + state filter already in place).
-- Empty/no-coords fallback: hide the map block when zero locations have `lat`/`lng`.
+## Plan
 
-## 3. Clinic Onboarding Portal UI
+### 1. Migration: add missing GRANTs
 
-Routes under `src/routes/_authenticated/portal.*` (gated by existing `_authenticated` layout; role check inside loaders/components — admin OR clinic_admin):
+Single migration adding privileges that match each table's existing RLS policies:
 
-- `portal.index.tsx` — dashboard: list of clinics the user owns (via `clinic_claims` where `status='approved'`), claim status, recruiting count, plan badge, lead delivery log count.
-- `portal.claim.tsx` — search clinics (reuses `listClinics`), submit claim (`submitClaim` server fn → inserts `clinic_claims` row with `status='pending'`).
-- `portal.clinic.$id.tsx` — edit profile fields the schema already supports: phone, website, intake_email, description, specialties, hero image (Lovable Cloud `clinic-images` bucket upload).
-- `portal.billing.tsx` — placeholder explaining premium placement; "Coming soon" CTA (no Stripe wiring this phase — flagged for next phase to keep scope tight; will request Stripe enablement then).
-- Admin: new "Clinic claims queue" section in `/admin` to approve/reject pending claims (sets `clinics.claim_status='approved'`, assigns `clinic_admin` role to the claimant on approval).
-- New server fns in `src/lib/clinics.functions.ts`: `submitClaim`, `getMyClinics`, `updateMyClinic`, `uploadClinicImage`, `listPendingClaims` (admin), `decideClaim` (admin).
-- `/auth` page: add a "Clinic operator sign up" tab that creates the user and stores intent; role assignment happens on claim approval (no self-grant).
-- Header: add "Portal" link visible only when signed in.
+```sql
+-- Public-readable directory + claim metadata
+GRANT SELECT ON public.clinics TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.clinics TO authenticated;
+GRANT ALL ON public.clinics TO service_role;
 
-## 4. Fix duplicate "Sponsors" link in header
+GRANT SELECT ON public.clinic_images TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.clinic_images TO authenticated;
+GRANT ALL ON public.clinic_images TO service_role;
 
-`src/components/SiteHeader.tsx` has two consecutive `<Link to="/sponsors">Sponsors</Link>` entries — remove the duplicate.
+-- Auth-only tables (no anon)
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.clinic_claims TO authenticated;
+GRANT ALL ON public.clinic_claims TO service_role;
 
-## 5. Expand Terms of Service and Privacy Policy
+-- Service-role only (eligibility leads + condition view stats are written by RPC/server fns)
+GRANT ALL ON public.lead_delivery_log TO service_role;
+GRANT ALL ON public.condition_views TO service_role;
 
-Rewrite `src/routes/legal.terms.tsx` and `src/routes/legal.privacy.tsx` into comprehensive, lawyer-style documents tailored to: **(a) we are an independent informational directory only, (b) we are not a medical provider / not a covered entity / not HIPAA-regulated, (c) we do not store eligibility responses or patient health data — they are forwarded statelessly to the research site, (d) we are not affiliated with ClinicalTrials.gov / NIH / US Government**.
+-- AI simplifications: anon read (shown on study pages), service_role writes
+GRANT SELECT ON public.study_simplifications TO anon;
+GRANT SELECT ON public.study_simplifications TO authenticated;
+GRANT ALL ON public.study_simplifications TO service_role;
+```
 
-Terms sections: Acceptance, Eligibility/Age (18+), Description of service (directory only, no medical advice, no recommendations), Account terms (admin-only), Intellectual property + ClinicalTrials.gov attribution, Acceptable Use Policy (no scraping abuse, no impersonation, no automated submissions, no use by minors without guardian), Eligibility-tool terms (stateless forwarding, consent to share with research site, accuracy warranty by user, indemnity for false submissions), Third-party sites & sponsors (no endorsement, no responsibility for their conduct, separate privacy practices apply once data is forwarded), Lead delivery & paid placement disclosure (we may receive referral fees, paid placement is labeled), AI-generated content disclaimer (may be inaccurate), No warranties (AS IS / AS AVAILABLE, full disclaimer block), Limitation of liability (cap at $100 or fees paid, exclusion of indirect/consequential damages, applies to AI summaries and lead delivery), Indemnification, DMCA notice & takedown procedure with designated agent contact, Termination, Governing law & venue (Delaware), Arbitration & class-action waiver (AAA, individual basis, 30-day opt-out), Changes to terms, Severability, Entire agreement, Contact.
+After the migration, `/clinics`, the claim search, and the homepage "Browse by clinic" section will populate immediately — no code changes required for the visibility fix.
 
-Privacy sections: Scope (US users, directory service), Controller identity & contact, What we collect (server logs, cookies, aggregate analytics, admin account credentials only — explicitly NOT patient health data, NOT eligibility responses beyond delivery metadata, NOT diagnoses), Eligibility tool data flow (stateless: assembled in-memory → encrypted payload → delivered to research site → discarded; only delivery metadata `{nct_id, timestamp, delivery_status}` retained, no PII retained server-side), Legal bases (legitimate interest for analytics, consent for eligibility submission), How we use info, Sharing & disclosures (research sites for forwarded eligibility submissions only; service providers; legal compliance; business transfers), No sale of personal information (CCPA/CPRA statement), International transfers (US-only service, do not direct to EEA/UK residents), Children (not directed at <18, COPPA), Retention (logs 90 days, delivery metadata 24 months), Security (TLS, hashed admin credentials, least-privilege backend), Cookies (essential only by default, list categories), Analytics (privacy-preserving, no cross-site tracking), HIPAA notice (we are NOT a covered entity or business associate; if you submit PHI you do so voluntarily and outside HIPAA's scope on our end — once delivered to a research site that entity's own privacy practices apply), State privacy rights (CA, VA, CO, CT, UT, TX disclosures + how to exercise; since we don't retain submissions there is typically no record to access/delete), Do Not Track signal handling, Third-party links, Data breach notification commitment, Changes to policy, Contact / DPO email.
+### 2. Split clinic auth from admin auth
 
-Both pages: keep within existing `prose` layout, add a clear "Last updated: June 29, 2026", route metadata, and prominent links from the footer.
+Current `/auth` doubles as both admin sign-in and clinic-operator sign-up. Per the request, separate them:
 
-6. **"Browse by clinic"** section on the homepage (data from topClinics, sorted by recruiting volume) should show
+- **New route** `src/routes/clinics.auth.tsx` — dedicated clinic operator sign-in / sign-up page. Same Supabase email+password flow; on success redirects to `/portal`. Includes a clear "Are you a clinic running trials?" intro. `noindex`.
+- **Trim `src/routes/auth.tsx`** — remove the sign-up tab; admin-only sign-in. Keeps the `seed-admin` ping.
+- **Header CTAs** in `src/components/SiteHeader.tsx`:
+  - Add a right-aligned pair: `Clinic sign in` (link to `/clinics/auth`) and `Sign up` (link to `/clinics/auth?mode=signup`).
+  - When the visitor is already signed in, show `Portal` instead.
+  - Keeps the existing "Find a trial" button.
 
----
+### 3. Verify clinic signups actually succeed
 
-## Technical notes
+Two things can silently block `supabase.auth.signUp`:
+- "Disable new signups" toggled on in Auth settings.
+- Email confirmations required but no SMTP wired.
 
-- New tables: none. Reuses `clinics`, `clinic_claims`, `clinic_images`, `user_roles`.
-- New migrations: (a) DO block that runs `generate_clinics_from_locations()` + `refresh_directory_counts()` once.
-- New deps: none (`leaflet` + `react-leaflet` already installed).
-- Security: keep `clinic_claims` admin-only writes for approval; user can insert their own pending row scoped to `auth.uid()`.
-- Out of scope this phase: Stripe billing wiring (placeholder only), AACT sync, SMS lead delivery.
+I'll call `supabase--configure_auth` to ensure `disable_signup = false` and `mailer_autoconfirm = true` (so a clinic operator can sign in immediately and submit a claim without waiting on email). The existing `clinic_admin` role is granted only after an admin approves their claim, so auto-confirm doesn't widen access.
 
-## Order of implementation
+### 4. Sanity checks after deploy
 
-1. Populate clinics (migration) + admin button.
-2. Header duplicate fix.
-3. Leaflet map component + study-detail integration.
-4. Clinic portal routes + server fns + admin claim queue.
-5. Rewrite Terms + Privacy.
+- Reload `/clinics` — expect the 26k directory paginated, 60 per page.
+- Reload `/` — "Browse by clinic" section renders the top 8 by `recruiting_count`.
+- From `/clinics/auth`, create a new account → land on `/portal` → search and submit a claim.
+- `/auth` still works for `nokunato@gmail.com` → `/admin`.
+
+## Out of scope this turn
+
+- Stripe billing for premium clinic placement.
+- Backfilling `clinics.lat/lng` / hero images beyond what import already populates.

@@ -30,6 +30,7 @@ import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
 import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
+import { Route as ClinicsAuthRouteImport } from './routes/clinics.auth'
 import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
 import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
@@ -144,6 +145,11 @@ const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
   path: '/conditions/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicsAuthRoute = ClinicsAuthRouteImport.update({
+  id: '/clinics/auth',
+  path: '/clinics/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClinicsSlugRoute = ClinicsSlugRouteImport.update({
   id: '/clinics/$slug',
   path: '/clinics/$slug',
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
+  '/clinics/auth': typeof ClinicsAuthRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
+  '/clinics/auth': typeof ClinicsAuthRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
+  '/clinics/auth': typeof ClinicsAuthRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/cities/$citySlug'
     | '/clinics/$slug'
+    | '/clinics/auth'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cities/$citySlug'
     | '/clinics/$slug'
+    | '/clinics/auth'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal'
     | '/cities/$citySlug'
     | '/clinics/$slug'
+    | '/clinics/auth'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -392,6 +404,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   CitiesCitySlugRoute: typeof CitiesCitySlugRoute
   ClinicsSlugRoute: typeof ClinicsSlugRoute
+  ClinicsAuthRoute: typeof ClinicsAuthRoute
   ConditionsSlugRoute: typeof ConditionsSlugRoute
   LearnSlugRoute: typeof LearnSlugRoute
   LegalDisclaimerRoute: typeof LegalDisclaimerRoute
@@ -560,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConditionsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clinics/auth': {
+      id: '/clinics/auth'
+      path: '/clinics/auth'
+      fullPath: '/clinics/auth'
+      preLoaderRoute: typeof ClinicsAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/clinics/$slug': {
       id: '/clinics/$slug'
       path: '/clinics/$slug'
@@ -665,6 +685,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   CitiesCitySlugRoute: CitiesCitySlugRoute,
   ClinicsSlugRoute: ClinicsSlugRoute,
+  ClinicsAuthRoute: ClinicsAuthRoute,
   ConditionsSlugRoute: ConditionsSlugRoute,
   LearnSlugRoute: LearnSlugRoute,
   LegalDisclaimerRoute: LegalDisclaimerRoute,
