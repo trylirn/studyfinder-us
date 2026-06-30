@@ -381,20 +381,29 @@ export const listClinics = createServerFn({ method: "GET" })
     const sb = publicClient();
     let q: any = sb
       .from("clinics")
-      .select("slug,name,city,state,zip,recruiting_count,plan,featured_until,logo_url", { count: "exact" })
+      // 🚀 FIXED: Removed non-existent logo_url column
+      .select("slug,name,city,state,zip,recruiting_count,plan,featured_until", { count: "exact" })
       .eq("published", true);
+
     if (data.q.trim()) q = q.ilike("name", `%${data.q.trim()}%`);
     if (data.state) {
-      // accept either slug (lowercase) or abbr/name
       const s = data.state.trim();
       q = q.or(`state.ilike.${s},state.ilike.${s.toUpperCase()}`);
     }
+
     const from = (data.page - 1) * LIST_PAGE_SIZE;
     q = q
       .order("recruiting_count", { ascending: false })
       .order("name", { ascending: true })
       .range(from, from + LIST_PAGE_SIZE - 1);
-    const { data: rows, count } = await q;
+
+    // 🚀 FIXED: Capturing and checking for errors instead of failing silently
+    const { data: rows, count, error } = await q;
+    if (error) {
+      console.error("Error loading public clinics directory:", error);
+      throw new Error(error.message);
+    }
+
     return { rows: rows ?? [], total: count ?? 0, page: data.page, pageSize: LIST_PAGE_SIZE };
   });
 
