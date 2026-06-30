@@ -39,6 +39,7 @@ import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenti
 import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as AuthenticatedPortalClaimRouteImport } from './routes/_authenticated/portal.claim'
 import { Route as AuthenticatedPortalBillingRouteImport } from './routes/_authenticated/portal.billing'
+import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
 import { Route as AuthenticatedPortalClinicIdRouteImport } from './routes/_authenticated/portal.clinic.$id'
 
 const SearchRoute = SearchRouteImport.update({
@@ -193,6 +194,12 @@ const AuthenticatedPortalBillingRoute =
     path: '/billing',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const ApiPublicCronImportStudiesRoute =
+  ApiPublicCronImportStudiesRouteImport.update({
+    id: '/api/public/cron/import-studies',
+    path: '/api/public/cron/import-studies',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedPortalClinicIdRoute =
   AuthenticatedPortalClinicIdRouteImport.update({
     id: '/clinic/$id',
@@ -231,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
+  '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -262,6 +270,7 @@ export interface FileRoutesByTo {
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
+  '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -296,6 +305,7 @@ export interface FileRoutesById {
   '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
+  '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/api/public/seed-admin'
     | '/portal/'
     | '/portal/clinic/$id'
+    | '/api/public/cron/import-studies'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/api/public/seed-admin'
     | '/portal'
     | '/portal/clinic/$id'
+    | '/api/public/cron/import-studies'
   id:
     | '__root__'
     | '/'
@@ -394,6 +406,7 @@ export interface FileRouteTypes {
     | '/api/public/seed-admin'
     | '/_authenticated/portal/'
     | '/_authenticated/portal/clinic/$id'
+    | '/api/public/cron/import-studies'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -422,6 +435,7 @@ export interface RootRouteChildren {
   SponsorsIndexRoute: typeof SponsorsIndexRoute
   StatesIndexRoute: typeof StatesIndexRoute
   ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
+  ApiPublicCronImportStudiesRoute: typeof ApiPublicCronImportStudiesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -636,6 +650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalBillingRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/api/public/cron/import-studies': {
+      id: '/api/public/cron/import-studies'
+      path: '/api/public/cron/import-studies'
+      fullPath: '/api/public/cron/import-studies'
+      preLoaderRoute: typeof ApiPublicCronImportStudiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/portal/clinic/$id': {
       id: '/_authenticated/portal/clinic/$id'
       path: '/clinic/$id'
@@ -703,6 +724,7 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorsIndexRoute: SponsorsIndexRoute,
   StatesIndexRoute: StatesIndexRoute,
   ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
+  ApiPublicCronImportStudiesRoute: ApiPublicCronImportStudiesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
