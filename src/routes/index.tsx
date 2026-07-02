@@ -54,6 +54,14 @@ function HomePage() {
             <div className="mx-auto mt-7 max-w-2xl">
               <SearchBar large />
             </div>
+            <div className="mt-4">
+              <Link
+                to="/get-matched"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
+              >
+                ✨ Take the free quiz — find trials near you
+              </Link>
+            </div>
             {trending.length > 0 && (
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
                 <span>Trending:</span>
