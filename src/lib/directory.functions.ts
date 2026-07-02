@@ -411,7 +411,14 @@ export const getClinicPage = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ slug: z.string() }).parse(d))
   .handler(async ({ data }) => {
     const sb = publicClient();
-    const { data: clinic } = await sb.from("clinics").select("*").eq("slug", data.slug).maybeSingle();
+    const { data: clinic } = await sb
+      .from("clinics")
+      .select(
+        "id,slug,name,city,state,zip,lat,lng,phone,website,description,specialties,hero_image,plan,featured_until,recruiting_count,claim_status,published,created_at,updated_at",
+      )
+      .eq("slug", data.slug)
+      .eq("published", true)
+      .maybeSingle();
     if (!clinic) return null;
     // Active recruiting trials at this clinic
     const { data: locs } = await sb
