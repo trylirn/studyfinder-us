@@ -36,7 +36,6 @@ import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
-import { Route as ApiPublicSeedAdminRouteImport } from './routes/api/public/seed-admin'
 import { Route as AuthenticatedPortalClaimRouteImport } from './routes/_authenticated/portal.claim'
 import { Route as AuthenticatedPortalBillingRouteImport } from './routes/_authenticated/portal.billing'
 import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
@@ -177,11 +176,6 @@ const AuthenticatedPortalIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
-const ApiPublicSeedAdminRoute = ApiPublicSeedAdminRouteImport.update({
-  id: '/api/public/seed-admin',
-  path: '/api/public/seed-admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedPortalClaimRoute =
   AuthenticatedPortalClaimRouteImport.update({
     id: '/claim',
@@ -235,7 +229,6 @@ export interface FileRoutesByFullPath {
   '/states/': typeof StatesIndexRoute
   '/portal/billing': typeof AuthenticatedPortalBillingRoute
   '/portal/claim': typeof AuthenticatedPortalClaimRoute
-  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
@@ -267,7 +260,6 @@ export interface FileRoutesByTo {
   '/states': typeof StatesIndexRoute
   '/portal/billing': typeof AuthenticatedPortalBillingRoute
   '/portal/claim': typeof AuthenticatedPortalClaimRoute
-  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
@@ -302,7 +294,6 @@ export interface FileRoutesById {
   '/states/': typeof StatesIndexRoute
   '/_authenticated/portal/billing': typeof AuthenticatedPortalBillingRoute
   '/_authenticated/portal/claim': typeof AuthenticatedPortalClaimRoute
-  '/api/public/seed-admin': typeof ApiPublicSeedAdminRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
@@ -337,7 +328,6 @@ export interface FileRouteTypes {
     | '/states/'
     | '/portal/billing'
     | '/portal/claim'
-    | '/api/public/seed-admin'
     | '/portal/'
     | '/portal/clinic/$id'
     | '/api/public/cron/import-studies'
@@ -369,7 +359,6 @@ export interface FileRouteTypes {
     | '/states'
     | '/portal/billing'
     | '/portal/claim'
-    | '/api/public/seed-admin'
     | '/portal'
     | '/portal/clinic/$id'
     | '/api/public/cron/import-studies'
@@ -403,7 +392,6 @@ export interface FileRouteTypes {
     | '/states/'
     | '/_authenticated/portal/billing'
     | '/_authenticated/portal/claim'
-    | '/api/public/seed-admin'
     | '/_authenticated/portal/'
     | '/_authenticated/portal/clinic/$id'
     | '/api/public/cron/import-studies'
@@ -434,7 +422,6 @@ export interface RootRouteChildren {
   LearnIndexRoute: typeof LearnIndexRoute
   SponsorsIndexRoute: typeof SponsorsIndexRoute
   StatesIndexRoute: typeof StatesIndexRoute
-  ApiPublicSeedAdminRoute: typeof ApiPublicSeedAdminRoute
   ApiPublicCronImportStudiesRoute: typeof ApiPublicCronImportStudiesRoute
 }
 
@@ -629,13 +616,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
-    '/api/public/seed-admin': {
-      id: '/api/public/seed-admin'
-      path: '/api/public/seed-admin'
-      fullPath: '/api/public/seed-admin'
-      preLoaderRoute: typeof ApiPublicSeedAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/portal/claim': {
       id: '/_authenticated/portal/claim'
       path: '/claim'
@@ -723,7 +703,6 @@ const rootRouteChildren: RootRouteChildren = {
   LearnIndexRoute: LearnIndexRoute,
   SponsorsIndexRoute: SponsorsIndexRoute,
   StatesIndexRoute: StatesIndexRoute,
-  ApiPublicSeedAdminRoute: ApiPublicSeedAdminRoute,
   ApiPublicCronImportStudiesRoute: ApiPublicCronImportStudiesRoute,
 }
 export const routeTree = rootRouteImport

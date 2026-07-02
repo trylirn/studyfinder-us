@@ -23,11 +23,17 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    try { await fetch("/api/public/seed-admin", { method: "POST" }); } catch { /* ignore */ }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signIn, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !signIn.user) {
+      setBusy(false);
+      return setMsg(error?.message ?? "Sign in failed");
+    }
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: signIn.user.id,
+      _role: "admin",
+    });
     setBusy(false);
-    if (error) return setMsg(error.message);
-    navigate({ to: email.toLowerCase() === "nokunato@gmail.com" ? "/admin" : "/portal" });
+    navigate({ to: isAdmin ? "/admin" : "/portal" });
   }
 
   return (
