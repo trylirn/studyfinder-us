@@ -381,14 +381,22 @@ export const listClinics = createServerFn({ method: "GET" })
     const sb = publicClient();
     let q: any = sb
       .from("clinics")
-      // 🚀 FIXED: Removed non-existent logo_url column
       .select("id,slug,name,city,state,zip,recruiting_count,plan,featured_until", { count: "exact" })
       .eq("published", true);
 
     if (data.q.trim()) q = q.ilike("name", `%${data.q.trim()}%`);
     if (data.state) {
-      const s = data.state.trim();
-      q = q.or(`state.ilike.${s},state.ilike.${s.toUpperCase()}`);
+      const raw = data.state.trim();
+      const { data: st } = await sb
+        .from("states")
+        .select("name,abbr,slug")
+        .or(`slug.eq.${raw.toLowerCase()},abbr.ilike.${raw},name.ilike.${raw}`)
+        .maybeSingle();
+      if (st) {
+        q = q.or(`state.ilike.${st.name},state.ilike.${st.abbr}`);
+      } else {
+        q = q.or(`state.ilike.${raw},state.ilike.${raw.toUpperCase()}`);
+      }
     }
 
     const from = (data.page - 1) * LIST_PAGE_SIZE;
@@ -397,7 +405,6 @@ export const listClinics = createServerFn({ method: "GET" })
       .order("name", { ascending: true })
       .range(from, from + LIST_PAGE_SIZE - 1);
 
-    // 🚀 FIXED: Capturing and checking for errors instead of failing silently
     const { data: rows, count, error } = await q;
     if (error) {
       console.error("Error loading public clinics directory:", error);
@@ -420,25 +427,77 @@ export const getClinicPage = createServerFn({ method: "GET" })
       .eq("published", true)
       .maybeSingle();
     if (!clinic) return null;
+    const clinicRow: any = clinic;
     // Active recruiting trials at this clinic
     const { data: locs } = await sb
       .from("locations")
       .select("nct_id, facility, city, state, status")
-      .eq("clinic_id", (clinic as any).id);
+      .eq("clinic_id", clinicRow.id);
     const nctIds = Array.from(new Set(((locs ?? []) as any[]).map((l) => l.nct_id)));
     let trials: any[] = [];
+    let topConditions: { slug: string; name: string; count: number }[] = [];
     if (nctIds.length > 0) {
       const { data } = await sb
         .from("studies")
-        .select("nct_id,title,overall_status,phase,conditions,sponsor_name,last_update_posted")
+        .select("nct_id,title,overall_status,phase,conditions,condition_slugs,sponsor_name,last_update_posted")
         .in("nct_id", nctIds)
         .not("brief_summary", "is", null)
         .order("last_update_posted", { ascending: false, nullsFirst: false })
         .order("nct_id", { ascending: false })
         .limit(60);
       trials = data ?? [];
+      // Aggregate top conditions
+      const counter = new Map<string, { name: string; count: number }>();
+      for (const s of trials) {
+        const names: string[] = s.conditions ?? [];
+        const slugs: string[] = s.condition_slugs ?? [];
+        for (let i = 0; i < slugs.length; i++) {
+          const slug = slugs[i];
+          if (!slug) continue;
+          const name = names[i] ?? slug;
+          const cur = counter.get(slug) ?? { name, count: 0 };
+          cur.count++;
+          counter.set(slug, cur);
+        }
+      }
+      topConditions = [...counter.entries()]
+        .map(([slug, v]) => ({ slug, name: v.name, count: v.count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 12);
     }
-    return { clinic, trials };
+
+    // Nearby clinics within 25 miles
+    let nearby: any[] = [];
+    if (clinicRow.lat && clinicRow.lng) {
+      const { data: sites } = await sb.rpc("nearby_sites", {
+        _lat: clinicRow.lat,
+        _lng: clinicRow.lng,
+        _radius_mi: 25,
+      });
+      const clinicIds = Array.from(
+        new Set(((sites ?? []) as any[]).map((s) => s.clinic_id).filter((id) => id && id !== clinicRow.id)),
+      );
+      if (clinicIds.length > 0) {
+        const { data: nearbyClinics } = await sb
+          .from("clinics")
+          .select("id,slug,name,city,state,recruiting_count,lat,lng")
+          .in("id", clinicIds)
+          .eq("published", true)
+          .limit(20);
+        const distByClinic = new Map<string, number>();
+        for (const s of (sites ?? []) as any[]) {
+          if (!s.clinic_id) continue;
+          const prev = distByClinic.get(s.clinic_id);
+          if (prev === undefined || s.distance_mi < prev) distByClinic.set(s.clinic_id, s.distance_mi);
+        }
+        nearby = (nearbyClinics ?? [])
+          .map((c: any) => ({ ...c, distance_mi: distByClinic.get(c.id) ?? 999 }))
+          .sort((a: any, b: any) => a.distance_mi - b.distance_mi)
+          .slice(0, 6);
+      }
+    }
+
+    return { clinic: clinicRow, trials, topConditions, nearby };
   });
 
 export const nearbySitesForStudy = createServerFn({ method: "GET" })

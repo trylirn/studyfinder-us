@@ -45,6 +45,7 @@ export type Database = {
       }
       clinic_claims: {
         Row: {
+          attested: boolean
           clinic_id: string
           contact_email: string | null
           contact_name: string | null
@@ -52,11 +53,17 @@ export type Database = {
           created_at: string
           id: string
           note: string | null
+          npi: string | null
+          proof_paths: string[]
+          relationship: string | null
+          role: string | null
           status: string
           updated_at: string
           user_id: string
+          work_website: string | null
         }
         Insert: {
+          attested?: boolean
           clinic_id: string
           contact_email?: string | null
           contact_name?: string | null
@@ -64,11 +71,17 @@ export type Database = {
           created_at?: string
           id?: string
           note?: string | null
+          npi?: string | null
+          proof_paths?: string[]
+          relationship?: string | null
+          role?: string | null
           status?: string
           updated_at?: string
           user_id: string
+          work_website?: string | null
         }
         Update: {
+          attested?: boolean
           clinic_id?: string
           contact_email?: string | null
           contact_name?: string | null
@@ -76,9 +89,14 @@ export type Database = {
           created_at?: string
           id?: string
           note?: string | null
+          npi?: string | null
+          proof_paths?: string[]
+          relationship?: string | null
+          role?: string | null
           status?: string
           updated_at?: string
           user_id?: string
+          work_website?: string | null
         }
         Relationships: [
           {

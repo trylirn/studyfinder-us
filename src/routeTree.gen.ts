@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RecruitingRouteImport } from './routes/recruiting'
+import { Route as GetMatchedRouteImport } from './routes/get-matched'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -49,6 +50,11 @@ const SearchRoute = SearchRouteImport.update({
 const RecruitingRoute = RecruitingRouteImport.update({
   id: '/recruiting',
   path: '/recruiting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GetMatchedRoute = GetMatchedRouteImport.update({
+  id: '/get-matched',
+  path: '/get-matched',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -204,6 +210,7 @@ const AuthenticatedPortalClinicIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/get-matched': typeof GetMatchedRoute
   '/recruiting': typeof RecruitingRoute
   '/search': typeof SearchRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/get-matched': typeof GetMatchedRoute
   '/recruiting': typeof RecruitingRoute
   '/search': typeof SearchRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -269,6 +277,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
+  '/get-matched': typeof GetMatchedRoute
   '/recruiting': typeof RecruitingRoute
   '/search': typeof SearchRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -303,6 +312,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/get-matched'
     | '/recruiting'
     | '/search'
     | '/admin'
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/get-matched'
     | '/recruiting'
     | '/search'
     | '/admin'
@@ -367,6 +378,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/get-matched'
     | '/recruiting'
     | '/search'
     | '/_authenticated/admin'
@@ -401,6 +413,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
+  GetMatchedRoute: typeof GetMatchedRoute
   RecruitingRoute: typeof RecruitingRoute
   SearchRoute: typeof SearchRoute
   CitiesCitySlugRoute: typeof CitiesCitySlugRoute
@@ -439,6 +452,13 @@ declare module '@tanstack/react-router' {
       path: '/recruiting'
       fullPath: '/recruiting'
       preLoaderRoute: typeof RecruitingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/get-matched': {
+      id: '/get-matched'
+      path: '/get-matched'
+      fullPath: '/get-matched'
+      preLoaderRoute: typeof GetMatchedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -682,6 +702,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
+  GetMatchedRoute: GetMatchedRoute,
   RecruitingRoute: RecruitingRoute,
   SearchRoute: SearchRoute,
   CitiesCitySlugRoute: CitiesCitySlugRoute,

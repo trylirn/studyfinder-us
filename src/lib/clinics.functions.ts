@@ -49,11 +49,18 @@ export const submitClinicClaim = createServerFn({ method: "POST" })
         contactName: z.string().min(2).max(120),
         contactEmail: z.string().email(),
         contactPhone: z.string().max(40).optional().default(""),
+        role: z.string().max(120).optional().default(""),
+        relationship: z.string().max(80).optional().default(""),
+        npi: z.string().max(40).optional().default(""),
+        workWebsite: z.string().max(500).optional().default(""),
         note: z.string().max(2000).optional().default(""),
+        proofPaths: z.array(z.string().max(500)).max(5).optional().default([]),
+        attested: z.boolean().optional().default(false),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    if (!data.attested) throw new Error("You must confirm the attestation.");
     const { error } = await context.supabase.from("clinic_claims").insert({
       user_id: context.userId,
       clinic_id: data.clinicId,
@@ -61,7 +68,13 @@ export const submitClinicClaim = createServerFn({ method: "POST" })
       contact_name: data.contactName,
       contact_email: data.contactEmail,
       contact_phone: data.contactPhone,
+      role: data.role,
+      relationship: data.relationship,
+      npi: data.npi,
+      work_website: data.workWebsite,
       note: data.note,
+      proof_paths: data.proofPaths,
+      attested: data.attested,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
