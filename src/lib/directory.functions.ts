@@ -382,7 +382,7 @@ export const listClinics = createServerFn({ method: "GET" })
     let q: any = sb
       .from("clinics")
       // 🚀 FIXED: Removed non-existent logo_url column
-      .select("slug,name,city,state,zip,recruiting_count,plan,featured_until", { count: "exact" })
+      .select("id,slug,name,city,state,zip,recruiting_count,plan,featured_until", { count: "exact" })
       .eq("published", true);
 
     if (data.q.trim()) q = q.ilike("name", `%${data.q.trim()}%`);
