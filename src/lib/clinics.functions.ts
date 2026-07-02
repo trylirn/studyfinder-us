@@ -137,10 +137,17 @@ export const getMyClinicForEdit = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const admin = await isAdmin(context);
-    const { data: clinic, error } = await context.supabase
+    // Verify ownership using the RLS-scoped client BEFORE loading sensitive fields
+    const { data: ownerRow, error: ownerErr } = await context.supabase
+      .from("clinics").select("id,claimed_by").eq("id", data.id).maybeSingle();
+    if (ownerErr) throw new Error(ownerErr.message);
+    if (!ownerRow) return null;
+    if (!admin && ownerRow.claimed_by !== context.userId) throw new Error("Forbidden");
+    // Load full row (including intake_email/intake_webhook_url) via admin client,
+    // since anon/authenticated roles are not granted SELECT on those columns.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: clinic, error } = await supabaseAdmin
       .from("clinics").select("*").eq("id", data.id).maybeSingle();
     if (error) throw new Error(error.message);
-    if (!clinic) return null;
-    if (!admin && clinic.claimed_by !== context.userId) throw new Error("Forbidden");
     return clinic;
   });
