@@ -28,12 +28,14 @@ function AuthPage() {
       setBusy(false);
       return setMsg(error?.message ?? "Sign in failed");
     }
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: signIn.user.id,
-      _role: "admin",
-    });
+    const { data: adminRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", signIn.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
     setBusy(false);
-    navigate({ to: isAdmin ? "/admin" : "/portal" });
+    navigate({ to: adminRow ? "/admin" : "/portal" });
   }
 
   return (
