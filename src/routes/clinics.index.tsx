@@ -55,7 +55,7 @@ function ClinicsIndex() {
         >
           <option value="">All states</option>
           {(states ?? []).map((st: any) => (
-            <option key={st.slug} value={st.abbr}>{st.name}</option>
+            <option key={st.slug} value={st.slug}>{st.name}</option>
           ))}
         </select>
       </div>

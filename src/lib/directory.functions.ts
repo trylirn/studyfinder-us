@@ -386,13 +386,11 @@ export const listClinics = createServerFn({ method: "GET" })
 
     if (data.q.trim()) q = q.ilike("name", `%${data.q.trim()}%`);
     if (data.state) {
-      // Resolve slug/abbr/name to both full name and abbreviation so the
-      // filter works regardless of what the imports stored on clinics.state.
       const raw = data.state.trim();
       const { data: st } = await sb
         .from("states")
         .select("name,abbr,slug")
-        .or(`slug.eq.${raw.toLowerCase()},abbr.ieq.${raw},name.ieq.${raw}`)
+        .or(`slug.eq.${raw.toLowerCase()},abbr.ilike.${raw},name.ilike.${raw}`)
         .maybeSingle();
       if (st) {
         q = q.or(`state.ilike.${st.name},state.ilike.${st.abbr}`);
