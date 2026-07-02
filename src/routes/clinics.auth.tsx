@@ -4,7 +4,16 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Hospital } from "lucide-react";
 
-const search = z.object({ mode: z.enum(["signin", "signup"]).optional() });
+const search = z.object({
+  mode: z.enum(["signin", "signup"]).optional(),
+  next: z.string().optional(),
+});
+
+function safeNext(next?: string): string {
+  if (!next) return "/portal";
+  if (!next.startsWith("/") || next.startsWith("//")) return "/portal";
+  return next;
+}
 
 export const Route = createFileRoute("/clinics/auth")({
   validateSearch: search,
@@ -19,7 +28,8 @@ export const Route = createFileRoute("/clinics/auth")({
 });
 
 function ClinicAuthPage() {
-  const { mode: initialMode } = Route.useSearch();
+  const { mode: initialMode, next } = Route.useSearch();
+  const nextPath = safeNext(next);
   const [mode, setMode] = useState<"signin" | "signup">(initialMode ?? "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,16 +45,18 @@ function ClinicAuthPage() {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/portal" });
+        window.location.href = nextPath;
+        return;
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/portal` },
+          options: { emailRedirectTo: `${window.location.origin}${nextPath}` },
         });
         if (error) throw error;
         if (data.session) {
-          navigate({ to: "/portal" });
+          window.location.href = nextPath;
+          return;
         } else {
           setMsg("Account created. You can sign in now.");
           setMode("signin");
