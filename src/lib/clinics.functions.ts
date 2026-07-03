@@ -117,12 +117,26 @@ export const listPendingClaims = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const { data, error } = await context.supabase
       .from("clinic_claims")
-      .select("id,user_id,clinic_id,status,note,contact_name,contact_email,contact_phone,created_at,clinics(slug,name,city,state)")
+      .select("id,user_id,clinic_id,status,note,contact_name,contact_email,contact_phone,role,relationship,npi,work_website,proof_paths,attested,created_at,clinics(slug,name,city,state)")
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
     return data ?? [];
+  });
+
+export const getClaimProofUrls = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ paths: z.array(z.string().max(500)).max(10) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (data.paths.length === 0) return [] as { path: string; url: string | null }[];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: signed, error } = await supabaseAdmin.storage
+      .from("clinic-images")
+      .createSignedUrls(data.paths, 300);
+    if (error) throw new Error(error.message);
+    return (signed ?? []).map((s: any) => ({ path: s.path, url: s.signedUrl ?? null }));
   });
 
 export const decideClinicClaim = createServerFn({ method: "POST" })

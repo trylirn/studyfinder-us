@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { listConditions } from "@/lib/directory.functions";
 import { matchTrialSites } from "@/lib/match.functions";
-import { MapPin, Search, ShieldCheck, ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { MapPin, Search, ShieldCheck, ArrowRight, ArrowLeft, Sparkles, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/get-matched")({
   head: () => ({
@@ -26,16 +26,26 @@ const PHASES = [
   { label: "Phase 3", value: "3" },
   { label: "Phase 4", value: "4" },
 ];
+const TOTAL_STEPS = 5;
 
 function GetMatchedPage() {
   const [step, setStep] = useState(1);
+  // Step 1
   const [conditionQuery, setConditionQuery] = useState("");
   const [conditionSlug, setConditionSlug] = useState("");
   const [conditionName, setConditionName] = useState("");
+  // Step 2
   const [zip, setZip] = useState("");
   const [radius, setRadius] = useState(50);
+  // Step 3 — about you
+  const [age, setAge] = useState<string>("");
+  const [sex, setSex] = useState<"" | "MALE" | "FEMALE">("");
+  const [healthyVolunteer, setHealthyVolunteer] = useState(false);
+  // Step 4 — preferences
   const [phase, setPhase] = useState("");
   const [recruitingOnly, setRecruitingOnly] = useState(true);
+  const [studyType, setStudyType] = useState<"" | "INTERVENTIONAL" | "OBSERVATIONAL">("");
+  const [acceptsPlacebo, setAcceptsPlacebo] = useState(true);
 
   const { data: conditions } = useQuery({
     queryKey: ["conditions-quiz", conditionQuery],
@@ -45,7 +55,21 @@ function GetMatchedPage() {
 
   const match = useMutation({
     mutationFn: () =>
-      matchTrialSites({ data: { condition: conditionSlug, zip, radius, phase, recruitingOnly } } as any),
+      matchTrialSites({
+        data: {
+          condition: conditionSlug,
+          conditionName,
+          zip,
+          radius,
+          phase,
+          recruitingOnly,
+          age: age ? Number(age) : undefined,
+          sex,
+          healthyVolunteer,
+          studyType,
+          acceptsPlacebo,
+        },
+      } as any),
   });
 
   const canNext1 = !!conditionSlug;
@@ -62,9 +86,20 @@ function GetMatchedPage() {
         <ShieldCheck className="h-4 w-4 text-success" /> Private and stateless — we don't save anything you enter.
       </p>
 
+      {/* Disclaimer */}
+      <div className="mt-4 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+        <p>
+          This tool provides general information only and is <strong>not medical advice, diagnosis, or a referral</strong>.
+          Eligibility is ultimately determined by each trial's research team. Please talk to your doctor before enrolling in
+          any clinical trial. Your answers are used only for this match and are not stored.{" "}
+          <Link to="/legal/disclaimer" className="underline">Read our full disclaimer</Link>.
+        </p>
+      </div>
+
       {/* Progress */}
       <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-        {[1, 2, 3, 4].map((n) => (
+        {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((n) => (
           <div key={n} className={`h-1.5 flex-1 rounded ${step >= n ? "bg-primary" : "bg-border"}`} />
         ))}
       </div>
@@ -107,10 +142,7 @@ function GetMatchedPage() {
               <p className="mt-2 text-xs text-success">Selected: {conditionName}</p>
             )}
           </div>
-          <StepNav
-            onNext={() => setStep(2)}
-            nextDisabled={!canNext1}
-          />
+          <StepNav onNext={() => setStep(2)} nextDisabled={!canNext1} />
         </section>
       )}
 
@@ -144,19 +176,62 @@ function GetMatchedPage() {
               </select>
             </div>
           </div>
-          <StepNav
-            onBack={() => setStep(1)}
-            onNext={() => setStep(3)}
-            nextDisabled={!canNext2}
-          />
+          <StepNav onBack={() => setStep(1)} onNext={() => setStep(3)} nextDisabled={!canNext2} />
         </section>
       )}
 
       {step === 3 && (
         <section className="mt-6 space-y-4 rounded-xl border border-border bg-card p-5">
           <div>
-            <h2 className="text-lg font-semibold">Refine your match</h2>
-            <p className="text-sm text-muted-foreground">Optional preferences to narrow the results.</p>
+            <h2 className="text-lg font-semibold">A bit about you</h2>
+            <p className="text-sm text-muted-foreground">
+              Helps us match trials whose age and sex requirements you meet. Optional — leave blank to skip.
+              Not saved anywhere.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs uppercase tracking-wider text-muted-foreground">Your age</label>
+              <input
+                inputMode="numeric"
+                maxLength={3}
+                value={age}
+                onChange={(e) => setAge(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                placeholder="e.g. 45"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-muted-foreground">Sex assigned at birth</label>
+              <select
+                value={sex}
+                onChange={(e) => setSex(e.target.value as any)}
+                className="mt-1 h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">Prefer not to say</option>
+                <option value="FEMALE">Female</option>
+                <option value="MALE">Male</option>
+              </select>
+            </div>
+            <label className="mt-6 flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={healthyVolunteer}
+                onChange={(e) => setHealthyVolunteer(e.target.checked)}
+                className="h-4 w-4"
+              />
+              I'm a healthy volunteer
+            </label>
+          </div>
+          <StepNav onBack={() => setStep(2)} onNext={() => setStep(4)} />
+        </section>
+      )}
+
+      {step === 4 && (
+        <section className="mt-6 space-y-4 rounded-xl border border-border bg-card p-5">
+          <div>
+            <h2 className="text-lg font-semibold">Trial preferences</h2>
+            <p className="text-sm text-muted-foreground">Narrow the results — all optional.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
@@ -169,7 +244,19 @@ function GetMatchedPage() {
                 {PHASES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
             </div>
-            <label className="mt-6 flex items-center gap-2 text-sm">
+            <div>
+              <label className="text-xs uppercase tracking-wider text-muted-foreground">Study type</label>
+              <select
+                value={studyType}
+                onChange={(e) => setStudyType(e.target.value as any)}
+                className="mt-1 h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">Any type</option>
+                <option value="INTERVENTIONAL">Interventional (treatment/drug trial)</option>
+                <option value="OBSERVATIONAL">Observational (survey/registry)</option>
+              </select>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={recruitingOnly}
@@ -178,16 +265,25 @@ function GetMatchedPage() {
               />
               Only currently recruiting
             </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={acceptsPlacebo}
+                onChange={(e) => setAcceptsPlacebo(e.target.checked)}
+                className="h-4 w-4"
+              />
+              OK with possibly receiving a placebo
+            </label>
           </div>
           <StepNav
-            onBack={() => setStep(2)}
-            onNext={() => { setStep(4); match.mutate(); }}
+            onBack={() => setStep(3)}
+            onNext={() => { setStep(5); match.mutate(); }}
             nextLabel="Find matches"
           />
         </section>
       )}
 
-      {step === 4 && (
+      {step === 5 && (
         <section className="mt-6 space-y-4">
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-lg font-semibold">Your matches</h2>
@@ -195,6 +291,12 @@ function GetMatchedPage() {
               {conditionName} · within {radius} mi of {zip}
               <button type="button" onClick={() => setStep(1)} className="ml-3 text-primary underline">Change</button>
             </p>
+            {match.data && match.data.ok && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {match.data.matchedCount} matching clinic{match.data.matchedCount === 1 ? "" : "s"}
+                {" · "}{match.data.totalNearby} total research site{match.data.totalNearby === 1 ? "" : "s"} in this area
+              </p>
+            )}
           </div>
 
           {match.isPending && (
@@ -209,60 +311,76 @@ function GetMatchedPage() {
             <div className="rounded-lg border border-border bg-card p-4 text-sm">Couldn't match: {match.data.reason}</div>
           )}
           {match.data && match.data.ok && match.data.results.length === 0 && (
-            <div className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">
-              No matching trial sites within {radius} miles. Try widening your travel distance, changing the condition, or removing filters.
+            <div className="rounded-lg border border-border bg-card p-6 text-sm">
+              <p className="font-medium">No exact matches within {radius} miles.</p>
+              <p className="mt-1 text-muted-foreground">
+                Try widening travel distance, relaxing filters, or removing age/sex to broaden the search.
+              </p>
+              {match.data.fallback && match.data.fallback.length > 0 && (
+                <div className="mt-4 border-t border-border pt-4">
+                  <p className="mb-3 text-sm font-medium">Nearest sites running {conditionName} trials (filters ignored):</p>
+                  <ResultsList items={match.data.fallback} />
+                </div>
+              )}
             </div>
           )}
           {match.data && match.data.ok && match.data.results.length > 0 && (
-            <ul className="space-y-3">
-              {match.data.results.map((r: any) => (
-                <li key={r.clinic.slug} className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <Link
-                        to="/clinics/$slug"
-                        params={{ slug: r.clinic.slug }}
-                        className="text-base font-semibold hover:text-primary"
-                      >
-                        {r.clinic.name}
-                      </Link>
-                      <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3" />
-                        {[r.clinic.city, r.clinic.state].filter(Boolean).join(", ")} · {r.distance_mi.toFixed(1)} miles away
-                      </p>
-                    </div>
-                    <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                      {r.trial_count} matching trial{r.trial_count === 1 ? "" : "s"}
-                    </span>
-                  </div>
-                  <ul className="mt-3 space-y-2 border-t border-border pt-3">
-                    {r.trials.map((t: any) => (
-                      <li key={t.nct_id}>
-                        <Link
-                          to="/studies/$nctId"
-                          params={{ nctId: t.nct_id }}
-                          className="block text-sm hover:text-primary"
-                        >
-                          <span className="line-clamp-2">{t.title}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {t.overall_status}{t.phase ? ` · ${t.phase.replace(/PHASE/g, "Phase ")}` : ""}{t.sponsor_name ? ` · ${t.sponsor_name}` : ""}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
+            <ResultsList items={match.data.results} />
           )}
 
-          <p className="mt-4 text-xs text-muted-foreground">
+          <div className="mt-4 rounded-md border border-border bg-muted/40 p-4 text-xs text-muted-foreground">
             <ShieldCheck className="mr-1 inline h-3 w-3 text-success" />
-            Your answers are used only for this match. Nothing is stored on our servers.
-          </p>
+            Your answers are used only for this match and are not stored on our servers. Contact the trial team directly to
+            confirm eligibility and enrollment. This is not medical advice.
+          </div>
         </section>
       )}
     </div>
+  );
+}
+
+function ResultsList({ items }: { items: any[] }) {
+  return (
+    <ul className="space-y-3">
+      {items.map((r: any) => (
+        <li key={r.clinic.slug} className="rounded-xl border border-border bg-card p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <Link
+                to="/clinics/$slug"
+                params={{ slug: r.clinic.slug }}
+                className="text-base font-semibold hover:text-primary"
+              >
+                {r.clinic.name}
+              </Link>
+              <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3" />
+                {[r.clinic.city, r.clinic.state].filter(Boolean).join(", ")} · {r.distance_mi.toFixed(1)} miles away
+              </p>
+            </div>
+            <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+              {r.trial_count} matching trial{r.trial_count === 1 ? "" : "s"}
+            </span>
+          </div>
+          <ul className="mt-3 space-y-2 border-t border-border pt-3">
+            {r.trials.map((t: any) => (
+              <li key={t.nct_id}>
+                <Link
+                  to="/studies/$nctId"
+                  params={{ nctId: t.nct_id }}
+                  className="block text-sm hover:text-primary"
+                >
+                  <span className="line-clamp-2">{t.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t.overall_status}{t.phase ? ` · ${t.phase.replace(/PHASE/g, "Phase ")}` : ""}{t.sponsor_name ? ` · ${t.sponsor_name}` : ""}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
   );
 }
 

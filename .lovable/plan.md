@@ -1,75 +1,62 @@
+## 1. Fix the "permission denied for function nearby_sites" error (from screenshot)
 
-## 1. "Claim this clinic" routes to clinic portal, not admin
+Root cause: last turn's security lockdown revoked EXECUTE on `nearby_sites` from `anon`/`authenticated`, but `matchTrialSites` calls it via the anon publishable client. Restore EXECUTE for `anon` and `authenticated` (function is `SECURITY DEFINER` and only reads already-public `locations` rows — safe to expose).
 
-`src/routes/clinics.$slug.tsx` links `to="/auth"` (admin). Change to `to="/clinics/auth"` with `search={{ mode: "signup" }}`, and preserve the target clinic slug via a `?next=/portal/claim?clinic=<slug>` param. Update `clinics.auth.tsx` to validate a `next` search param and redirect there after successful sign‑in/sign‑up (falling back to `/portal`). Update `portal.claim.tsx` to read a `?clinic=<slug>` search param and pre‑select that clinic (looking it up via `listClinics` by slug).
+Migration:
+```sql
+GRANT EXECUTE ON FUNCTION public.nearby_sites(double precision, double precision, double precision, text)
+  TO anon, authenticated;
+```
 
-## 2. Sign out from clinic dashboard
+## 2. Make the Get Matched quiz smarter and more accurate
 
-Add a "Sign out" button to `src/routes/_authenticated/portal.tsx` nav (right side). On click: `await supabase.auth.signOut()` then `navigate({ to: "/clinics/auth" })`. Also show the signed‑in email next to it.
+**New questions** (all optional except condition + ZIP):
+1. Condition (existing, keep autocomplete)
+2. Location: ZIP + max distance (existing)
+3. **About you** (new step): age, sex assigned at birth, whether you have a diagnosis today, general health status
+4. **Trial preferences** (existing step + additions): phase, recruiting-only, study type (interventional/observational), accepts healthy volunteers, willing to receive placebo, paid studies only
 
-## 3. Proof of ownership on claim form
+**Better matching in `src/lib/match.functions.ts`**:
+- Broaden the study query: match on `condition_slugs.contains([slug])` OR `search_tsv @@ plainto_tsquery(conditionName)` so misspellings/synonyms still find studies.
+- Apply age/gender client-provided values to `min_age_years` / `max_age_years` / `gender` filters (`gender IN ('ALL', <sex>)` and `min_age_years <= age AND (max_age_years IS NULL OR max_age_years >= age)`).
+- Study-type filter (`INTERVENTIONAL` / `OBSERVATIONAL`).
+- Rank results by: distance, then trial_count, then whether clinic is currently recruiting.
+- Return `matched_count` vs `total_nearby` so the UI can show a helpful message ("42 sites within 25 mi, 6 match your criteria").
+- If zero results, return the closest 5 sites regardless of filters as a "nearest sites" fallback list, clearly labeled.
 
-Expand `portal.claim.tsx`:
-- Add fields: **Job title/role**, **Relationship to clinic** (dropdown: Owner, Administrator, Principal Investigator, Staff, Marketing/Comms, Other), **NPI number** (optional), **Work website URL** (optional).
-- Add **proof upload** (1–3 files: business card, staff ID badge, letterhead, employment verification). Upload to existing private `clinic-images` bucket under `claims/<userId>/<uuid>-<filename>`; store returned storage paths on the claim record.
-- Add mandatory attestation checkbox: "I confirm I am authorized to manage this clinic's profile."
-- Extend `submitClinicClaim` server fn (`src/lib/clinics.functions.ts`) input schema + insert to persist the new fields.
-- Migration: add columns to `public.clinic_claims`: `role text`, `relationship text`, `npi text`, `work_website text`, `proof_paths text[]`, `attested boolean not null default false`. (Admin review UI in `_authenticated/admin.tsx` will surface these + signed URLs for the proof files.)
+**Nothing is persisted** — all inputs stay in React state; no DB writes, no logs.
 
-## 4. State filter on `/clinics` not working
+## 3. Prominent disclaimer on the quiz
 
-`listClinics` compares `clinics.state` with the option's `abbr` (e.g. `MD`) but `clinics.state` stores the full name (e.g. `Maryland`). Fix by: passing state **slug** from the `<select>` (`value={st.slug}`), and in `listClinics` resolving slug → both `name` and `abbr` via the `states` table, then filtering `state.in.(Name,ABBR)`. This makes the filter robust regardless of how imports stored the state string.
+Add before Step 1 and again above the results:
+> This tool provides general information only and is not medical advice, diagnosis, or a referral. Eligibility is determined by the trial's research team, not by us. Talk to your doctor before enrolling in any clinical trial. We do not store your answers.
 
-## 5. Richer clinic profile with map
+Reuses the existing `<LegalDisclaimer />` component in a compact variant, plus a link to `/legal/disclaimer`.
 
-Update `src/routes/clinics.$slug.tsx`:
-- Add a **Leaflet map** (reuse `TrialMapInner`) centered on the clinic lat/lng with a marker; fall back to geocoding via zippopotam.us when lat/lng missing (server‑side, cached on the row).
-- Add sections: **Contact & hours** (phone, website, address with "Get directions" Google Maps link), **Specialties** chips, **About** (already there), **At a glance** stats (recruiting count, total historical trials, phases distribution), **Nearby sites within 25 mi** (uses existing `nearby_sites` RPC), and a **Conditions studied here** list (top 10 conditions from the trials linked to this clinic).
-- Extend `getClinicPage` to return these aggregates.
+## 4. Admin polish — recent imports widget + claim proof review
 
-## 6. "Get Matched" quiz (stateless)
+Current admin page already lists recent runs but is basic. Improvements:
 
-New public route `src/routes/get-matched.tsx` — multi‑step wizard, no DB writes:
-1. What are you looking to treat? (condition autocomplete against `conditions` table)
-2. ZIP code + max travel distance (10 / 25 / 50 / 100 mi)
-3. Optional: age, sex, currently recruiting only (default on), phase preference (any/1/2/3/4)
-4. Results screen: calls a new public server fn `matchTrialSites({ condition, zip, radius, ... })` which:
-   - Geocodes ZIP (zippopotam.us).
-   - Runs `nearby_sites` for radius.
-   - Joins to `studies` filtered by condition slug + recruiting + filters.
-   - Groups by clinic; returns list of `{ clinic, distance_mi, matching_trials: [{nct_id, title, phase}] }` sorted by distance then trial count.
-   - Nothing persisted; inputs live only in URL search params / component state.
-5. Each result card links to `/clinics/$slug` and lists the matching trials linking to `/studies/$nctId`.
+- **Recent imports widget**: show last 10 runs with started/finished timestamps, status badge (running/completed/failed), page count, and any error message truncated. Add a small "auto-import status" line noting the pg_cron schedule.
+- **Claim review with proof docs**: extend `listPendingClaims` to also return `role`, `relationship`, `npi`, `work_website`, `proof_paths`. In the admin claim row:
+  - Show role/relationship/NPI/website inline.
+  - For each `proof_paths[]` entry, generate a signed URL (server-side, 5-minute expiry) via a new `getClaimProofUrls` server function using `supabaseAdmin` (bucket is private).
+  - Render as clickable links "Proof 1 · Proof 2…" with filename.
+  - Admin can preview before approve/reject.
 
-Add a prominent CTA on homepage and `/recruiting` linking to `/get-matched`.
+## 5. Verification
 
-## 7. Automatic study importation
+After changes:
+- Load `/get-matched`, complete the flow with Diabetes Mellitus / 77030 / 25 mi → confirm results render and no permission error.
+- Load `/admin` → confirm recent-runs list and claim proof links open signed URLs.
 
-Wire `pg_cron` + `pg_net` to hit the existing `/api/public/cron.import-studies` endpoint (which already exists and is `CRON_SECRET`‑protected):
-- Migration: `create extension if not exists pg_cron; create extension if not exists pg_net;`
-- Schedule two jobs:
-  - Every 6 hours: incremental import of recently‑updated recruiting US studies (batch of ~500).
-  - Nightly at 08:00 UTC: `select public.refresh_directory_counts();` and `select public.generate_clinics_from_locations();`
-- The `net.http_post` call passes `x-cron-secret` header from a DB `vault`/setting. Because Lovable Cloud users can't set DB vault, we'll store the secret using `alter database ... set app.cron_secret` — or simpler: switch the endpoint to also accept the Supabase `apikey` header (anon key) in addition to `CRON_SECRET`, per platform guidance, and call it with `apikey`. I'll use the `apikey` pattern (documented) to avoid new secrets.
-- Add an admin panel widget in `_authenticated/admin.tsx` showing last N `import_runs` rows and a "Run now" button (calls existing server fn).
+### Technical details
 
-## Technical notes
+- **Files touched**
+  - Migration: grant EXECUTE on `nearby_sites`.
+  - `src/lib/match.functions.ts`: extend input schema (age, sex, studyType, healthyVolunteers, placebo, paidOnly), broaden study query, apply eligibility filters, add fallback list, return richer counts.
+  - `src/routes/get-matched.tsx`: 5-step wizard (condition → location → about you → preferences → results), disclaimer banner, richer results UI.
+  - `src/lib/clinics.functions.ts`: extend `listPendingClaims` select columns; add `getClaimProofUrls` server function (admin-only, uses `supabaseAdmin.storage.from('clinic-images').createSignedUrls`).
+  - `src/routes/_authenticated/admin.tsx`: richer runs list, richer claim rows with proof links.
 
-- All new/changed server fns use existing patterns (`createServerFn` + `publicClient()` or `requireSupabaseAuth`). Match server fn is public, read‑only.
-- Storage: reuse `clinic-images` bucket; add a folder policy allowing authenticated users to `insert` under `claims/<auth.uid()>/*` and admins to `select`.
-- New migration includes GRANTs for the added `clinic_claims` columns (table already has grants; column additions inherit).
-- No changes to admin auth flow or existing `/auth` route.
-
-## Files touched
-
-- `src/routes/clinics.$slug.tsx` (link + map/profile expansion)
-- `src/routes/clinics.auth.tsx` (`next` param)
-- `src/routes/clinics.index.tsx` (state filter by slug)
-- `src/routes/_authenticated/portal.tsx` (sign‑out)
-- `src/routes/_authenticated/portal.claim.tsx` (proof fields + upload + preselect)
-- `src/routes/get-matched.tsx` (new)
-- `src/routes/index.tsx` (Get Matched CTA)
-- `src/lib/directory.functions.ts` (state filter fix, richer `getClinicPage`)
-- `src/lib/clinics.functions.ts` (extended claim schema)
-- `src/lib/match.functions.ts` (new — `matchTrialSites`)
-- Migration: `clinic_claims` new columns; pg_cron/pg_net schedules; storage policy for `clinic-images/claims/*`.
+- **Non-goals**: no schema changes beyond the GRANT; no new tables; no persistence of quiz answers.
