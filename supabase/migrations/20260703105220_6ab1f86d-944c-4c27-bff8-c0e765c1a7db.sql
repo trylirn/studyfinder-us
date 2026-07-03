@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.nearby_sites(double precision, double precision, double precision, text) TO anon, authenticated;
