@@ -12,9 +12,11 @@ export const Route = createFileRoute("/get-matched")({
       { name: "description", content: "Answer a few quick questions to find clinical research sites near you that run trials for your condition. Nothing is stored — matching happens live." },
       { property: "og:title", content: "Get matched with clinical trials near you" },
       { property: "og:description", content: "Free, private matching — no account required." },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/get-matched" },
     ],
-    links: [{ rel: "canonical", href: "/get-matched" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/get-matched" }],
   }),
+
   component: GetMatchedPage,
 });
 
