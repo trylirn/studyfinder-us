@@ -71,7 +71,7 @@ export const submitClinicClaim = createServerFn({ method: "POST" })
         role: z.string().max(120).optional().default(""),
         relationship: z.string().max(80).optional().default(""),
         npi: z.string().max(40).optional().default(""),
-        workWebsite: z.string().max(500).optional().default(""),
+        workWebsite: httpUrl.optional().default(""),
         note: z.string().max(2000).optional().default(""),
         proofPaths: z.array(z.string().max(500)).max(5).optional().default([]),
         attested: z.boolean().optional().default(false),
