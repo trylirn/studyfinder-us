@@ -12,12 +12,50 @@ export const Route = createFileRoute("/cities/$citySlug")({
     if (!d) throw notFound();
     return d;
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: `Clinical Trials in ${loaderData?.city?.name}, ${loaderData?.state?.abbr ?? ""} | TrialFinderUS` },
-      { name: "description", content: `Find ${loaderData?.total ?? 0} clinical trials and research studies recruiting in ${loaderData?.city?.name}.` },
-    ],
-  }),
+  head: ({ loaderData, params }) => {
+    const cityName = loaderData?.city?.name ?? params.citySlug;
+    const abbr = loaderData?.state?.abbr;
+    const stateName = loaderData?.state?.name;
+    const total = loaderData?.total ?? 0;
+    const title = abbr
+      ? `Clinical Trials in ${cityName}, ${abbr} | TrialFinderUS`
+      : `Clinical Trials in ${cityName} | TrialFinderUS`;
+    const desc = `Find ${total} clinical trials and research studies recruiting in ${cityName}${abbr ? `, ${abbr}` : ""}.`;
+    const url = `https://studyfinder-us.lovable.app/cities/${params.citySlug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: `Clinical Trials in ${cityName}${abbr ? `, ${abbr}` : ""}`,
+            description: desc,
+            url,
+            about: {
+              "@type": "Place",
+              name: cityName,
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: cityName,
+                addressRegion: stateName ?? abbr ?? undefined,
+                addressCountry: "US",
+              },
+            },
+          }),
+        },
+      ],
+    };
+  },
+
   component: CityPage,
 });
 
