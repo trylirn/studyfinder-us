@@ -44,15 +44,12 @@ function parseDate(s?: string): string | null {
 
 function authorized(request: Request) {
   const secret = process.env.CRON_SECRET;
-  const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!secret) return false;
   const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   const cronHeader = request.headers.get("x-cron-secret");
-  const apikey = request.headers.get("apikey");
-  if (secret && (bearer === secret || cronHeader === secret)) return true;
-  // pg_cron uses the anon apikey (public, safe for public data ingest endpoint)
-  if (anon && (apikey === anon || bearer === anon)) return true;
-  return false;
+  return bearer === secret || cronHeader === secret;
 }
+
 
 export const Route = createFileRoute("/api/public/cron/import-studies")({
   server: {
