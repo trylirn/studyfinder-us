@@ -469,11 +469,13 @@ export const getClinicPage = createServerFn({ method: "GET" })
     // Nearby clinics within 25 miles
     let nearby: any[] = [];
     if (clinicRow.lat && clinicRow.lng) {
-      const { data: sites } = await sb.rpc("nearby_sites", {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: sites } = await supabaseAdmin.rpc("nearby_sites", {
         _lat: clinicRow.lat,
         _lng: clinicRow.lng,
         _radius_mi: 25,
       });
+
       const clinicIds = Array.from(
         new Set(((sites ?? []) as any[]).map((s) => s.clinic_id).filter((id) => id && id !== clinicRow.id)),
       );
