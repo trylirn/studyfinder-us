@@ -13,6 +13,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           { loc: "/states", priority: 0.9 },
           { loc: "/sponsors", priority: 0.8 },
           { loc: "/recruiting", priority: 0.9 },
+          { loc: "/clinics", priority: 0.8 },
+          { loc: "/get-matched", priority: 0.8 },
           { loc: "/learn", priority: 0.6 },
         ];
         for (const p of ["1", "2", "3", "4"]) urls.push({ loc: `/phase/${p}`, priority: 0.7 });
