@@ -516,13 +516,15 @@ export const nearbySitesForStudy = createServerFn({ method: "GET" })
     if (!place) return { ok: false as const, reason: "ZIP not found" };
     const lat = parseFloat(place.latitude);
     const lng = parseFloat(place.longitude);
-    const { data: sites, error } = await sb.rpc("nearby_sites", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: sites, error } = await supabaseAdmin.rpc("nearby_sites", {
       _lat: lat,
       _lng: lng,
       _radius_mi: data.radius,
       _nct_id: data.nctId,
     });
     if (error) return { ok: false as const, reason: error.message };
+
     return {
       ok: true as const,
       origin: { lat, lng, place: place["place name"], state: place["state abbreviation"] },
