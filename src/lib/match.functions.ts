@@ -55,12 +55,18 @@ export const matchTrialSites = createServerFn({ method: "GET" })
       .select("nct_id,title,phase,overall_status,sponsor_name,study_type,min_age_years,max_age_years,gender,eligibility")
       .not("brief_summary", "is", null);
     if (data.conditionName && data.conditionName.length > 2) {
-      // Match either exact slug OR text-search hit — better recall for synonyms
-      const safe = data.conditionName.replace(/[^\w\s-]/g, " ").trim();
-      sq = sq.or(`condition_slugs.cs.{${data.condition}},search_tsv.fts.${safe}`);
+      // Strip characters that would break PostgREST .or() filter list or tsquery
+      const safe = data.conditionName.replace(/[^\w\s-]/g, " ").replace(/\s+/g, " ").trim();
+      if (safe) {
+        // plfts = plainto_tsquery — accepts plain multi-word phrases safely
+        sq = sq.or(`condition_slugs.cs.{${data.condition}},search_tsv.plfts.${safe}`);
+      } else {
+        sq = sq.contains("condition_slugs", [data.condition]);
+      }
     } else {
       sq = sq.contains("condition_slugs", [data.condition]);
     }
+
     if (data.recruitingOnly) sq = sq.eq("overall_status", "RECRUITING");
     if (data.phase) sq = sq.ilike("phase", `%PHASE${data.phase}%`);
     if (data.studyType) sq = sq.eq("study_type", data.studyType);
