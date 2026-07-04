@@ -43,12 +43,14 @@ function ClinicsIndex() {
       <div className="mt-5 flex flex-wrap gap-2">
         <input
           type="search"
+          aria-label="Search clinics by name"
           defaultValue={search.q ?? ""}
           placeholder="Search clinic name…"
           onChange={(e) => navigate({ search: (s: any) => ({ ...s, q: e.target.value || undefined, page: undefined }) })}
           className="min-w-[240px] flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
         />
         <select
+          aria-label="Filter clinics by state"
           value={search.state ?? ""}
           onChange={(e) => navigate({ search: (s: any) => ({ ...s, state: e.target.value || undefined, page: undefined }) })}
           className="rounded-md border border-border bg-card px-2 py-2 text-sm"
@@ -59,6 +61,7 @@ function ClinicsIndex() {
           ))}
         </select>
       </div>
+
 
       {data && (
         <p className="mt-3 text-xs text-muted-foreground">{data.total.toLocaleString()} clinics</p>

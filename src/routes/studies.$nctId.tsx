@@ -35,16 +35,20 @@ export const Route = createFileRoute("/studies/$nctId")({
     const desc =
       loaderData?.study?.brief_summary?.slice(0, 160) ??
       `Details, eligibility, locations, and sponsor for clinical trial ${params.nctId}.`;
+    const url = `https://studyfinder-us.lovable.app/studies/${params.nctId}`;
     return {
       meta: [
         { title: `${title} (${params.nctId}) | TrialFinderUS` },
         { name: "description", content: desc },
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
       ],
-      links: [{ rel: "canonical", href: `/studies/${params.nctId}` }],
+      links: [{ rel: "canonical", href: url }],
     };
   },
+
   component: StudyPage,
 });
 

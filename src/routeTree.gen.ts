@@ -9,8 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RecruitingRouteImport } from './routes/recruiting'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as GetMatchedRouteImport } from './routes/get-matched'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -23,8 +26,6 @@ import { Route as ClinicsIndexRouteImport } from './routes/clinics.index'
 import { Route as StudiesNctIdRouteImport } from './routes/studies.$nctId'
 import { Route as StatesStateSlugRouteImport } from './routes/states.$stateSlug'
 import { Route as SponsorsSlugRouteImport } from './routes/sponsors.$slug'
-import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
-import { Route as RobotsTxtRouteImport } from './routes/robots.txt'
 import { Route as PhasePhaseRouteImport } from './routes/phase.$phase'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
@@ -42,14 +43,29 @@ import { Route as AuthenticatedPortalBillingRouteImport } from './routes/_authen
 import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
 import { Route as AuthenticatedPortalClinicIdRouteImport } from './routes/_authenticated/portal.clinic.$id'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecruitingRoute = RecruitingRouteImport.update({
   id: '/recruiting',
   path: '/recruiting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GetMatchedRoute = GetMatchedRouteImport.update({
@@ -109,16 +125,6 @@ const StatesStateSlugRoute = StatesStateSlugRouteImport.update({
 const SponsorsSlugRoute = SponsorsSlugRouteImport.update({
   id: '/sponsors/$slug',
   path: '/sponsors/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapXmlRoute = SitemapXmlRouteImport.update({
-  id: '/sitemap/xml',
-  path: '/sitemap/xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsTxtRoute = RobotsTxtRouteImport.update({
-  id: '/robots/txt',
-  path: '/robots/txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PhasePhaseRoute = PhasePhaseRouteImport.update({
@@ -211,8 +217,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/get-matched': typeof GetMatchedRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recruiting': typeof RecruitingRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
@@ -224,8 +233,6 @@ export interface FileRoutesByFullPath {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/phase/$phase': typeof PhasePhaseRoute
-  '/robots/txt': typeof RobotsTxtRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
@@ -244,8 +251,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/get-matched': typeof GetMatchedRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recruiting': typeof RecruitingRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
@@ -256,8 +266,6 @@ export interface FileRoutesByTo {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/phase/$phase': typeof PhasePhaseRoute
-  '/robots/txt': typeof RobotsTxtRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
@@ -278,8 +286,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/get-matched': typeof GetMatchedRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recruiting': typeof RecruitingRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
@@ -291,8 +302,6 @@ export interface FileRoutesById {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/phase/$phase': typeof PhasePhaseRoute
-  '/robots/txt': typeof RobotsTxtRoute
-  '/sitemap/xml': typeof SitemapXmlRoute
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
@@ -313,8 +322,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/get-matched'
+    | '/llms.txt'
     | '/recruiting'
+    | '/robots.txt'
     | '/search'
+    | '/sitemap.xml'
     | '/admin'
     | '/portal'
     | '/cities/$citySlug'
@@ -326,8 +338,6 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/phase/$phase'
-    | '/robots/txt'
-    | '/sitemap/xml'
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
@@ -346,8 +356,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/get-matched'
+    | '/llms.txt'
     | '/recruiting'
+    | '/robots.txt'
     | '/search'
+    | '/sitemap.xml'
     | '/admin'
     | '/cities/$citySlug'
     | '/clinics/$slug'
@@ -358,8 +371,6 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/phase/$phase'
-    | '/robots/txt'
-    | '/sitemap/xml'
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
@@ -379,8 +390,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/get-matched'
+    | '/llms.txt'
     | '/recruiting'
+    | '/robots.txt'
     | '/search'
+    | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/_authenticated/portal'
     | '/cities/$citySlug'
@@ -392,8 +406,6 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/terms'
     | '/phase/$phase'
-    | '/robots/txt'
-    | '/sitemap/xml'
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
@@ -414,8 +426,11 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
   GetMatchedRoute: typeof GetMatchedRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   RecruitingRoute: typeof RecruitingRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SearchRoute: typeof SearchRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CitiesCitySlugRoute: typeof CitiesCitySlugRoute
   ClinicsSlugRoute: typeof ClinicsSlugRoute
   ClinicsAuthRoute: typeof ClinicsAuthRoute
@@ -425,8 +440,6 @@ export interface RootRouteChildren {
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
   PhasePhaseRoute: typeof PhasePhaseRoute
-  RobotsTxtRoute: typeof RobotsTxtRoute
-  SitemapXmlRoute: typeof SitemapXmlRoute
   SponsorsSlugRoute: typeof SponsorsSlugRoute
   StatesStateSlugRoute: typeof StatesStateSlugRoute
   StudiesNctIdRoute: typeof StudiesNctIdRoute
@@ -440,6 +453,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
@@ -447,11 +467,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recruiting': {
       id: '/recruiting'
       path: '/recruiting'
       fullPath: '/recruiting'
       preLoaderRoute: typeof RecruitingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/get-matched': {
@@ -536,20 +570,6 @@ declare module '@tanstack/react-router' {
       path: '/sponsors/$slug'
       fullPath: '/sponsors/$slug'
       preLoaderRoute: typeof SponsorsSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap/xml': {
-      id: '/sitemap/xml'
-      path: '/sitemap/xml'
-      fullPath: '/sitemap/xml'
-      preLoaderRoute: typeof SitemapXmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots/txt': {
-      id: '/robots/txt'
-      path: '/robots/txt'
-      fullPath: '/robots/txt'
-      preLoaderRoute: typeof RobotsTxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/phase/$phase': {
@@ -703,8 +723,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
   GetMatchedRoute: GetMatchedRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   RecruitingRoute: RecruitingRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SearchRoute: SearchRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   CitiesCitySlugRoute: CitiesCitySlugRoute,
   ClinicsSlugRoute: ClinicsSlugRoute,
   ClinicsAuthRoute: ClinicsAuthRoute,
@@ -714,8 +737,6 @@ const rootRouteChildren: RootRouteChildren = {
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
   PhasePhaseRoute: PhasePhaseRoute,
-  RobotsTxtRoute: RobotsTxtRoute,
-  SitemapXmlRoute: SitemapXmlRoute,
   SponsorsSlugRoute: SponsorsSlugRoute,
   StatesStateSlugRoute: StatesStateSlugRoute,
   StudiesNctIdRoute: StudiesNctIdRoute,

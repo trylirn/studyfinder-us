@@ -30,11 +30,13 @@ function StatesIndex() {
       <h1 className="text-3xl font-semibold tracking-tight">Clinical Trials by State</h1>
       <input
         type="search"
+        aria-label="Filter states by name"
         defaultValue={search.q ?? ""}
         placeholder="Filter states by name…"
         onChange={(e) => navigate({ search: { q: e.target.value || undefined } })}
         className="mt-5 w-full max-w-md rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
       />
+
       <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {(data ?? []).map((s: { slug: string; name: string; abbr: string; study_count: number }) => (
           <Link key={s.slug} to="/states/$stateSlug" params={{ stateSlug: s.slug }} className="rounded-md border border-border bg-card p-3 hover:border-primary/60">

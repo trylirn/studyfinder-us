@@ -17,14 +17,23 @@ export const Route = createFileRoute("/clinics/$slug")({
   head: ({ loaderData, params }) => {
     const c = loaderData?.clinic as any;
     const name = c?.name ?? params.slug;
+    const loc = [c?.city, c?.state].filter(Boolean).join(", ");
+    const title = `${name} — Clinical Research Site | TrialFinderUS`;
+    const desc = `${name}${loc ? ` in ${loc}` : ""}. Active recruiting clinical trials and contact information.`;
+    const url = `https://studyfinder-us.lovable.app/clinics/${params.slug}`;
     return {
       meta: [
-        { title: `${name} — Clinical Research Site | TrialFinderUS` },
-        { name: "description", content: `${name} in ${[c?.city, c?.state].filter(Boolean).join(", ")}. Active recruiting clinical trials and contact information.` },
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
       ],
-      links: [{ rel: "canonical", href: `/clinics/${params.slug}` }],
+      links: [{ rel: "canonical", href: url }],
     };
   },
+
   component: ClinicPage,
 });
 

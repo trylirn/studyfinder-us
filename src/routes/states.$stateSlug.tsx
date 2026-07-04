@@ -12,13 +12,37 @@ export const Route = createFileRoute("/states/$stateSlug")({
     if (!d) throw notFound();
     return d;
   },
-  head: ({ loaderData, params }) => ({
-    meta: [
-      { title: `Clinical Trials in ${loaderData?.state?.name ?? params.stateSlug} | TrialFinderUS` },
-      { name: "description", content: `Find ${loaderData?.total ?? 0} clinical trials and research studies recruiting in ${loaderData?.state?.name ?? ""}.` },
-    ],
-    links: [{ rel: "canonical", href: `/states/${params.stateSlug}` }],
-  }),
+  head: ({ loaderData, params }) => {
+    const stateName = loaderData?.state?.name ?? params.stateSlug;
+    const total = loaderData?.total ?? 0;
+    const title = `Clinical Trials in ${stateName} | TrialFinderUS`;
+    const desc = `Find ${total} clinical trials and research studies recruiting in ${stateName}.`;
+    const url = `https://studyfinder-us.lovable.app/states/${params.stateSlug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: `Clinical Trials in ${stateName}`,
+            description: desc,
+            url,
+            about: { "@type": "Place", name: stateName, address: { "@type": "PostalAddress", addressRegion: stateName, addressCountry: "US" } },
+          }),
+        },
+      ],
+    };
+  },
+
   component: StatePage,
 });
 

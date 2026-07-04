@@ -12,18 +12,19 @@ const trendingQuery = queryOptions({ queryKey: ["trending-conditions"], queryFn:
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Clinical Trials & Research Studies in the United States | TrialFinderUS" },
+      { title: "U.S. Clinical Trials Directory | TrialFinderUS" },
       {
         name: "description",
         content:
           "Search thousands of recruiting clinical trials and paid research studies across the U.S. by condition, city, state, sponsor, and phase.",
       },
-      { property: "og:title", content: "TrialFinderUS — U.S. Clinical Trials Directory" },
+      { property: "og:title", content: "U.S. Clinical Trials Directory | TrialFinderUS" },
       { property: "og:description", content: "Find recruiting clinical trials across the United States." },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/" }],
   }),
+
   loader: ({ context }) =>
     Promise.all([
       context.queryClient.ensureQueryData(homeQuery),

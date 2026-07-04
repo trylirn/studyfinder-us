@@ -14,14 +14,35 @@ export const Route = createFileRoute("/conditions/$slug")({
   },
   head: ({ loaderData, params }) => {
     const name = loaderData?.condition?.name ?? params.slug;
+    const total = loaderData?.total ?? 0;
+    const title = `${name} Clinical Trials in the U.S. | TrialFinderUS`;
+    const desc = `Browse ${total} ${name} clinical trials and research studies recruiting in the United States.`;
+    const url = `https://studyfinder-us.lovable.app/conditions/${params.slug}`;
     return {
       meta: [
-        { title: `${name} Clinical Trials in the U.S. | TrialFinderUS` },
-        { name: "description", content: `Browse ${loaderData?.total ?? 0} ${name} clinical trials and research studies recruiting in the United States.` },
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
       ],
-      links: [{ rel: "canonical", href: `/conditions/${params.slug}` }],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: `${name} Clinical Trials`,
+            description: desc,
+            url,
+            about: { "@type": "MedicalCondition", name },
+          }),
+        },
+      ],
     };
   },
+
   component: ConditionPage,
 });
 

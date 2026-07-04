@@ -45,12 +45,14 @@ function RecruitingPage() {
       <div className="mt-5 flex flex-wrap gap-2">
         <input
           type="search"
+          aria-label="Search recruiting studies by condition, treatment, or keyword"
           defaultValue={search.q ?? ""}
           placeholder="Search by condition, treatment, or keyword…"
           onChange={(e) => navigate({ search: (s: any) => ({ ...s, q: e.target.value || undefined, page: undefined }) })}
           className="min-w-[240px] flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
         />
         <select
+          aria-label="Filter studies by state"
           value={search.state ?? ""}
           onChange={(e) => navigate({ search: (s: any) => ({ ...s, state: e.target.value || undefined, page: undefined }) })}
           className="rounded-md border border-border bg-card px-2 py-2 text-sm"
@@ -61,6 +63,7 @@ function RecruitingPage() {
           ))}
         </select>
         <select
+          aria-label="Filter studies by trial phase"
           value={search.phase ?? ""}
           onChange={(e) => navigate({ search: (s: any) => ({ ...s, phase: e.target.value || undefined, page: undefined }) })}
           className="rounded-md border border-border bg-card px-2 py-2 text-sm"
@@ -72,6 +75,7 @@ function RecruitingPage() {
           <option value="4">Phase 4</option>
         </select>
       </div>
+
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {isLoading && Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-36 animate-pulse rounded-xl border border-border bg-card" />)}
