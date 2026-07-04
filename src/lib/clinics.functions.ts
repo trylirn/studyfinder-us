@@ -107,7 +107,7 @@ export const updateMyClinic = createServerFn({ method: "POST" })
         clinicId: z.string().uuid(),
         patch: z.object({
           phone: z.string().max(40).optional(),
-          website: z.string().url().max(500).optional().or(z.literal("")),
+          website: httpUrl.optional().or(z.literal("")),
           intake_email: z.string().email().optional().or(z.literal("")),
           description: z.string().max(4000).optional(),
           specialties: z.array(z.string().max(80)).max(40).optional(),
