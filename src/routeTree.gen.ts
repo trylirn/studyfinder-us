@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RecruitingRouteImport } from './routes/recruiting'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as GetMatchedRouteImport } from './routes/get-matched'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -60,6 +61,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const RecruitingRoute = RecruitingRouteImport.update({
   id: '/recruiting',
   path: '/recruiting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GetMatchedRoute = GetMatchedRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/get-matched': typeof GetMatchedRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recruiting': typeof RecruitingRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/get-matched': typeof GetMatchedRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recruiting': typeof RecruitingRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/get-matched': typeof GetMatchedRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/recruiting': typeof RecruitingRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
@@ -313,6 +322,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/get-matched'
+    | '/llms.txt'
     | '/recruiting'
     | '/robots.txt'
     | '/search'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/get-matched'
+    | '/llms.txt'
     | '/recruiting'
     | '/robots.txt'
     | '/search'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/get-matched'
+    | '/llms.txt'
     | '/recruiting'
     | '/robots.txt'
     | '/search'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
   GetMatchedRoute: typeof GetMatchedRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   RecruitingRoute: typeof RecruitingRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SearchRoute: typeof SearchRoute
@@ -466,6 +479,13 @@ declare module '@tanstack/react-router' {
       path: '/recruiting'
       fullPath: '/recruiting'
       preLoaderRoute: typeof RecruitingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/get-matched': {
@@ -703,6 +723,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
   GetMatchedRoute: GetMatchedRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   RecruitingRoute: RecruitingRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SearchRoute: SearchRoute,
