@@ -2,6 +2,25 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+// Allow only http(s) URLs — blocks javascript:, data:, etc. to prevent stored XSS
+// when the value is later rendered as an <a href={...}> link.
+const httpUrl = z
+  .string()
+  .max(500)
+  .refine(
+    (v) => {
+      if (!v) return true;
+      try {
+        const u = new URL(v);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    { message: "URL must start with http:// or https://" },
+  );
+
+
 async function isAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
