@@ -97,13 +97,15 @@ export const matchTrialSites = createServerFn({ method: "GET" })
     const nctIds = filtered.map((s: any) => s.nct_id);
     const studyMap = new Map<string, any>(filtered.map((s: any) => [s.nct_id, s]));
 
-    // Nearby sites within radius
-    const { data: sites, error: nErr } = await sb.rpc("nearby_sites", {
+    // Nearby sites within radius (SECURITY DEFINER RPC — call via service role)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: sites, error: nErr } = await supabaseAdmin.rpc("nearby_sites", {
       _lat: lat,
       _lng: lng,
       _radius_mi: data.radius,
     });
     if (nErr) return { ok: false as const, reason: nErr.message };
+
 
     const totalNearby = new Set((sites ?? []).map((s: any) => s.clinic_id).filter(Boolean)).size;
 
