@@ -92,11 +92,12 @@ function ClinicPage() {
             <Phone className="h-4 w-4 text-primary" /> {clinic.phone}
           </a>
         )}
-        {clinic.website && (
+        {clinic.website && /^https?:\/\//i.test(clinic.website) && (
           <a href={clinic.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm hover:border-primary/60">
             <Globe className="h-4 w-4 text-primary" /> <span className="truncate">Website</span>
           </a>
         )}
+
         {(clinic.lat && clinic.lng) || clinic.address_line1 ? (
           <a
             href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([clinic.name, clinic.address_line1, clinic.city, clinic.state, clinic.zip].filter(Boolean).join(", "))}`}

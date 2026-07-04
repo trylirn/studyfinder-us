@@ -469,11 +469,13 @@ export const getClinicPage = createServerFn({ method: "GET" })
     // Nearby clinics within 25 miles
     let nearby: any[] = [];
     if (clinicRow.lat && clinicRow.lng) {
-      const { data: sites } = await sb.rpc("nearby_sites", {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: sites } = await supabaseAdmin.rpc("nearby_sites", {
         _lat: clinicRow.lat,
         _lng: clinicRow.lng,
         _radius_mi: 25,
       });
+
       const clinicIds = Array.from(
         new Set(((sites ?? []) as any[]).map((s) => s.clinic_id).filter((id) => id && id !== clinicRow.id)),
       );
@@ -514,13 +516,15 @@ export const nearbySitesForStudy = createServerFn({ method: "GET" })
     if (!place) return { ok: false as const, reason: "ZIP not found" };
     const lat = parseFloat(place.latitude);
     const lng = parseFloat(place.longitude);
-    const { data: sites, error } = await sb.rpc("nearby_sites", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: sites, error } = await supabaseAdmin.rpc("nearby_sites", {
       _lat: lat,
       _lng: lng,
       _radius_mi: data.radius,
       _nct_id: data.nctId,
     });
     if (error) return { ok: false as const, reason: error.message };
+
     return {
       ok: true as const,
       origin: { lat, lng, place: place["place name"], state: place["state abbreviation"] },

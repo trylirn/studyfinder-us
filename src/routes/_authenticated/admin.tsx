@@ -186,14 +186,15 @@ function ClaimRow({ claim: c, decide }: { claim: any; decide: any }) {
             {c.role && <p><span className="text-muted-foreground">Role:</span> {c.role}</p>}
             {c.relationship && <p><span className="text-muted-foreground">Relationship:</span> {c.relationship}</p>}
             {c.npi && <p><span className="text-muted-foreground">NPI:</span> {c.npi}</p>}
-            {c.work_website && (
+            {c.work_website && /^https?:\/\//i.test(c.work_website) && (
               <p>
                 <span className="text-muted-foreground">Website:</span>{" "}
-                <a href={c.work_website} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                <a href={c.work_website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                   {c.work_website}
                 </a>
               </p>
             )}
+
             <p><span className="text-muted-foreground">Attested:</span> {c.attested ? "Yes" : "No"}</p>
           </div>
           {c.note && <p className="mt-2 rounded border border-border bg-muted/40 p-2 text-xs italic">"{c.note}"</p>}

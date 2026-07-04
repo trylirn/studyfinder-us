@@ -48,7 +48,8 @@ export const bumpConditionView = createServerFn({ method: "POST" })
     return { slug };
   })
   .handler(async ({ data }) => {
-    const sb = pub();
-    await sb.rpc("bump_condition_view", { _slug: data.slug });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.rpc("bump_condition_view", { _slug: data.slug });
     return { ok: true };
   });
+

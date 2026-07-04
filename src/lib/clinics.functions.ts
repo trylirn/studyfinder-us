@@ -2,6 +2,25 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+// Allow only http(s) URLs — blocks javascript:, data:, etc. to prevent stored XSS
+// when the value is later rendered as an <a href={...}> link.
+const httpUrl = z
+  .string()
+  .max(500)
+  .refine(
+    (v) => {
+      if (!v) return true;
+      try {
+        const u = new URL(v);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    { message: "URL must start with http:// or https://" },
+  );
+
+
 async function isAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
@@ -52,7 +71,7 @@ export const submitClinicClaim = createServerFn({ method: "POST" })
         role: z.string().max(120).optional().default(""),
         relationship: z.string().max(80).optional().default(""),
         npi: z.string().max(40).optional().default(""),
-        workWebsite: z.string().max(500).optional().default(""),
+        workWebsite: httpUrl.optional().default(""),
         note: z.string().max(2000).optional().default(""),
         proofPaths: z.array(z.string().max(500)).max(5).optional().default([]),
         attested: z.boolean().optional().default(false),
@@ -88,7 +107,7 @@ export const updateMyClinic = createServerFn({ method: "POST" })
         clinicId: z.string().uuid(),
         patch: z.object({
           phone: z.string().max(40).optional(),
-          website: z.string().url().max(500).optional().or(z.literal("")),
+          website: httpUrl.optional().or(z.literal("")),
           intake_email: z.string().email().optional().or(z.literal("")),
           description: z.string().max(4000).optional(),
           specialties: z.array(z.string().max(80)).max(40).optional(),
