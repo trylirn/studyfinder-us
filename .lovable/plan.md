@@ -1,31 +1,25 @@
-## Problem
+## Goal
+Make each row in the "Research locations" list on a study page clickable, opening the matching clinic profile at `/clinics/$slug` when a clinic is linked to that site.
 
-On `/get-matched`, submitting a multi-word condition like "Chronic Migraine" returns:
+## Changes
 
-> Couldn't match: syntax error in tsquery: "Chronic Migraine"
+### 1. `src/components/LocationsList.tsx`
+- Extend the `Location` type with optional `clinic_id: string | null` and `clinic_slug: string | null`.
+- Accept an optional `clinicMap?: Record<string, { slug: string; name: string }>` prop (parent already has this) as an alternative to per-row `clinic_slug`, so callers can pass either shape.
+- For each list item, resolve `slug = location.clinic_slug ?? clinicMap?.[location.clinic_id ?? ""]?.slug ?? null`.
+  - If `slug` exists: render the row as a TanStack `<Link to="/clinics/$slug" params={{ slug }}>` with hover styles (border/text primary) and an aria-label like `View clinic profile for {facility}`.
+  - If no slug: keep the current non-interactive `<li>` (many CT.gov sites don't have a corresponding clinic in our DB).
+- Keep existing filter/search UI and the `slice(0, 60)` cap unchanged.
+- Add a small "View profile →" affordance on linked rows so users can tell which are clickable.
 
-Root cause in `src/lib/match.functions.ts`:
+### 2. `src/routes/studies.$nctId.tsx`
+- Pass `clinicMap` down: `<LocationsList locations={locations} clinicMap={clinicMap} />`. No other changes.
 
-```ts
-sq = sq.or(`condition_slugs.cs.{${data.condition}},search_tsv.fts.${safe}`);
-```
-
-PostgREST `fts` maps to `to_tsquery`, which requires explicit boolean operators between tokens (`Chronic & Migraine`). Any plain multi-word phrase throws the tsquery syntax error the user is seeing.
-
-## Fix
-
-Switch the full-text branch from `fts` (to_tsquery) to `plfts` (plainto_tsquery), which safely accepts plain phrases with spaces. Also tighten the sanitizer so URL-reserved characters (`,`, parentheses, colon) can't break the `.or()` filter list.
-
-### File to change
-
-- `src/lib/match.functions.ts`
-  - Replace the safe-string sanitizer to strip commas/parens/colons in addition to non-word chars.
-  - Change `search_tsv.fts.${safe}` → `search_tsv.plfts.${safe}`.
-  - Guard against an empty `safe` string (fall back to slug-only match) so a purely punctuation input doesn't send `plfts.`.
-
-No UI changes, no schema changes, no other files touched. Matching quality stays the same or improves (plainto handles phrase input more predictably than to_tsquery).
+## Out of scope
+- No schema changes, no new server function, no changes to how locations/clinics are joined (already done in `getStudy`).
+- Map pins already link to clinics; no changes there.
+- No changes to filters, pagination, or the eligibility/CTA sections.
 
 ## Verification
-
-- Rerun the quiz with "Chronic Migraine" + ZIP 77030 and confirm results (or the graceful "no matches, showing nearest sites" fallback) render instead of the tsquery error.
-- Rerun with a single-word condition ("Migraine") to confirm the slug-only path still works.
+- Load a study whose locations include one of our clinics; confirm that row is a link, hover state works, and clicking navigates to `/clinics/<slug>`.
+- Load a study with only unmatched CT.gov sites; confirm rows render as before (non-clickable) with no console errors.
