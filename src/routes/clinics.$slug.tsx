@@ -66,6 +66,8 @@ function ClinicPage() {
       }),
     [trials, statusFilter, phaseFilter],
   );
+  const formatStatus = (s: string) =>
+    s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
   const ld = {
     "@context": "https://schema.org",
     "@type": "MedicalOrganization",
