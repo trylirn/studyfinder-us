@@ -198,12 +198,53 @@ function ClinicPage() {
       )}
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold">Trials currently recruiting here</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Trials currently recruiting here</h2>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <select
+              aria-label="Filter trials by status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-md border border-border bg-card px-2 py-1.5"
+            >
+              <option value="">All statuses</option>
+              {availableStatuses.map((s) => (
+                <option key={s} value={s}>{formatStatus(s)}</option>
+              ))}
+            </select>
+            <select
+              aria-label="Filter trials by phase"
+              value={phaseFilter}
+              onChange={(e) => setPhaseFilter(e.target.value)}
+              className="rounded-md border border-border bg-card px-2 py-1.5"
+            >
+              <option value="">All phases</option>
+              {availablePhases.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {(statusFilter || phaseFilter) && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Showing {filteredTrials.length} of {trials.length} trials
+            {(statusFilter || phaseFilter) && (
+              <button
+                onClick={() => { setStatusFilter(""); setPhaseFilter(""); }}
+                className="ml-2 text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </p>
+        )}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {trials.length > 0 ? (
-            trials.map((s) => <StudyCard key={s.nct_id} study={s} />)
+          {filteredTrials.length > 0 ? (
+            filteredTrials.map((s) => <StudyCard key={s.nct_id} study={s} />)
           ) : (
-            <p className="text-sm text-muted-foreground">No active trials linked to this site yet.</p>
+            <p className="text-sm text-muted-foreground">
+              {trials.length === 0 ? "No active trials linked to this site yet." : "No trials match these filters."}
+            </p>
           )}
         </div>
       </section>
