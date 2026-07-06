@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { getClinicPage } from "@/lib/directory.functions";
 import { StudyCard } from "@/components/StudyCard";
 import { TrialMap } from "@/components/TrialMap";
@@ -43,6 +44,30 @@ function ClinicPage() {
   if (!data) return null;
   const clinic = data.clinic as any;
   const trials = (data.trials ?? []) as any[];
+  const [statusFilter, setStatusFilter] = useState("");
+  const [phaseFilter, setPhaseFilter] = useState("");
+  const availableStatuses = useMemo(
+    () => Array.from(new Set(trials.map((t) => t.overall_status).filter(Boolean))).sort(),
+    [trials],
+  );
+  const availablePhases = useMemo(
+    () => Array.from(new Set(trials.flatMap((t) => (Array.isArray(t.phase) ? t.phase : [t.phase])).filter(Boolean))).sort(),
+    [trials],
+  );
+  const filteredTrials = useMemo(
+    () =>
+      trials.filter((t) => {
+        if (statusFilter && t.overall_status !== statusFilter) return false;
+        if (phaseFilter) {
+          const phases = Array.isArray(t.phase) ? t.phase : t.phase ? [t.phase] : [];
+          if (!phases.includes(phaseFilter)) return false;
+        }
+        return true;
+      }),
+    [trials, statusFilter, phaseFilter],
+  );
+  const formatStatus = (s: string) =>
+    s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
   const ld = {
     "@context": "https://schema.org",
     "@type": "MedicalOrganization",
@@ -175,12 +200,53 @@ function ClinicPage() {
       )}
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold">Trials currently recruiting here</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Trials currently recruiting here</h2>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <select
+              aria-label="Filter trials by status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-md border border-border bg-card px-2 py-1.5"
+            >
+              <option value="">All statuses</option>
+              {availableStatuses.map((s) => (
+                <option key={s} value={s}>{formatStatus(s)}</option>
+              ))}
+            </select>
+            <select
+              aria-label="Filter trials by phase"
+              value={phaseFilter}
+              onChange={(e) => setPhaseFilter(e.target.value)}
+              className="rounded-md border border-border bg-card px-2 py-1.5"
+            >
+              <option value="">All phases</option>
+              {availablePhases.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {(statusFilter || phaseFilter) && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Showing {filteredTrials.length} of {trials.length} trials
+            {(statusFilter || phaseFilter) && (
+              <button
+                onClick={() => { setStatusFilter(""); setPhaseFilter(""); }}
+                className="ml-2 text-primary hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </p>
+        )}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {trials.length > 0 ? (
-            trials.map((s) => <StudyCard key={s.nct_id} study={s} />)
+          {filteredTrials.length > 0 ? (
+            filteredTrials.map((s) => <StudyCard key={s.nct_id} study={s} />)
           ) : (
-            <p className="text-sm text-muted-foreground">No active trials linked to this site yet.</p>
+            <p className="text-sm text-muted-foreground">
+              {trials.length === 0 ? "No active trials linked to this site yet." : "No trials match these filters."}
+            </p>
           )}
         </div>
       </section>
