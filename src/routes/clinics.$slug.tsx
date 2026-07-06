@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { getClinicPage } from "@/lib/directory.functions";
 import { StudyCard } from "@/components/StudyCard";
 import { TrialMap } from "@/components/TrialMap";
