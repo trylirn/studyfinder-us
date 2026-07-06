@@ -1,38 +1,74 @@
 ## Goal
-Make every research-site row on a study page link to a real clinic profile, by (a) tightening the stub-clinic generator so name/whitespace variants still get linked, (b) creating a per-city "unnamed research site" stub for rows where CT.gov didn't provide a facility, and (c) running the updated generator to backfill the ~17k unlinked rows.
+1. Finish the previously approved fix: replace `generate_clinics_from_locations()` and backfill so every research-site row links to a clinic profile.
+2. Merge duplicate clinics that share the **same address** and have **near-identical names**, so slight naming variants (e.g. "Georgia Lung Associates" and "Georgia Lung Associates, PC"; "Kaiser Permanente - Deer Valley" and "Kaiser Permanente-Deer Valley Medical Center") collapse into a single profile.
 
-## Root cause
-`public.generate_clinics_from_locations()` currently:
-- Skips rows with NULL/short `facility` → 7,593 sites never get a stub.
-- Links by exact equality (`l.facility = c.name AND l.city = c.city AND l.state = c.state`) → whitespace, case, or a slug collision from a sibling facility leaves ~9,370 rows unlinked even after a clinic exists.
+## Merge rules (both conditions must hold)
 
-## Changes
+**"Same address"** — either of:
+- Same `zip` (non-null) and same `state`, or
+- Same rounded `(lat, lng)` to 3 decimals (~110 m) and same `state`.
+
+Rows with only a shared city+state but no zip/coords are NOT merged (too many false positives — same city can hold dozens of unrelated real clinics).
+
+**"Similar name"** — after normalization (lowercase, strip punctuation, strip trailing legal suffixes `inc|llc|pc|pa|pllc|corp|ltd`, collapse whitespace) one of:
+- Normalized names are equal, or
+- One normalized name is a prefix or contains the other (min 8 chars overlap), or
+- `similarity(a, b) >= 0.72` via `pg_trgm` (already enabled).
+
+**Exclusions** — never merge a clinic that:
+- has `claimed_by IS NOT NULL` into another clinic (claimed profiles are authoritative);
+- has a different `claimed_by` than its candidate canonical;
+- is the per-city `research-site-…` stub introduced in step 1 (those are city-level catch-alls, not real clinics).
+
+**Canonical winner within a group:**
+1. `claimed_by IS NOT NULL` wins.
+2. Else the row with the most `locations` currently linked.
+3. Else shortest normalized name (prefix winner).
+4. Tie-break: oldest `created_at`, then smallest `id`.
+
+**Merge action** (one transaction per group):
+- Reassign `locations.clinic_id`, `clinic_claims.clinic_id`, `clinic_images.clinic_id`, `lead_delivery_log.clinic_id` from each duplicate → canonical.
+- Backfill NULL fields on canonical from duplicates: `zip, lat, lng, phone, website, description, npi` (only when canonical is NULL).
+- `DELETE` the duplicate `clinics` rows.
+- Call `refresh_directory_counts()` at the end.
+
+## Deliverables
 
 ### 1. Migration — replace `public.generate_clinics_from_locations()`
-Keep the signature `RETURNS TABLE(inserted_count int, linked_count int)`; internals:
+(Same body as the previously approved plan: normalize facility name for slug + link, add per-city fallback stubs for NULL-facility sites, add slug-fallback link step.)
 
-- Compute a normalized name once (`btrim(regexp_replace(facility, '\s+', ' ', 'g'))`) and use it for both slug and post-insert linking.
-- Insert stubs for every unlinked (normalized_name, city, state) group where name length > 2 (unchanged rule, just applied to the normalized value), with `ON CONFLICT (slug) DO NOTHING`.
-- Insert **city-level fallback stubs** for unlinked rows with NULL/blank facility: one clinic per (city, state) named `"Research site — {city}, {state}"`, slug `research-site-{city-slug}-{state}`, `published=true`, `claim_status='unclaimed'`. Same ON CONFLICT behavior.
-- Link step 1: `UPDATE locations SET clinic_id = c.id FROM clinics c WHERE locations.clinic_id IS NULL AND btrim(regexp_replace(locations.facility, '\s+', ' ', 'g')) = c.name AND lower(locations.city) = lower(c.city) AND locations.state = c.state`.
-- Link step 2 (slug fallback for collisions): for still-unlinked rows with a facility, match by the same slug the insert would have produced.
-- Link step 3 (city-level fallback): for rows with NULL/blank facility, link to the per-city stub by slug.
-- Return `(total_inserted, total_linked)`.
+### 2. Migration — new one-shot function `public.merge_duplicate_clinics()`
+`SECURITY DEFINER SET search_path = public`, returns `TABLE(groups_merged int, clinics_removed int)`.
+Body implements the rules above with a single CTE that:
+- Groups candidate clinics by `(state, coalesce(zip, round(lat,3)::text||','||round(lng,3)::text))`.
+- Within each group, builds pairs where normalized-name equality / prefix / trigram similarity ≥ 0.72 holds.
+- Uses a union-find via `WITH RECURSIVE` to form transitive clusters, then picks the canonical row per cluster and executes the reassign/backfill/delete.
 
-The function stays `SECURITY DEFINER SET search_path = public`, matching the existing security posture.
+Also add an idempotent guard: after the run, any newly linked `locations` that still don't have `clinic_id` stay untouched.
 
-### 2. Data run (after migration approval)
-Run `SELECT * FROM public.generate_clinics_from_locations();` then `SELECT public.refresh_directory_counts();` via the insert tool so the new stubs, links, and clinic recruiting counts are populated for the current dataset. No app code change required beyond this — imports already call both RPCs, so future ingests self-heal.
+### 3. Data run (via insert tool, after migration approval)
+```sql
+SELECT * FROM public.generate_clinics_from_locations();
+SELECT * FROM public.merge_duplicate_clinics();
+SELECT public.refresh_directory_counts();
+```
 
-### 3. No frontend changes needed
-`LocationsList` already renders a link whenever `clinic_id` resolves, so once the backfill completes every row will be clickable — including CT.gov entries with no facility name (they'll link to the per-city stub).
+### 4. No frontend changes
+Rows already link via `clinic_id`; existing routes handle the survivor slug. TanStack Query cache reloads on next fetch — nothing to invalidate manually.
 
-## Out of scope
-- No fuzzy/trigram matching against pre-existing user-owned clinics — normalized exact match plus slug fallback is enough for the CT.gov feed and avoids linking legit clinics to unrelated CT.gov names.
-- No changes to `locations` schema, RLS, or the cron endpoint.
-- No changes to clinic-claim flow; new stubs remain `claim_status='unclaimed'` and can be claimed via the existing portal.
+## Safety / reversibility
+- Ships as a callable function, not an inline one-shot migration DML, so it can be re-run.
+- Dry-run preview available via `psql` before the destructive step: I'll `SELECT ... EXPLAIN`-style query the cluster preview and report counts (groups + rows-to-delete) to you before invoking the function.
+- Because we reassign FKs before delete, no `locations` will end up with a stale `clinic_id`.
+- Not merged in this pass: cross-city name matches, and any row without zip/coords.
 
 ## Verification
-- `SELECT count(*) FILTER (WHERE clinic_id IS NULL) FROM public.locations;` drops to ~0.
-- Open the study the user was viewing (`NCT05822388`) and confirm every research-location row is a link.
-- Spot-check a per-city fallback stub page at `/clinics/research-site-<city>-<state>` renders without error.
+- `SELECT count(*) FROM public.clinics;` before/after — expect a meaningful drop.
+- `SELECT count(*) FILTER (WHERE clinic_id IS NULL) FROM public.locations;` ≈ 0.
+- Load `NCT05822388` — every research-site row links, and same-address variants share one profile URL.
+- Spot-check a merged clinic's page shows the aggregated study count.
+
+## Out of scope
+- Fuzzy cross-city merging (e.g. campus branches in adjacent cities).
+- Manual admin merge UI — can add later if needed.
+- Merging user-owned clinics with different claimants.

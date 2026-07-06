@@ -593,6 +593,13 @@ export type Database = {
           linked_count: number
         }[]
       }
+      merge_duplicate_clinics: {
+        Args: never
+        Returns: {
+          clinics_removed: number
+          groups_merged: number
+        }[]
+      }
       nearby_sites: {
         Args: {
           _lat: number
@@ -614,6 +621,7 @@ export type Database = {
           zip: string
         }[]
       }
+      normalize_clinic_name: { Args: { _name: string }; Returns: string }
       refresh_directory_counts: { Args: never; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
