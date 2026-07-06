@@ -44,6 +44,28 @@ function ClinicPage() {
   if (!data) return null;
   const clinic = data.clinic as any;
   const trials = (data.trials ?? []) as any[];
+  const [statusFilter, setStatusFilter] = useState("");
+  const [phaseFilter, setPhaseFilter] = useState("");
+  const availableStatuses = useMemo(
+    () => Array.from(new Set(trials.map((t) => t.overall_status).filter(Boolean))).sort(),
+    [trials],
+  );
+  const availablePhases = useMemo(
+    () => Array.from(new Set(trials.flatMap((t) => (Array.isArray(t.phase) ? t.phase : [t.phase])).filter(Boolean))).sort(),
+    [trials],
+  );
+  const filteredTrials = useMemo(
+    () =>
+      trials.filter((t) => {
+        if (statusFilter && t.overall_status !== statusFilter) return false;
+        if (phaseFilter) {
+          const phases = Array.isArray(t.phase) ? t.phase : t.phase ? [t.phase] : [];
+          if (!phases.includes(phaseFilter)) return false;
+        }
+        return true;
+      }),
+    [trials, statusFilter, phaseFilter],
+  );
   const ld = {
     "@context": "https://schema.org",
     "@type": "MedicalOrganization",
