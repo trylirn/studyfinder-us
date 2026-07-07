@@ -1,9 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, Search, ArrowRight } from "lucide-react";
+import { MapPin, Search, ArrowRight, Phone, Mail, Navigation } from "lucide-react";
+import { track } from "@/lib/analytics";
+
+type LocationContact = { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string };
 
 type Location = {
   id: string | number;
+  nct_id?: string | null;
   facility: string | null;
   city: string | null;
   state: string | null;
@@ -13,9 +17,13 @@ type Location = {
   status: string | null;
   clinic_id?: string | null;
   clinic_slug?: string | null;
+  contacts?: LocationContact[] | null;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 type ClinicMap = Record<string, { slug: string; name: string }>;
+
 
 export function LocationsList({
   locations,
