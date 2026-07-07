@@ -329,3 +329,71 @@ function SideItem({ icon, label, children }: { icon: React.ReactNode; label: str
     </li>
   );
 }
+
+type ContactRow = { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string };
+type OfficialRow = { name?: string; affiliation?: string; role?: string };
+
+function StudyContacts({
+  nctId,
+  recruiting,
+  centralContacts,
+  overallOfficials,
+}: {
+  nctId: string;
+  recruiting: boolean;
+  centralContacts: ContactRow[];
+  overallOfficials: OfficialRow[];
+}) {
+  if (!recruiting && centralContacts.length === 0 && overallOfficials.length === 0) return null;
+  return (
+    <section id="study-contacts" className="mt-6 rounded-xl border border-border bg-card p-5">
+      <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <Phone className="h-4 w-4" /> Contact the study team
+      </h2>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Reach out directly with questions about eligibility, visits, or enrollment. Source: ClinicalTrials.gov.
+      </p>
+      {centralContacts.length === 0 && overallOfficials.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No central contact was published for this trial. Try the site contacts under Research locations below.
+        </p>
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {centralContacts.map((c, i) => (
+            <div key={`c-${i}`} className="rounded-md border border-border p-3 text-sm">
+              <p className="font-medium">{c.name ?? "Study contact"}</p>
+              {c.role && <p className="text-xs text-muted-foreground">{c.role}</p>}
+              {c.phone && (
+                <a
+                  href={`tel:${c.phone}`}
+                  onClick={() => import("@/lib/analytics").then((m) => m.track({ event_type: "lead_call", nct_id: nctId, meta: { where: "study_central" } }))}
+                  className="mt-2 inline-flex items-center gap-1.5 text-primary hover:underline"
+                >
+                  <Phone className="h-3.5 w-3.5" /> {c.phone}{c.phoneExt ? ` ext ${c.phoneExt}` : ""}
+                </a>
+              )}
+              {c.email && (
+                <a
+                  href={`mailto:${c.email}`}
+                  className="mt-1 flex items-center gap-1.5 text-primary hover:underline"
+                >
+                  <Mail className="h-3.5 w-3.5" /> {c.email}
+                </a>
+              )}
+            </div>
+          ))}
+          {overallOfficials.map((o, i) => (
+            <div key={`o-${i}`} className="rounded-md border border-border p-3 text-sm">
+              <p className="flex items-center gap-1.5 font-medium">
+                <UserRound className="h-3.5 w-3.5 text-muted-foreground" /> {o.name ?? "Study official"}
+              </p>
+              {o.role && <p className="text-xs text-muted-foreground">{o.role}</p>}
+              {o.affiliation && <p className="text-xs text-muted-foreground">{o.affiliation}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
