@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { phaseLabel, statusLabel } from "@/lib/slug";
+import { track } from "@/lib/analytics";
+
 
 type Study = {
   nct_id: string;
