@@ -28,6 +28,8 @@ type CTGStudy = {
       stdAges?: string[];
     };
     contactsLocationsModule?: {
+      centralContacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
+      overallOfficials?: { name?: string; affiliation?: string; role?: string }[];
       locations?: {
         facility?: string;
         city?: string;
@@ -36,6 +38,7 @@ type CTGStudy = {
         zip?: string;
         status?: string;
         geoPoint?: { lat?: number; lon?: number };
+        contacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
       }[];
     };
   };
@@ -203,6 +206,7 @@ export const runStudyImport = createServerFn({ method: "POST" })
               status: l.status ?? null,
               lat: typeof l.geoPoint?.lat === "number" ? l.geoPoint.lat : null,
               lng: typeof l.geoPoint?.lon === "number" ? l.geoPoint.lon : null,
+              contacts: (l.contacts ?? []) as unknown as object,
             });
           }
 
@@ -236,6 +240,8 @@ export const runStudyImport = createServerFn({ method: "POST" })
             enrollment: ps.designModule?.enrollmentInfo?.count ?? null,
             state_slugs: [...stateSlugSet],
             city_slugs: [...citySlugSet],
+            central_contacts: (ps.contactsLocationsModule?.centralContacts ?? []) as unknown as object,
+            overall_officials: (ps.contactsLocationsModule?.overallOfficials ?? []) as unknown as object,
           });
           for (const li of locInsert) locationRows.push({ ...li, nct_id: id });
         }
