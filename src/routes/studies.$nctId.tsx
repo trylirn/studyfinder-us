@@ -164,6 +164,15 @@ function StudyPage() {
         </div>
       </div>
 
+      {/* Study contacts from ClinicalTrials.gov */}
+      <StudyContacts
+        nctId={study.nct_id}
+        recruiting={isRecruiting}
+        centralContacts={((study as unknown as { central_contacts?: unknown[] }).central_contacts ?? []) as ContactRow[]}
+        overallOfficials={((study as unknown as { overall_officials?: unknown[] }).overall_officials ?? []) as OfficialRow[]}
+      />
+
+
       <div className="mt-6 grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-8">
           {study.brief_summary && (
