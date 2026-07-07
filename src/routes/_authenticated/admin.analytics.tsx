@@ -31,7 +31,7 @@ function AnalyticsPage() {
           <h1 className="text-3xl font-semibold tracking-tight">Analytics</h1>
           <p className="mt-1 text-sm text-muted-foreground">Directory usage, discovery, and lead intent.</p>
         </div>
-        <Link to="/_authenticated/admin" className="text-sm text-muted-foreground hover:text-foreground">← Back to admin</Link>
+        <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">← Back to admin</Link>
       </div>
 
       <AnalyticsRangePicker value={range} onChange={setRange} />
