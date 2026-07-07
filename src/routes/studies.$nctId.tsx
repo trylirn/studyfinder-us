@@ -4,7 +4,7 @@ import { useState } from "react";
 import { getStudy } from "@/lib/directory.functions";
 import { Badge } from "@/components/ui/badge";
 import { phaseLabel, statusLabel } from "@/lib/slug";
-import { Building2, Calendar, Users, ExternalLink, ClipboardCheck, FlaskConical, Hospital } from "lucide-react";
+import { Building2, Calendar, Users, ExternalLink, ClipboardCheck, FlaskConical, Hospital, Phone, Mail, UserRound } from "lucide-react";
 import { EligibilityModal } from "@/components/EligibilityModal";
 import { AiSimplify } from "@/components/AiSimplify";
 import { LocationsList } from "@/components/LocationsList";
