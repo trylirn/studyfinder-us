@@ -40,6 +40,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as AuthenticatedPortalClaimRouteImport } from './routes/_authenticated/portal.claim'
 import { Route as AuthenticatedPortalBillingRouteImport } from './routes/_authenticated/portal.billing'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
 import { Route as AuthenticatedPortalClinicIdRouteImport } from './routes/_authenticated/portal.clinic.$id'
 
@@ -200,6 +201,12 @@ const AuthenticatedPortalBillingRoute =
     path: '/billing',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicCronImportStudiesRoute =
   ApiPublicCronImportStudiesRouteImport.update({
     id: '/api/public/cron/import-studies',
@@ -222,7 +229,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/portal/billing': typeof AuthenticatedPortalBillingRoute
   '/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
@@ -256,7 +264,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
   '/clinics/auth': typeof ClinicsAuthRoute
@@ -274,6 +282,7 @@ export interface FileRoutesByTo {
   '/learn': typeof LearnIndexRoute
   '/sponsors': typeof SponsorsIndexRoute
   '/states': typeof StatesIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/portal/billing': typeof AuthenticatedPortalBillingRoute
   '/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
@@ -291,7 +300,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
@@ -310,6 +319,7 @@ export interface FileRoutesById {
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/portal/billing': typeof AuthenticatedPortalBillingRoute
   '/_authenticated/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/learn/'
     | '/sponsors/'
     | '/states/'
+    | '/admin/analytics'
     | '/portal/billing'
     | '/portal/claim'
     | '/portal/'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/learn'
     | '/sponsors'
     | '/states'
+    | '/admin/analytics'
     | '/portal/billing'
     | '/portal/claim'
     | '/portal'
@@ -414,6 +426,7 @@ export interface FileRouteTypes {
     | '/learn/'
     | '/sponsors/'
     | '/states/'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/portal/billing'
     | '/_authenticated/portal/claim'
     | '/_authenticated/portal/'
@@ -670,6 +683,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalBillingRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/cron/import-studies': {
       id: '/api/public/cron/import-studies'
       path: '/api/public/cron/import-studies'
@@ -686,6 +706,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalBillingRoute: typeof AuthenticatedPortalBillingRoute
@@ -705,12 +736,12 @@ const AuthenticatedPortalRouteWithChildren =
   AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren)
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
 }
 
