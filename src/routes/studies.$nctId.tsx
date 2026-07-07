@@ -221,7 +221,7 @@ function StudyPage() {
                 <TrialMap pins={mapPins} height={320} />
               </div>
             )}
-            <LocationsList locations={locations} clinicMap={clinicMap} />
+            <LocationsList locations={locations as never} clinicMap={clinicMap} />
           </section>
 
           <LegalDisclaimer />
