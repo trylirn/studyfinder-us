@@ -282,8 +282,12 @@ function StudyPage() {
         onClose={() => setModalOpen(false)}
         nctId={study.nct_id}
         trialTitle={study.title}
-        conditions={study.conditions ?? []}
         eligibilitySnippet={eligibility.criteria}
+        minAge={study.min_age_years ?? null}
+        maxAge={study.max_age_years ?? null}
+        studySex={study.gender ?? null}
+        recruiting={isRecruiting}
+        contactAnchor="#study-contacts"
       />
     </article>
   );
