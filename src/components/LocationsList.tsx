@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Search, ArrowRight, Phone, Mail, Navigation } from "lucide-react";
 import { track } from "@/lib/analytics";
 
-type LocationContact = { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string };
+export type LocationContact = { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string };
 
 type Location = {
   id: string | number;
