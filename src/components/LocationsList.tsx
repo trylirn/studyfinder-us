@@ -107,6 +107,59 @@ export function LocationsList({
           const slug = resolveSlug(l);
           const facility = l.facility || "Research site";
           const address = [l.city, l.state, l.zip, l.country].filter(Boolean).join(", ");
+          const contacts = Array.isArray(l.contacts) ? (l.contacts as LocationContact[]) : [];
+          const directionsHref = l.lat != null && l.lng != null
+            ? `https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}`
+            : address
+              ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`
+              : null;
+
+          const body = (
+            <div className="min-w-0 flex-1">
+              <p className="font-medium">{facility}</p>
+              <p className="text-muted-foreground">{address}</p>
+              {l.status && (
+                <p className="mt-0.5 text-xs text-muted-foreground">Status: {l.status}</p>
+              )}
+              {(contacts.length > 0 || directionsHref) && (
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                  {contacts.slice(0, 2).map((c, i) => (
+                    <span key={i} className="inline-flex items-center gap-2">
+                      {c.phone && (
+                        <a
+                          href={`tel:${c.phone}`}
+                          onClick={(e) => { e.stopPropagation(); track({ event_type: "lead_call", nct_id: l.nct_id ?? null, clinic_id: l.clinic_id ?? null, meta: { where: "site" } }); }}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          <Phone className="h-3 w-3" /> {c.phone}
+                        </a>
+                      )}
+                      {c.email && (
+                        <a
+                          href={`mailto:${c.email}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          <Mail className="h-3 w-3" /> {c.email}
+                        </a>
+                      )}
+                    </span>
+                  ))}
+                  {directionsHref && (
+                    <a
+                      href={directionsHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => { e.stopPropagation(); track({ event_type: "lead_directions", nct_id: l.nct_id ?? null, clinic_id: l.clinic_id ?? null }); }}
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      <Navigation className="h-3 w-3" /> Directions
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          );
 
           if (slug) {
             return (
@@ -115,16 +168,11 @@ export function LocationsList({
                   to="/clinics/$slug"
                   params={{ slug }}
                   aria-label={`View clinic profile for ${facility}`}
+                  onClick={() => track({ event_type: "listing_click", clinic_id: l.clinic_id ?? null, nct_id: l.nct_id ?? null })}
                   className="group flex items-start gap-3 py-3 text-sm transition hover:bg-muted/40 -mx-2 px-2 rounded-md"
                 >
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium group-hover:text-primary">{facility}</p>
-                    <p className="text-muted-foreground">{address}</p>
-                    {l.status && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">Status: {l.status}</p>
-                    )}
-                  </div>
+                  {body}
                   <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition group-hover:opacity-100">
                     View profile <ArrowRight className="h-3 w-3" />
                   </span>
@@ -136,17 +184,12 @@ export function LocationsList({
           return (
             <li key={l.id} className="flex items-start gap-3 py-3 text-sm">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <div className="min-w-0">
-                <p className="font-medium">{facility}</p>
-                <p className="text-muted-foreground">{address}</p>
-                {l.status && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">Status: {l.status}</p>
-                )}
-              </div>
+              {body}
             </li>
           );
         })}
       </ul>
+
       {filtered.length === 0 && (
         <p className="mt-3 text-sm text-muted-foreground">No sites match these filters.</p>
       )}
