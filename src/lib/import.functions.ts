@@ -240,6 +240,8 @@ export const runStudyImport = createServerFn({ method: "POST" })
             enrollment: ps.designModule?.enrollmentInfo?.count ?? null,
             state_slugs: [...stateSlugSet],
             city_slugs: [...citySlugSet],
+            central_contacts: (ps.contactsLocationsModule?.centralContacts ?? []) as unknown as object,
+            overall_officials: (ps.contactsLocationsModule?.overallOfficials ?? []) as unknown as object,
           });
           for (const li of locInsert) locationRows.push({ ...li, nct_id: id });
         }
