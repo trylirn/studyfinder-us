@@ -28,6 +28,8 @@ type CTGStudy = {
       stdAges?: string[];
     };
     contactsLocationsModule?: {
+      centralContacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
+      overallOfficials?: { name?: string; affiliation?: string; role?: string }[];
       locations?: {
         facility?: string;
         city?: string;
@@ -36,6 +38,7 @@ type CTGStudy = {
         zip?: string;
         status?: string;
         geoPoint?: { lat?: number; lon?: number };
+        contacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
       }[];
     };
   };
