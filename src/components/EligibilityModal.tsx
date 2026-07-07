@@ -1,97 +1,68 @@
-import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { submitEligibilityLead } from "@/lib/eligibility.functions";
-import { X, Loader2, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
-import { LegalDisclaimer } from "./LegalDisclaimer";
+import { useMemo, useState } from "react";
+import { X, CheckCircle2, AlertTriangle, ShieldCheck, ArrowRight } from "lucide-react";
+import { parseEligibility, scoreEligibility, type Answer } from "@/lib/eligibility-parser";
+import { track } from "@/lib/analytics";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   nctId: string;
   trialTitle: string;
-  conditions: string[];
   eligibilitySnippet?: string | null;
+  minAge?: number | null;
+  maxAge?: number | null;
+  studySex?: string | null;
+  recruiting: boolean;
+  contactAnchor?: string; // hash target on the same page for follow-up
 };
 
-type Result =
-  | null
-  | { ok: true; delivered: boolean; channel: string }
-  | { ok: false; reason: string };
-
-export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions, eligibilitySnippet }: Props) {
-  const fn = useServerFn(submitEligibilityLead);
+export function EligibilityModal({
+  open,
+  onClose,
+  nctId,
+  trialTitle,
+  eligibilitySnippet,
+  minAge,
+  maxAge,
+  studySex,
+  recruiting,
+  contactAnchor = "#study-contacts",
+}: Props) {
+  const parsed = useMemo(() => parseEligibility(eligibilitySnippet ?? null), [eligibilitySnippet]);
   const [step, setStep] = useState(0);
   const [age, setAge] = useState<string>("");
   const [gender, setGender] = useState<"male" | "female" | "other" | "prefer_not">("prefer_not");
-  const [criteriaChecked, setCriteriaChecked] = useState<Record<string, boolean>>({});
-  const [zip, setZip] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [consent, setConsent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<Result>(null);
+  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const [submitted, setSubmitted] = useState(false);
 
   if (!open) return null;
 
-  const conditionQuestions = conditions
-    .slice(0, 4)
-    .map((c) => `I have been diagnosed with ${c}.`);
-
-  function reset() {
+  function close() {
     setStep(0);
     setAge("");
     setGender("prefer_not");
-    setCriteriaChecked({});
-    setZip("");
-    setName("");
-    setEmail("");
-    setPhone("");
-    setConsent(false);
-    setError(null);
-    setResult(null);
-  }
-
-  function close() {
-    reset();
+    setAnswers({});
+    setSubmitted(false);
     onClose();
   }
 
-  async function submit() {
-    setError(null);
-    setLoading(true);
-    try {
-      const confirmed = Object.entries(criteriaChecked)
-        .filter(([, v]) => v)
-        .map(([k]) => k);
-      const res = await fn({
-        data: {
-          nctId,
-          age: Number(age),
-          gender,
-          zip,
-          confirmedCriteria: confirmed,
-          name,
-          email,
-          phone,
-          consent: true,
-        },
-      });
-      setResult(res);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Submission failed");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const result = submitted
+    ? scoreEligibility({
+        age: age === "" ? null : Number(age),
+        gender,
+        minAge: minAge ?? null,
+        maxAge: maxAge ?? null,
+        studySex: studySex ?? null,
+        recruiting,
+        answers,
+        questions: parsed.questions,
+      })
+    : null;
 
-  function canNext(): boolean {
-    if (step === 0) return age !== "" && Number(age) >= 0 && Number(age) < 120;
-    if (step === 1) return true; // criteria optional
-    if (step === 2) return /^\d{5}$/.test(zip);
-    if (step === 3) return name.trim().length > 0 && /.+@.+\..+/.test(email) && phone.trim().length >= 7 && consent;
-    return false;
+  function ageOk() {
+    if (age === "") return true; // skip is allowed
+    const n = Number(age);
+    return Number.isFinite(n) && n >= 0 && n < 120;
   }
 
   return (
@@ -106,45 +77,61 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
           <X className="h-4 w-4" />
         </button>
 
-        {result?.ok ? (
-          <div className="py-6 text-center">
-            <CheckCircle2 className="mx-auto h-10 w-10 text-success" />
-            <h3 className="mt-3 text-lg font-semibold">You may be a match.</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              We {result.delivered ? "sent your info securely to the research site" : "queued your info for the research site"}.
-              They typically respond within 1–3 business days. Your responses were not stored on our servers.
-            </p>
-            <button onClick={close} className="mt-5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-              Done
-            </button>
-          </div>
-        ) : result && !result.ok ? (
-          <div className="py-6 text-center">
-            <AlertTriangle className="mx-auto h-10 w-10 text-warning" />
-            <h3 className="mt-3 text-lg font-semibold">Not a match for this trial</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{result.reason}</p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              This is a pre-screening tool, not a medical decision. Talk to your doctor about other options.
-            </p>
-            <button onClick={close} className="mt-5 rounded-md border border-border bg-card px-4 py-2 text-sm">
-              Close
-            </button>
-          </div>
+        {result ? (
+          result.ok ? (
+            <div className="py-6 text-center">
+              <CheckCircle2 className="mx-auto h-10 w-10 text-success" />
+              <h3 className="mt-3 text-lg font-semibold">You may be a match.</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Based on your answers, you appear to meet the basic criteria for this trial. The study team makes the
+                final determination.
+              </p>
+              <a
+                href={contactAnchor}
+                onClick={() => {
+                  track({ event_type: "lead_eligibility", nct_id: nctId, meta: { result: "pass" } });
+                  close();
+                }}
+                className="mt-5 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              >
+                Contact the study team <ArrowRight className="h-4 w-4" />
+              </a>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Your answers stayed on this device. Nothing was submitted or stored.
+              </p>
+            </div>
+          ) : (
+            <div className="py-6 text-center">
+              <AlertTriangle className="mx-auto h-10 w-10 text-warning" />
+              <h3 className="mt-3 text-lg font-semibold">Likely not a match for this trial</h3>
+              <ul className="mt-2 space-y-1 text-left text-sm text-muted-foreground">
+                {result.reasons.slice(0, 5).map((r, i) => (
+                  <li key={i}>• {r}</li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs text-muted-foreground">
+                This is a self-check, not a medical decision. Talk to your doctor about other trials.
+              </p>
+              <button onClick={close} className="mt-5 rounded-md border border-border bg-card px-4 py-2 text-sm">
+                Close
+              </button>
+            </div>
+          )
         ) : (
           <>
             <div className="mb-1 flex items-center gap-2 text-xs font-medium text-primary">
-              <ShieldCheck className="h-3.5 w-3.5" /> Stateless pre-screening — your responses are not saved.
+              <ShieldCheck className="h-3.5 w-3.5" /> Private self-check — answers stay on your device.
             </div>
             <h3 className="text-base font-semibold leading-snug">Check eligibility</h3>
             <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{trialTitle}</p>
 
             <div className="mt-4 flex gap-1">
-              {[0, 1, 2, 3].map((i) => (
+              {[0, 1].map((i) => (
                 <div key={i} className={`h-1 flex-1 rounded ${i <= step ? "bg-primary" : "bg-muted"}`} />
               ))}
             </div>
 
-            <div className="mt-5 space-y-4">
+            <div className="mt-5 max-h-[55vh] space-y-4 overflow-y-auto pr-1">
               {step === 0 && (
                 <div className="space-y-3">
                   <Label>Age</Label>
@@ -156,7 +143,7 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
                     onChange={(e) => setAge(e.target.value)}
                     className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   />
-                  <Label>Gender</Label>
+                  <Label>Sex assigned at birth</Label>
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value as typeof gender)}
@@ -164,76 +151,62 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
                   >
                     <option value="male">Male</option>
                     <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="other">Other / intersex</option>
                     <option value="prefer_not">Prefer not to say</option>
                   </select>
+                  <p className="text-xs text-muted-foreground">
+                    Used only to compare against this trial's eligibility. Not sent anywhere.
+                  </p>
                 </div>
               )}
 
               {step === 1 && (
-                <div className="space-y-2">
-                  <Label>Confirm any diagnoses that apply</Label>
-                  {conditionQuestions.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No specific diagnoses to confirm for this trial.</p>
+                <div className="space-y-3">
+                  {parsed.questions.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      This trial does not publish structured criteria we can turn into questions. We'll base the result
+                      on your age and sex only.
+                    </p>
                   )}
-                  {conditionQuestions.map((q) => (
-                    <label key={q} className="flex items-start gap-2 rounded-md border border-border bg-card p-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={!!criteriaChecked[q]}
-                        onChange={(e) => setCriteriaChecked((s) => ({ ...s, [q]: e.target.checked }))}
-                        className="mt-0.5"
-                      />
-                      <span>{q}</span>
-                    </label>
+                  {parsed.questions.map((q) => (
+                    <div key={q.id} className="rounded-md border border-border bg-card p-3 text-sm">
+                      <p className="font-medium">
+                        <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                          {q.kind}
+                        </span>
+                        {q.question}
+                      </p>
+                      <div className="mt-2 flex gap-2">
+                        {(["yes", "no", "unsure"] as Answer[]).map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => setAnswers((s) => ({ ...s, [q.id]: v }))}
+                            className={`rounded-md border px-3 py-1 text-xs capitalize ${
+                              answers[q.id] === v
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border bg-card text-muted-foreground"
+                            }`}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
-                  {eligibilitySnippet && (
-                    <details className="mt-2 text-xs text-muted-foreground">
-                      <summary className="cursor-pointer">Full trial eligibility criteria</summary>
-                      <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-muted p-2 font-sans">
-                        {eligibilitySnippet.slice(0, 2000)}
-                      </pre>
+                  {parsed.extra.length > 0 && (
+                    <details className="text-xs text-muted-foreground">
+                      <summary className="cursor-pointer">Additional criteria to review with the study team</summary>
+                      <ul className="mt-2 space-y-1">
+                        {parsed.extra.slice(0, 20).map((t, i) => (
+                          <li key={i}>• {t}</li>
+                        ))}
+                      </ul>
                     </details>
                   )}
                 </div>
               )}
-
-              {step === 2 && (
-                <div className="space-y-3">
-                  <Label>ZIP code</Label>
-                  <input
-                    inputMode="numeric"
-                    maxLength={5}
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 5))}
-                    placeholder="e.g. 02115"
-                    className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                  <p className="text-xs text-muted-foreground">Used only to find the nearest research site.</p>
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="space-y-3">
-                  <Label>Full name</Label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary" />
-                  <Label>Email</Label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary" />
-                  <Label>Phone</Label>
-                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary" />
-                  <label className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
-                    <span>
-                      I consent to share my answers and contact info with the research site for this trial. I understand
-                      this is not medical advice and that TrialFinderUS will not store my responses.
-                    </span>
-                  </label>
-                  <LegalDisclaimer variant="inline" />
-                </div>
-              )}
             </div>
-
-            {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
 
             <div className="mt-5 flex items-center justify-between">
               <button
@@ -243,10 +216,10 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
               >
                 {step === 0 ? "Cancel" : "Back"}
               </button>
-              {step < 3 ? (
+              {step < 1 ? (
                 <button
                   type="button"
-                  disabled={!canNext()}
+                  disabled={!ageOk()}
                   onClick={() => setStep(step + 1)}
                   className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
                 >
@@ -255,11 +228,10 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
               ) : (
                 <button
                   type="button"
-                  disabled={!canNext() || loading}
-                  onClick={submit}
-                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                  onClick={() => setSubmitted(true)}
+                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
                 >
-                  {loading && <Loader2 className="h-4 w-4 animate-spin" />} Submit
+                  See result
                 </button>
               )}
             </div>
