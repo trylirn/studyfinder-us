@@ -206,6 +206,7 @@ export const runStudyImport = createServerFn({ method: "POST" })
               status: l.status ?? null,
               lat: typeof l.geoPoint?.lat === "number" ? l.geoPoint.lat : null,
               lng: typeof l.geoPoint?.lon === "number" ? l.geoPoint.lon : null,
+              contacts: (l.contacts ?? []) as unknown as object,
             });
           }
 
