@@ -1,90 +1,74 @@
-Three independent workstreams, all shippable in one build pass.
+## Goal
+1. Finish the previously approved fix: replace `generate_clinics_from_locations()` and backfill so every research-site row links to a clinic profile.
+2. Merge duplicate clinics that share the **same address** and have **near-identical names**, so slight naming variants (e.g. "Georgia Lung Associates" and "Georgia Lung Associates, PC"; "Kaiser Permanente - Deer Valley" and "Kaiser Permanente-Deer Valley Medical Center") collapse into a single profile.
 
-## 1. Trial contact info from ClinicalTrials.gov
+## Merge rules (both conditions must hold)
 
-**Schema** (migration):
-- `studies`: add `central_contacts jsonb NOT NULL DEFAULT '[]'`, `overall_officials jsonb NOT NULL DEFAULT '[]'`.
-- `locations`: add `contacts jsonb NOT NULL DEFAULT '[]'` (per-site contact array).
+**"Same address"** — either of:
+- Same `zip` (non-null) and same `state`, or
+- Same rounded `(lat, lng)` to 3 decimals (~110 m) and same `state`.
 
-**Importer** (`src/lib/import.functions.ts`):
-- Extend `contactsLocationsModule` type with `centralContacts[]`, `overallOfficials[]`, and per-location `contacts[]` (name, role, phone, phoneExt, email).
-- Map into new columns during upsert. Backfill on next scheduled/manual import.
+Rows with only a shared city+state but no zip/coords are NOT merged (too many false positives — same city can hold dozens of unrelated real clinics).
 
-**Study page** (`src/routes/studies.$nctId.tsx`):
-- New "Contact the study team" section under the header when `overall_status = RECRUITING`:
-  - Central contacts: name, role, phone (`tel:` link), email (`mailto:` link).
-  - Overall officials: name, role, affiliation (no phone typically).
-  - Fallback text if none present: "Contact information not provided by sponsor. Use the location list below."
-- `LocationsList`: per-site expandable "Site contact" showing that location's contacts.
+**"Similar name"** — after normalization (lowercase, strip punctuation, strip trailing legal suffixes `inc|llc|pc|pa|pllc|corp|ltd`, collapse whitespace) one of:
+- Normalized names are equal, or
+- One normalized name is a prefix or contains the other (min 8 chars overlap), or
+- `similarity(a, b) >= 0.72` via `pg_trgm` (already enabled).
 
-## 2. Rework "Check my eligibility" — no PII / no lead capture
+**Exclusions** — never merge a clinic that:
+- has `claimed_by IS NOT NULL` into another clinic (claimed profiles are authoritative);
+- has a different `claimed_by` than its candidate canonical;
+- is the per-city `research-site-…` stub introduced in step 1 (those are city-level catch-alls, not real clinics).
 
-Replace `EligibilityModal.tsx` with a stateless self-screener:
-- Steps: (1) demographics (age, sex), (2) study-specific structured questions parsed from `eligibility.criteria`, (3) result screen.
-- **Question generator** (`src/lib/eligibility-parser.ts`, pure client util):
-  - Split criteria text into Inclusion / Exclusion bullets.
-  - Emit yes/no questions per bullet: "Inclusion: {text} — Does this apply to you?" / "Exclusion: {text} — Does this apply to you?".
-  - Cap at ~12 questions; show a "view full criteria" details block for the rest.
-- **Scoring** (client only, nothing sent to server):
-  - Fail if age out of range, sex mismatch, any inclusion answered "No", any exclusion answered "Yes", or status ≠ RECRUITING.
-  - Otherwise "You may be eligible" + guidance to contact the study team (deep-link to the new contact section on same page).
-- Remove: name/email/phone/zip inputs, consent checkbox, lead-delivery flow, `submitEligibilityLead` server fn.
-- Retire (do not delete tables) `lead_delivery_log` writes from the eligibility path; server fn file removed.
-- Add a small "Your answers stay on this device — nothing is submitted or stored" notice.
+**Canonical winner within a group:**
+1. `claimed_by IS NOT NULL` wins.
+2. Else the row with the most `locations` currently linked.
+3. Else shortest normalized name (prefix winner).
+4. Tie-break: oldest `created_at`, then smallest `id`.
 
-## 3. Admin analytics dashboard
+**Merge action** (one transaction per group):
+- Reassign `locations.clinic_id`, `clinic_claims.clinic_id`, `clinic_images.clinic_id`, `lead_delivery_log.clinic_id` from each duplicate → canonical.
+- Backfill NULL fields on canonical from duplicates: `zip, lat, lng, phone, website, description, npi` (only when canonical is NULL).
+- `DELETE` the duplicate `clinics` rows.
+- Call `refresh_directory_counts()` at the end.
 
-**Event capture** (new table + policies migration):
-- `public.analytics_events`:
-  - `id bigserial pk`, `occurred_at timestamptz default now()`,
-  - `event_type text` (`search`, `impression`, `listing_click`, `lead_call`, `lead_website`, `lead_directions`, `lead_eligibility`),
-  - `session_id uuid`, `path text`, `is_mobile bool`,
-  - `city_slug text`, `state_slug text`, `condition_slug text`, `clinic_id uuid`, `nct_id text`,
-  - `query text`, `referrer text`, `meta jsonb default '{}'`.
-- Indexes on `(occurred_at desc)`, `(event_type, occurred_at)`, `(city_slug)`, `(clinic_id)`, `(condition_slug)`, `(session_id)`.
-- RLS: `INSERT` allowed for `anon`+`authenticated` (rate-limit via app), `SELECT` only via admin server fns using `has_role`. GRANT INSERT to anon/authenticated, SELECT to service_role.
+## Deliverables
 
-**Client tracker** (`src/lib/analytics.ts` + `src/lib/analytics.functions.ts`):
-- `track(event)` batches events, POSTs to `logAnalyticsEvent` server fn (publishable-key insert).
-- Persistent `session_id` in `localStorage` (uuid, no PII). Detect mobile via UA + viewport.
-- Wire calls:
-  - `search` on search-bar submit and filter changes (state/city/condition/phase).
-  - `impression` on StudyCard/ClinicCard mount via IntersectionObserver.
-  - `listing_click` on StudyCard/ClinicCard click.
-  - `lead_call` on `tel:` click, `lead_website` on website outbound, `lead_directions` on map "directions" click, `lead_eligibility` on eligibility modal open.
+### 1. Migration — replace `public.generate_clinics_from_locations()`
+(Same body as the previously approved plan: normalize facility name for slug + link, add per-city fallback stubs for NULL-facility sites, add slug-fallback link step.)
 
-**Admin routes** (all under `_authenticated/admin.*`, gated by `has_role(admin)` in server fns):
-- `_authenticated/admin.analytics.tsx` — Overview (tab bar for sub-pages).
-- `_authenticated/admin.analytics.cities.tsx` — City/state deep dive with drill-in.
-- `_authenticated/admin.analytics.cities.$slug.tsx` — Per-city detail.
-- `_authenticated/admin.analytics.clinics.tsx` — Clinics deep dive.
-- `_authenticated/admin.analytics.conditions.tsx` — Conditions deep dive.
-- `_authenticated/admin.analytics.journeys.tsx` — User journey explorer.
-- Shared `AnalyticsRangePicker` component: Today, Yesterday, 7d, 30d, This month, Last month, Custom (2 date inputs). Range persisted in URL search params.
+### 2. Migration — new one-shot function `public.merge_duplicate_clinics()`
+`SECURITY DEFINER SET search_path = public`, returns `TABLE(groups_merged int, clinics_removed int)`.
+Body implements the rules above with a single CTE that:
+- Groups candidate clinics by `(state, coalesce(zip, round(lat,3)::text||','||round(lng,3)::text))`.
+- Within each group, builds pairs where normalized-name equality / prefix / trigram similarity ≥ 0.72 holds.
+- Uses a union-find via `WITH RECURSIVE` to form transitive clusters, then picks the canonical row per cluster and executes the reassign/backfill/delete.
 
-**Server aggregations** (`src/lib/analytics.functions.ts`, all `.middleware([requireSupabaseAuth])` + admin role check):
-- `getOverview({from,to})`: totals for searches, impressions, listing clicks, lead actions (by type), unique sessions with ≥1 lead action, CTR (clicks/impressions), mobile share, top 10 cities by searches+clicks, top 10 clinics by clicks, discovery breakdown (referrer host / internal path), lead action mix, live feed (latest 20 events).
-- `getCitiesAnalytics({from,to})`: top cities by impressions, by searches, by lead actions; activity table (searches, impressions, clicks, leads per city).
-- `getCityDetail({slug,from,to})`: same metrics scoped to one city + top clinics in that city.
-- `getClinicsAnalytics({from,to})`: top clinics by leads, by impressions, activity table.
-- `getConditionsAnalytics({from,to})`: top conditions by searches, impressions, leads.
-- `getJourneys({from,to,limit})`: group last N events by `session_id`, ordered timeline per session (search → impressions → click → lead action).
-- Live feed via TanStack Query `refetchInterval: 15s` (no realtime channel needed; keeps costs down).
+Also add an idempotent guard: after the run, any newly linked `locations` that still don't have `clinic_id` stay untouched.
 
-**UI**:
-- Cards + tables using existing shadcn primitives; simple bar lists (no chart lib needed for v1). If a chart is required, use `recharts` (already common); confirm during build if not installed.
-- Range picker in header of every analytics page; drill-in links preserve range.
+### 3. Data run (via insert tool, after migration approval)
+```sql
+SELECT * FROM public.generate_clinics_from_locations();
+SELECT * FROM public.merge_duplicate_clinics();
+SELECT public.refresh_directory_counts();
+```
 
-**Add nav link** from `admin.tsx` header → Analytics.
+### 4. No frontend changes
+Rows already link via `clinic_id`; existing routes handle the survivor slug. TanStack Query cache reloads on next fetch — nothing to invalidate manually.
+
+## Safety / reversibility
+- Ships as a callable function, not an inline one-shot migration DML, so it can be re-run.
+- Dry-run preview available via `psql` before the destructive step: I'll `SELECT ... EXPLAIN`-style query the cluster preview and report counts (groups + rows-to-delete) to you before invoking the function.
+- Because we reassign FKs before delete, no `locations` will end up with a stale `clinic_id`.
+- Not merged in this pass: cross-city name matches, and any row without zip/coords.
 
 ## Verification
-- Import 1 page, spot-check `studies.central_contacts` and `locations.contacts` populated.
-- Open a recruiting study → contact section renders with `tel:`/`mailto:`.
-- Open Check eligibility → no PII fields, questions derived from criteria, pass/fail correct.
-- Browse directory pages while signed in as admin → `analytics_events` rows appear; admin analytics pages render numbers > 0 across ranges.
-- All new server fns require admin; anonymous access returns 401/403.
+- `SELECT count(*) FROM public.clinics;` before/after — expect a meaningful drop.
+- `SELECT count(*) FILTER (WHERE clinic_id IS NULL) FROM public.locations;` ≈ 0.
+- Load `NCT05822388` — every research-site row links, and same-address variants share one profile URL.
+- Spot-check a merged clinic's page shows the aggregated study count.
 
 ## Out of scope
-- Historical backfill of analytics before this ships.
-- Charting library beyond what already exists (bar lists first; recharts if needed).
-- Merging/deduping contacts across sites.
+- Fuzzy cross-city merging (e.g. campus branches in adjacent cities).
+- Manual admin merge UI — can add later if needed.
+- Merging user-owned clinics with different claimants.

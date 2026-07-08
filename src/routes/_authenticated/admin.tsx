@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminStats, runStudyImport, refreshDirectoryCounts } from "@/lib/import.functions";
@@ -60,15 +60,12 @@ function AdminPage() {
     <div className="container mx-auto max-w-5xl px-4 py-10">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
-        <div className="flex items-center gap-4">
-          <Link to="/admin/analytics" className="text-sm font-medium text-primary hover:underline">Analytics →</Link>
-          <button
-            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            Sign out
-          </button>
-        </div>
+        <button
+          onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          Sign out
+        </button>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">

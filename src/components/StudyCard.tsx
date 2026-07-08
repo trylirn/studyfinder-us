@@ -1,9 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { phaseLabel, statusLabel } from "@/lib/slug";
-import { track } from "@/lib/analytics";
-
 
 type Study = {
   nct_id: string;
@@ -25,33 +22,13 @@ function isPhaseShown(phase?: string | null): phase is string {
 export function StudyCard({ study }: { study: Study }) {
   const isRecruiting = study.overall_status === "RECRUITING";
   const showPhase = isPhaseShown(study.phase);
-  const ref = useRef<HTMLAnchorElement | null>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    let fired = false;
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting && !fired) {
-          fired = true;
-          track({ event_type: "impression", nct_id: study.nct_id });
-          io.disconnect();
-        }
-      }
-    }, { threshold: 0.5 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [study.nct_id]);
   return (
     <Link
-      ref={ref}
       to="/studies/$nctId"
       params={{ nctId: study.nct_id }}
-      onClick={() => track({ event_type: "listing_click", nct_id: study.nct_id })}
       className="group block rounded-xl border border-border bg-card p-5 transition hover:border-primary/60 hover:shadow-md"
     >
       <div className="flex flex-wrap items-center gap-2 text-xs">
-
         <Badge
           variant="outline"
           className={isRecruiting ? "border-success/40 bg-success/10 text-success" : ""}
