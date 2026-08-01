@@ -6,7 +6,7 @@ import { listPendingClaims, decideClinicClaim, getClaimProofUrls } from "@/lib/c
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, ExternalLink } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
     meta: [
       { title: "Admin — TrialFinderUS" },
