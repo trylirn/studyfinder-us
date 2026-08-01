@@ -68,7 +68,9 @@ function AdminPage() {
         >
           Sign out
         </button>
+        </div>
       </div>
+
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
         <Stat label="Total studies" value={stats.totalStudies} />
