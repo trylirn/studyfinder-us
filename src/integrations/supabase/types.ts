@@ -30,6 +30,7 @@ export type Database = {
           referrer: string | null
           session_id: string | null
           state_slug: string | null
+          visitor_id: string | null
         }
         Insert: {
           city_slug?: string | null
@@ -46,6 +47,7 @@ export type Database = {
           referrer?: string | null
           session_id?: string | null
           state_slug?: string | null
+          visitor_id?: string | null
         }
         Update: {
           city_slug?: string | null
@@ -62,6 +64,7 @@ export type Database = {
           referrer?: string | null
           session_id?: string | null
           state_slug?: string | null
+          visitor_id?: string | null
         }
         Relationships: []
       }
@@ -645,6 +648,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      analytics_breakdown: {
+        Args: { _dim: string; _from: string; _limit?: number; _to: string }
+        Returns: Json
+      }
+      analytics_feed: { Args: { _limit?: number }; Returns: Json }
+      analytics_journeys: {
+        Args: {
+          _converted?: boolean
+          _from: string
+          _limit?: number
+          _to: string
+        }
+        Returns: Json
+      }
+      analytics_overview: {
+        Args: { _from: string; _to: string }
+        Returns: Json
+      }
+      analytics_path_bucket: { Args: { _path: string }; Returns: string }
+      analytics_series: {
+        Args: { _bucket?: string; _from: string; _to: string }
+        Returns: Json
+      }
       bump_condition_view: { Args: { _slug: string }; Returns: undefined }
       generate_clinics_from_locations: {
         Args: never
