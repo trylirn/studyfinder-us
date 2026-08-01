@@ -1,39 +1,59 @@
-# Fix auto-import + restore the Analytics dashboard
+# Admin Analytics Dashboard (user behaviour on the directory)
 
-## What's wrong today
+The `Analytics →` link in the admin header points to a page that doesn't exist yet, and almost nothing in the app currently records user behaviour (the events table holds 244 old rows from impressions/clicks only). So this comes in two halves: start capturing the behaviour, then build the dashboard on top of it.
 
-**Auto-import is failing silently.** The scheduled job does fire, but the request it sends to the import endpoint comes back `401 Unauthorized` (last attempt: today at 18:00). The reason: the job sends a shared secret it reads from a database setting that was never actually set, so it sends an empty value and the endpoint rejects it. Every import in the history table was started by hand from the admin page — none by the schedule.
+## 1. Capture the behaviour (tracking layer)
 
-**Analytics page is missing.** The `Analytics →` link next to `Sign out` in your screenshot points at a page that no longer exists in the project, so clicking it does nothing / errors. The underlying event data table still exists in the database (244 events recorded: impressions, listing clicks, directions clicks), but nothing in the current app writes to it or reads it.
+A lightweight tracker fires events into the existing events table. No personal data: a random per-browser visitor id + per-visit session id, no IP, no form answers, no PHI.
 
-## What I'll build
+Events captured:
+- `search` — every search/filter submit (query text, city, state, condition, phase, status, result count)
+- `impression` — study cards, clinic cards and location rows actually rendered in a list (batched, one row per listing per page view)
+- `listing_click` — click into a study, clinic profile or research location
+- `page_view` — route changes, with city/state/condition/clinic/NCT context and mobile flag
+- Lead actions (high intent): `lead_call`, `lead_website`, `lead_directions`, `lead_eligibility`
 
-### 1. Make the automatic import actually run
-- Generate a fresh import secret, store it both as the app secret and as a database setting, so the scheduled job and the endpoint agree.
-- Reschedule the import to **every 3 hours with bigger batches** (~1,000 recruiting studies per run, 10 pages x 100).
-- Keep the nightly job that regenerates clinics and refreshes directory counts.
-- Add a self-check: if a scheduled run fails, it is recorded in the import history with the error, so the admin page shows it.
-- Clean up the three stale "running" rows left over from timed-out manual runs, and mark any run stuck over an hour as failed automatically.
+Each row already supports `session_id`, `path`, `is_mobile`, `city_slug`, `state_slug`, `condition_slug`, `clinic_id`, `nct_id`, `query`, `referrer`, `meta` — plus a new `visitor_id` column so "unique people" is distinct visitors, not distinct sessions.
 
-### 2. Restore the Analytics page
-New admin-only page at `/admin/analytics`, reachable from the `Analytics →` link:
-- Headline numbers for the last 7 / 30 days: page views, unique sessions, mobile share.
-- Top pages, top conditions, top states/cities, top clinics by impressions.
-- Lead activity: eligibility submissions, directions clicks, listing clicks.
-- Import health: last successful sync time, studies added in the last 7 days.
-- Simple date-range toggle (7d / 30d / 90d), no charting library needed beyond lightweight bars.
+## 2. The dashboard
 
-### 3. Start collecting events again
-- A small tracking helper fires a page-view event on every route change plus click events on study cards, clinic listings and "Get directions", writing to the existing events table.
-- No personal data: session id is a random per-browser id, no IP, no form answers.
+Route `/admin/analytics`, admin-only, `noindex`, with a shared time-range picker: Today, Yesterday, 7 days, 30 days, This month, Last month, Custom range. Every tab respects it, and every number shows a change vs the previous equivalent period.
 
-### 4. Admin page copy fix
-Update the "scheduled every 6 hours" text to reflect the new 3-hour cadence and show the last automated run time.
+### Overview
+- KPI row: Searches, Impressions, Listing clicks, Click rate (clicks ÷ impressions), Lead actions, Unique leads (distinct visitors who took ≥1 lead action), Mobile share.
+- Lead actions breakdown: calls, website visits, directions, eligibility checks — count + unique people each.
+- Trend chart: impressions / clicks / lead actions over time (hourly for today, daily otherwise).
+- Top cities by demand (searches + clicks side by side).
+- Top clinics by clicks.
+- How users discover listings: entry source (search page, condition page, city/state page, clinic directory, direct/organic referrer).
+- Live action feed: the most recent 50 events as readable journey lines ("Visitor from Dallas searched 'diabetes' → viewed Baylor Research → got directions"), auto-refreshing.
+
+### City / State deep dive
+- Top cities by impressions; state roll-up table.
+- City activity overview: impressions, clicks, CTR, lead actions, unique visitors per city.
+- Searched cities — only cities that exist in the directory (matched against the cities table), so junk queries don't pollute it.
+- Top cities by lead actions.
+- Each row clicks through to a city detail panel: that city's trend, top clinics, top conditions, lead breakdown.
+
+### Clinics deep dive
+- Top providers by lead action, top providers by impressions.
+- Provider activity table: impressions, clicks, CTR, calls, website, directions, eligibility, unique visitors — sortable, searchable, click-through to a per-clinic detail panel.
+
+### Conditions deep dive
+- Top conditions by searches, impressions, clicks, lead actions; CTR per condition; click-through to a per-condition panel showing the cities and clinics that condition converts in.
+
+### User journey explorer
+- Sessions list (visitor, device, city, entry page, #steps, whether it ended in a lead action), filterable by "converted only".
+- Expanding a session shows the ordered step-by-step path: search terms used, listings seen, listings compared, clinic finally chosen, lead action taken.
 
 ## Technical notes
 
-- Migration: unschedule/reschedule the two `pg_cron` jobs; set `app.cron_secret` via `ALTER DATABASE ... SET`; add an aggregate SQL function for analytics rollups (admin-only, `EXECUTE` granted to `authenticated` behind a role check inside the function, matching the existing hardening pattern); index already present on `occurred_at`.
-- Secret rotation for `CRON_SECRET` so the endpoint and the job share one value.
-- New files: `src/routes/_authenticated/admin.analytics.tsx`, `src/lib/analytics.functions.ts`, `src/lib/track.ts`.
-- Edits: `src/routes/_authenticated/admin.tsx` (Analytics link, cadence copy, last-auto-run), `src/routes/__root.tsx` (page-view tracking).
-- Analytics reads run through server functions guarded by `requireSupabaseAuth` + admin role check; the page lives under the existing `_authenticated` gate and stays `noindex`.
+- Migration: add `visitor_id` to `analytics_events` + supporting indexes; add SQL aggregate functions (overview KPIs, breakdown by dimension, time series, session journeys) as `SECURITY DEFINER` with an in-function admin role check, executable by `authenticated` only — matching the hardening already applied to other functions. RLS on the events table stays as-is (anon insert, admin read).
+- New files: `src/lib/analytics.functions.ts` (server functions, `requireSupabaseAuth` + admin check), `src/lib/track.ts` (client tracker with batching via `sendBeacon`), `src/routes/_authenticated/admin.analytics.tsx` (tab shell), plus small tab components under `src/components/analytics/`.
+- Edits: `src/routes/_authenticated/admin.tsx` (wire the existing Analytics link), `src/routes/__root.tsx` (mount page-view tracking), and the search / study / clinic / locations components to emit search, impression, click and lead-action events.
+- Charts use Recharts (already available via shadcn stack) with tokens from the design system — no hardcoded colours.
+- All queries aggregate in SQL with time-bucket + limit, so the page stays fast as the events table grows; heavy tables paginate.
+
+## Note on data
+
+Tracking starts collecting from the moment this ships, so the dashboard will look sparse for the first day or two — historical browsing before now was never recorded and can't be backfilled.
