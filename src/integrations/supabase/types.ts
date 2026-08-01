@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          city_slug: string | null
+          clinic_id: string | null
+          condition_slug: string | null
+          event_type: string
+          id: number
+          is_mobile: boolean | null
+          meta: Json
+          nct_id: string | null
+          occurred_at: string
+          path: string | null
+          query: string | null
+          referrer: string | null
+          session_id: string | null
+          state_slug: string | null
+        }
+        Insert: {
+          city_slug?: string | null
+          clinic_id?: string | null
+          condition_slug?: string | null
+          event_type: string
+          id?: number
+          is_mobile?: boolean | null
+          meta?: Json
+          nct_id?: string | null
+          occurred_at?: string
+          path?: string | null
+          query?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          state_slug?: string | null
+        }
+        Update: {
+          city_slug?: string | null
+          clinic_id?: string | null
+          condition_slug?: string | null
+          event_type?: string
+          id?: number
+          is_mobile?: boolean | null
+          meta?: Json
+          nct_id?: string | null
+          occurred_at?: string
+          path?: string | null
+          query?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          state_slug?: string | null
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           name: string
@@ -348,6 +399,7 @@ export type Database = {
           city: string | null
           city_slug: string | null
           clinic_id: string | null
+          contacts: Json
           country: string | null
           facility: string | null
           id: number
@@ -363,6 +415,7 @@ export type Database = {
           city?: string | null
           city_slug?: string | null
           clinic_id?: string | null
+          contacts?: Json
           country?: string | null
           facility?: string | null
           id?: number
@@ -378,6 +431,7 @@ export type Database = {
           city?: string | null
           city_slug?: string | null
           clinic_id?: string | null
+          contacts?: Json
           country?: string | null
           facility?: string | null
           id?: number
@@ -448,6 +502,7 @@ export type Database = {
       studies: {
         Row: {
           brief_summary: string | null
+          central_contacts: Json
           city_slugs: string[]
           collaborators: string[]
           completion_date: string | null
@@ -463,6 +518,7 @@ export type Database = {
           max_age_years: number | null
           min_age_years: number | null
           nct_id: string
+          overall_officials: Json
           overall_status: string | null
           phase: string | null
           search_tsv: unknown
@@ -476,6 +532,7 @@ export type Database = {
         }
         Insert: {
           brief_summary?: string | null
+          central_contacts?: Json
           city_slugs?: string[]
           collaborators?: string[]
           completion_date?: string | null
@@ -491,6 +548,7 @@ export type Database = {
           max_age_years?: number | null
           min_age_years?: number | null
           nct_id: string
+          overall_officials?: Json
           overall_status?: string | null
           phase?: string | null
           search_tsv?: unknown
@@ -504,6 +562,7 @@ export type Database = {
         }
         Update: {
           brief_summary?: string | null
+          central_contacts?: Json
           city_slugs?: string[]
           collaborators?: string[]
           completion_date?: string | null
@@ -519,6 +578,7 @@ export type Database = {
           max_age_years?: number | null
           min_age_years?: number | null
           nct_id?: string
+          overall_officials?: Json
           overall_status?: string | null
           phase?: string | null
           search_tsv?: unknown
