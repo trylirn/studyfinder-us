@@ -1,74 +1,39 @@
-## Goal
-1. Finish the previously approved fix: replace `generate_clinics_from_locations()` and backfill so every research-site row links to a clinic profile.
-2. Merge duplicate clinics that share the **same address** and have **near-identical names**, so slight naming variants (e.g. "Georgia Lung Associates" and "Georgia Lung Associates, PC"; "Kaiser Permanente - Deer Valley" and "Kaiser Permanente-Deer Valley Medical Center") collapse into a single profile.
+# Fix auto-import + restore the Analytics dashboard
 
-## Merge rules (both conditions must hold)
+## What's wrong today
 
-**"Same address"** — either of:
-- Same `zip` (non-null) and same `state`, or
-- Same rounded `(lat, lng)` to 3 decimals (~110 m) and same `state`.
+**Auto-import is failing silently.** The scheduled job does fire, but the request it sends to the import endpoint comes back `401 Unauthorized` (last attempt: today at 18:00). The reason: the job sends a shared secret it reads from a database setting that was never actually set, so it sends an empty value and the endpoint rejects it. Every import in the history table was started by hand from the admin page — none by the schedule.
 
-Rows with only a shared city+state but no zip/coords are NOT merged (too many false positives — same city can hold dozens of unrelated real clinics).
+**Analytics page is missing.** The `Analytics →` link next to `Sign out` in your screenshot points at a page that no longer exists in the project, so clicking it does nothing / errors. The underlying event data table still exists in the database (244 events recorded: impressions, listing clicks, directions clicks), but nothing in the current app writes to it or reads it.
 
-**"Similar name"** — after normalization (lowercase, strip punctuation, strip trailing legal suffixes `inc|llc|pc|pa|pllc|corp|ltd`, collapse whitespace) one of:
-- Normalized names are equal, or
-- One normalized name is a prefix or contains the other (min 8 chars overlap), or
-- `similarity(a, b) >= 0.72` via `pg_trgm` (already enabled).
+## What I'll build
 
-**Exclusions** — never merge a clinic that:
-- has `claimed_by IS NOT NULL` into another clinic (claimed profiles are authoritative);
-- has a different `claimed_by` than its candidate canonical;
-- is the per-city `research-site-…` stub introduced in step 1 (those are city-level catch-alls, not real clinics).
+### 1. Make the automatic import actually run
+- Generate a fresh import secret, store it both as the app secret and as a database setting, so the scheduled job and the endpoint agree.
+- Reschedule the import to **every 3 hours with bigger batches** (~1,000 recruiting studies per run, 10 pages x 100).
+- Keep the nightly job that regenerates clinics and refreshes directory counts.
+- Add a self-check: if a scheduled run fails, it is recorded in the import history with the error, so the admin page shows it.
+- Clean up the three stale "running" rows left over from timed-out manual runs, and mark any run stuck over an hour as failed automatically.
 
-**Canonical winner within a group:**
-1. `claimed_by IS NOT NULL` wins.
-2. Else the row with the most `locations` currently linked.
-3. Else shortest normalized name (prefix winner).
-4. Tie-break: oldest `created_at`, then smallest `id`.
+### 2. Restore the Analytics page
+New admin-only page at `/admin/analytics`, reachable from the `Analytics →` link:
+- Headline numbers for the last 7 / 30 days: page views, unique sessions, mobile share.
+- Top pages, top conditions, top states/cities, top clinics by impressions.
+- Lead activity: eligibility submissions, directions clicks, listing clicks.
+- Import health: last successful sync time, studies added in the last 7 days.
+- Simple date-range toggle (7d / 30d / 90d), no charting library needed beyond lightweight bars.
 
-**Merge action** (one transaction per group):
-- Reassign `locations.clinic_id`, `clinic_claims.clinic_id`, `clinic_images.clinic_id`, `lead_delivery_log.clinic_id` from each duplicate → canonical.
-- Backfill NULL fields on canonical from duplicates: `zip, lat, lng, phone, website, description, npi` (only when canonical is NULL).
-- `DELETE` the duplicate `clinics` rows.
-- Call `refresh_directory_counts()` at the end.
+### 3. Start collecting events again
+- A small tracking helper fires a page-view event on every route change plus click events on study cards, clinic listings and "Get directions", writing to the existing events table.
+- No personal data: session id is a random per-browser id, no IP, no form answers.
 
-## Deliverables
+### 4. Admin page copy fix
+Update the "scheduled every 6 hours" text to reflect the new 3-hour cadence and show the last automated run time.
 
-### 1. Migration — replace `public.generate_clinics_from_locations()`
-(Same body as the previously approved plan: normalize facility name for slug + link, add per-city fallback stubs for NULL-facility sites, add slug-fallback link step.)
+## Technical notes
 
-### 2. Migration — new one-shot function `public.merge_duplicate_clinics()`
-`SECURITY DEFINER SET search_path = public`, returns `TABLE(groups_merged int, clinics_removed int)`.
-Body implements the rules above with a single CTE that:
-- Groups candidate clinics by `(state, coalesce(zip, round(lat,3)::text||','||round(lng,3)::text))`.
-- Within each group, builds pairs where normalized-name equality / prefix / trigram similarity ≥ 0.72 holds.
-- Uses a union-find via `WITH RECURSIVE` to form transitive clusters, then picks the canonical row per cluster and executes the reassign/backfill/delete.
-
-Also add an idempotent guard: after the run, any newly linked `locations` that still don't have `clinic_id` stay untouched.
-
-### 3. Data run (via insert tool, after migration approval)
-```sql
-SELECT * FROM public.generate_clinics_from_locations();
-SELECT * FROM public.merge_duplicate_clinics();
-SELECT public.refresh_directory_counts();
-```
-
-### 4. No frontend changes
-Rows already link via `clinic_id`; existing routes handle the survivor slug. TanStack Query cache reloads on next fetch — nothing to invalidate manually.
-
-## Safety / reversibility
-- Ships as a callable function, not an inline one-shot migration DML, so it can be re-run.
-- Dry-run preview available via `psql` before the destructive step: I'll `SELECT ... EXPLAIN`-style query the cluster preview and report counts (groups + rows-to-delete) to you before invoking the function.
-- Because we reassign FKs before delete, no `locations` will end up with a stale `clinic_id`.
-- Not merged in this pass: cross-city name matches, and any row without zip/coords.
-
-## Verification
-- `SELECT count(*) FROM public.clinics;` before/after — expect a meaningful drop.
-- `SELECT count(*) FILTER (WHERE clinic_id IS NULL) FROM public.locations;` ≈ 0.
-- Load `NCT05822388` — every research-site row links, and same-address variants share one profile URL.
-- Spot-check a merged clinic's page shows the aggregated study count.
-
-## Out of scope
-- Fuzzy cross-city merging (e.g. campus branches in adjacent cities).
-- Manual admin merge UI — can add later if needed.
-- Merging user-owned clinics with different claimants.
+- Migration: unschedule/reschedule the two `pg_cron` jobs; set `app.cron_secret` via `ALTER DATABASE ... SET`; add an aggregate SQL function for analytics rollups (admin-only, `EXECUTE` granted to `authenticated` behind a role check inside the function, matching the existing hardening pattern); index already present on `occurred_at`.
+- Secret rotation for `CRON_SECRET` so the endpoint and the job share one value.
+- New files: `src/routes/_authenticated/admin.analytics.tsx`, `src/lib/analytics.functions.ts`, `src/lib/track.ts`.
+- Edits: `src/routes/_authenticated/admin.tsx` (Analytics link, cadence copy, last-auto-run), `src/routes/__root.tsx` (page-view tracking).
+- Analytics reads run through server functions guarded by `requireSupabaseAuth` + admin role check; the page lives under the existing `_authenticated` gate and stays `noindex`.
