@@ -68,6 +68,27 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_secrets: {
+        Row: {
+          created_at: string
+          name: string
+          rotated_at: string
+          secret: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          rotated_at?: string
+          secret: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          rotated_at?: string
+          secret?: string
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           name: string
