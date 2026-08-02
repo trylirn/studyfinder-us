@@ -76,7 +76,9 @@ function flush() {
   const events = queue.slice(0, 40);
   queue = queue.slice(40);
   void trackEvents({ data: { events } as never }).catch(() => {
-    /* analytics must never break the app */
+    // Navigation can abort an in-flight request. Requeue once the page is visible again.
+    queue = [...events, ...queue].slice(0, 200);
+    if (document.visibilityState === "visible") schedule();
   });
   if (queue.length > 0) schedule();
 }
@@ -131,14 +133,12 @@ export function trackImpressions(items: TrackPayload[], source?: string) {
 
 export function initTracking() {
   if (typeof window === "undefined") return () => {};
-  const onHide = () => {
-    if (document.visibilityState === "hidden") flush();
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible" && queue.length > 0) schedule();
   };
-  document.addEventListener("visibilitychange", onHide);
-  window.addEventListener("pagehide", onHide);
+  document.addEventListener("visibilitychange", onVisibilityChange);
   return () => {
-    document.removeEventListener("visibilitychange", onHide);
-    window.removeEventListener("pagehide", onHide);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
   };
 }
 
