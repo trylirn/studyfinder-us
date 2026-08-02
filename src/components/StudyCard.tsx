@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { phaseLabel, statusLabel } from "@/lib/slug";
+import { useEffect, useRef } from "react";
+import { track, trackImpressions } from "@/lib/track";
 
 type Study = {
   nct_id: string;
@@ -19,13 +21,32 @@ function isPhaseShown(phase?: string | null): phase is string {
   return p.includes("PHASE");
 }
 
-export function StudyCard({ study }: { study: Study }) {
+export function StudyCard({ study, source = "study_list" }: { study: Study; source?: string }) {
+  const cardRef = useRef<HTMLAnchorElement>(null);
   const isRecruiting = study.overall_status === "RECRUITING";
   const showPhase = isPhaseShown(study.phase);
+
+  useEffect(() => {
+    const node = cardRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        trackImpressions([{ nct_id: study.nct_id }], source);
+        observer.disconnect();
+      },
+      { threshold: 0.35 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [source, study.nct_id]);
+
   return (
     <Link
+      ref={cardRef}
       to="/studies/$nctId"
       params={{ nctId: study.nct_id }}
+      onClick={() => track("listing_click", { nct_id: study.nct_id, meta: { source } })}
       className="group block rounded-xl border border-border bg-card p-5 transition hover:border-primary/60 hover:shadow-md"
     >
       <div className="flex flex-wrap items-center gap-2 text-xs">

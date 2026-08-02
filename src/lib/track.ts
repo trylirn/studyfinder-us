@@ -90,15 +90,23 @@ export function track(event: TrackEventType, payload: TrackPayload = {}) {
   if (typeof window === "undefined") return;
   const id = ids();
   if (!id) return;
+  const path = payload.path ?? window.location.pathname + window.location.search;
+  const pathname = path.split("?")[0];
+  const segments = pathname.split("/").filter(Boolean);
+  const inferred: TrackPayload = {};
+  if (segments[0] === "cities") inferred.city_slug = segments[1] ?? null;
+  if (segments[0] === "states") inferred.state_slug = segments[1] ?? null;
+  if (segments[0] === "conditions") inferred.condition_slug = segments[1] ?? null;
+  if (segments[0] === "studies") inferred.nct_id = segments[1] ?? null;
   queue.push({
     event_type: event,
-    path: payload.path ?? window.location.pathname + window.location.search,
+    path,
     query: payload.query ?? null,
-    city_slug: payload.city_slug ?? null,
-    state_slug: payload.state_slug ?? null,
-    condition_slug: payload.condition_slug ?? null,
+    city_slug: payload.city_slug ?? inferred.city_slug ?? null,
+    state_slug: payload.state_slug ?? inferred.state_slug ?? null,
+    condition_slug: payload.condition_slug ?? inferred.condition_slug ?? null,
     clinic_id: payload.clinic_id ?? null,
-    nct_id: payload.nct_id ?? null,
+    nct_id: payload.nct_id ?? inferred.nct_id ?? null,
     referrer: document.referrer ? document.referrer.slice(0, 500) : null,
     is_mobile: window.matchMedia("(max-width: 768px)").matches,
     session_id: id.session,
@@ -123,7 +131,9 @@ export function trackImpressions(items: TrackPayload[], source?: string) {
 
 export function initTracking() {
   if (typeof window === "undefined") return () => {};
-  const onHide = () => flush();
+  const onHide = () => {
+    if (document.visibilityState === "hidden") flush();
+  };
   document.addEventListener("visibilitychange", onHide);
   window.addEventListener("pagehide", onHide);
   return () => {

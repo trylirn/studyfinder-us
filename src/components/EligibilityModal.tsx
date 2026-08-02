@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { submitEligibilityLead } from "@/lib/eligibility.functions";
 import { X, Loader2, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
 import { LegalDisclaimer } from "./LegalDisclaimer";
+import { track } from "@/lib/track";
 
 type Props = {
   open: boolean;
@@ -79,6 +80,12 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
         },
       });
       setResult(res);
+      if (res.ok) {
+        track("lead_eligibility", {
+          nct_id: nctId,
+          meta: { condition: conditions[0] ?? null, delivered: res.delivered },
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed");
     } finally {

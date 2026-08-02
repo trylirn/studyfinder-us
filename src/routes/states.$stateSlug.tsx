@@ -61,7 +61,7 @@ function StatePage() {
       <div className="mt-8 grid gap-8 md:grid-cols-3">
         <div className="md:col-span-2 space-y-4">
           <h2 className="text-lg font-semibold">Latest studies</h2>
-          {studies.map((s) => <StudyCard key={s.nct_id} study={s} />)}
+          {studies.map((s) => <StudyCard key={s.nct_id} study={s} source="state_page" />)}
         </div>
         <aside className="space-y-6">
           {cities.length > 0 && (
