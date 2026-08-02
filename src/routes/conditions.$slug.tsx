@@ -66,7 +66,7 @@ function ConditionPage() {
       <div className="mt-8 grid gap-8 md:grid-cols-3">
         <div className="space-y-4 md:col-span-2">
           <h2 className="text-lg font-semibold">Latest {condition.name} studies</h2>
-          {(studies as any[]).map((s) => <StudyCard key={s.nct_id} study={s} />)}
+          {(studies as any[]).map((s) => <StudyCard key={s.nct_id} study={s} source="condition_page" />)}
         </div>
         <aside className="space-y-6">
           {topStates.length > 0 && (

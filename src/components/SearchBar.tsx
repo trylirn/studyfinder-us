@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { track } from "@/lib/track";
 
 export function SearchBar({ initial = "", large = false }: { initial?: string; large?: boolean }) {
   const [q, setQ] = useState(initial);
@@ -9,7 +10,9 @@ export function SearchBar({ initial = "", large = false }: { initial?: string; l
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        navigate({ to: "/search", search: { q: q.trim() || undefined } });
+        const query = q.trim();
+        track("search", { query: query || null, meta: { source: large ? "homepage" : "search_page" } });
+        navigate({ to: "/search", search: { q: query || undefined } });
       }}
       className={`flex w-full items-center gap-2 rounded-xl border border-border bg-card p-2 shadow-sm ${large ? "md:p-3" : ""}`}
     >

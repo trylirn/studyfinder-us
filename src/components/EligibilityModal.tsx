@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { submitEligibilityLead } from "@/lib/eligibility.functions";
 import { X, Loader2, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
 import { LegalDisclaimer } from "./LegalDisclaimer";
+import { track } from "@/lib/track";
 
 type Props = {
   open: boolean;
@@ -10,6 +11,7 @@ type Props = {
   nctId: string;
   trialTitle: string;
   conditions: string[];
+  conditionSlugs?: string[];
   eligibilitySnippet?: string | null;
 };
 
@@ -18,7 +20,7 @@ type Result =
   | { ok: true; delivered: boolean; channel: string }
   | { ok: false; reason: string };
 
-export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions, eligibilitySnippet }: Props) {
+export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions, conditionSlugs = [], eligibilitySnippet }: Props) {
   const fn = useServerFn(submitEligibilityLead);
   const [step, setStep] = useState(0);
   const [age, setAge] = useState<string>("");
@@ -79,6 +81,13 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
         },
       });
       setResult(res);
+      if (res.ok) {
+        track("lead_eligibility", {
+          nct_id: nctId,
+          condition_slug: conditionSlugs[0] ?? null,
+          meta: { delivered: res.delivered },
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Submission failed");
     } finally {

@@ -117,7 +117,7 @@ function HomePage() {
       <Section icon={<FlaskConical className="h-5 w-5" />} title="Recently updated studies" cta={{ label: "Search all", to: "/search" }}>
         <div className="grid gap-4 md:grid-cols-2">
           {data.recent.map((s) => (
-            <StudyCard key={s.nct_id} study={s} />
+            <StudyCard key={s.nct_id} study={s} source="homepage" />
           ))}
         </div>
       </Section>

@@ -79,7 +79,7 @@ function SearchPage() {
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {isLoading && Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} />)}
-        {!isLoading && ((data?.rows ?? []) as any[]).map((s) => <StudyCard key={s.nct_id} study={s} />)}
+        {!isLoading && ((data?.rows ?? []) as any[]).map((s) => <StudyCard key={s.nct_id} study={s} source="search_results" />)}
         {!isLoading && (data?.rows.length ?? 0) === 0 && (
           <p className="text-sm text-muted-foreground">No studies match your filters. Try a broader search.</p>
         )}

@@ -29,7 +29,7 @@ export const Route = createFileRoute("/sponsors/$slug")({
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">{data.sponsor.name} Clinical Trials</h1>
         <p className="mt-2 text-muted-foreground">{data.total.toLocaleString()} studies sponsored by {data.sponsor.name}.</p>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {data.studies.map((s) => <StudyCard key={s.nct_id} study={s} />)}
+          {data.studies.map((s) => <StudyCard key={s.nct_id} study={s} source="sponsor_page" />)}
         </div>
       </div>
     );

@@ -76,7 +76,9 @@ function flush() {
   const events = queue.slice(0, 40);
   queue = queue.slice(40);
   void trackEvents({ data: { events } as never }).catch(() => {
-    /* analytics must never break the app */
+    // Navigation can abort an in-flight request. Requeue once the page is visible again.
+    queue = [...events, ...queue].slice(0, 200);
+    if (document.visibilityState === "visible") schedule();
   });
   if (queue.length > 0) schedule();
 }
@@ -90,15 +92,23 @@ export function track(event: TrackEventType, payload: TrackPayload = {}) {
   if (typeof window === "undefined") return;
   const id = ids();
   if (!id) return;
+  const path = payload.path ?? window.location.pathname + window.location.search;
+  const pathname = path.split("?")[0];
+  const segments = pathname.split("/").filter(Boolean);
+  const inferred: TrackPayload = {};
+  if (segments[0] === "cities") inferred.city_slug = segments[1] ?? null;
+  if (segments[0] === "states") inferred.state_slug = segments[1] ?? null;
+  if (segments[0] === "conditions") inferred.condition_slug = segments[1] ?? null;
+  if (segments[0] === "studies") inferred.nct_id = segments[1] ?? null;
   queue.push({
     event_type: event,
-    path: payload.path ?? window.location.pathname + window.location.search,
+    path,
     query: payload.query ?? null,
-    city_slug: payload.city_slug ?? null,
-    state_slug: payload.state_slug ?? null,
-    condition_slug: payload.condition_slug ?? null,
+    city_slug: payload.city_slug ?? inferred.city_slug ?? null,
+    state_slug: payload.state_slug ?? inferred.state_slug ?? null,
+    condition_slug: payload.condition_slug ?? inferred.condition_slug ?? null,
     clinic_id: payload.clinic_id ?? null,
-    nct_id: payload.nct_id ?? null,
+    nct_id: payload.nct_id ?? inferred.nct_id ?? null,
     referrer: document.referrer ? document.referrer.slice(0, 500) : null,
     is_mobile: window.matchMedia("(max-width: 768px)").matches,
     session_id: id.session,
@@ -123,12 +133,12 @@ export function trackImpressions(items: TrackPayload[], source?: string) {
 
 export function initTracking() {
   if (typeof window === "undefined") return () => {};
-  const onHide = () => flush();
-  document.addEventListener("visibilitychange", onHide);
-  window.addEventListener("pagehide", onHide);
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible" && queue.length > 0) schedule();
+  };
+  document.addEventListener("visibilitychange", onVisibilityChange);
   return () => {
-    document.removeEventListener("visibilitychange", onHide);
-    window.removeEventListener("pagehide", onHide);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
   };
 }
 

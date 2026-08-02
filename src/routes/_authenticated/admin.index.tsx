@@ -23,6 +23,7 @@ function AdminPage() {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<string[]>([]);
+  const latestAutomated = (stats.runs as Array<any>).find((run) => run.params?.automated === true);
 
   const { data: claims } = useQuery({ queryKey: ["pending-claims"], queryFn: () => listPendingClaims() });
   const decide = useMutation({
@@ -86,7 +87,10 @@ function AdminPage() {
           Fetch the latest studies via the public v2 API. Records are deduplicated by NCT ID and re-indexed for SEO pages.
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          Auto-import: scheduled every 6 hours via pg_cron. Directory counts refresh nightly.
+          Automatic sync runs every 6 hours; directory counts refresh nightly.
+          {latestAutomated
+            ? ` Last automated run: ${new Date(latestAutomated.started_at).toLocaleString()} (${latestAutomated.status}).`
+            : " No automated run has completed yet."}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <button disabled={busy} onClick={() => runImport(5, true)} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
@@ -131,6 +135,7 @@ function AdminPage() {
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <th className="pb-2 pr-4 font-medium">Started</th>
+                <th className="pb-2 pr-4 font-medium">Type</th>
                 <th className="pb-2 pr-4 font-medium">Status</th>
                 <th className="pb-2 pr-4 font-medium">Pages</th>
                 <th className="pb-2 pr-4 font-medium">New</th>
@@ -142,7 +147,8 @@ function AdminPage() {
               {(stats.runs as Array<any>).map((r) => (
                 <tr key={r.id} className="border-b border-border/50 last:border-0">
                   <td className="py-2 pr-4 text-xs">{new Date(r.started_at).toLocaleString()}</td>
-                  <td className="py-2 pr-4">
+                   <td className="py-2 pr-4 text-xs text-muted-foreground">{r.params?.automated ? "Automatic" : "Manual"}</td>
+                   <td className="py-2 pr-4">
                     <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${
                       r.status === "ok" ? "bg-success/10 text-success" :
                       r.status === "error" ? "bg-destructive/10 text-destructive" :
@@ -158,7 +164,7 @@ function AdminPage() {
                 </tr>
               ))}
               {stats.runs.length === 0 && (
-                <tr><td colSpan={6} className="py-3 text-center text-muted-foreground">No imports yet — run the quick sync above.</td></tr>
+                 <tr><td colSpan={7} className="py-3 text-center text-muted-foreground">No imports have run yet.</td></tr>
               )}
             </tbody>
           </table>

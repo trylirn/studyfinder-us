@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -14,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
+import { initTracking, resetImpressionCache, track } from "@/lib/track";
 
 function NotFoundComponent() {
   return (
@@ -146,6 +148,14 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const location = useLocation();
+
+  useEffect(() => initTracking(), []);
+
+  useEffect(() => {
+    resetImpressionCache();
+    track("page_view", { path: location.href });
+  }, [location.href]);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {

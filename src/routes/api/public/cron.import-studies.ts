@@ -42,12 +42,31 @@ function parseDate(s?: string): string | null {
   return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 }
 
-function authorized(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
+function safeEqual(left: string, right: string) {
+  if (left.length !== right.length) return false;
+  let mismatch = 0;
+  for (let index = 0; index < left.length; index++) {
+    mismatch |= left.charCodeAt(index) ^ right.charCodeAt(index);
+  }
+  return mismatch === 0;
+}
+
+async function authorized(request: Request) {
   const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   const cronHeader = request.headers.get("x-cron-secret");
-  return bearer === secret || cronHeader === secret;
+  const presented = bearer || cronHeader;
+  if (!presented) return false;
+
+  const environmentSecret = process.env.CRON_SECRET;
+  if (environmentSecret && safeEqual(presented, environmentSecret)) return true;
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("automation_secrets")
+    .select("secret")
+    .eq("name", "study_import_cron")
+    .maybeSingle();
+  return typeof data?.secret === "string" && safeEqual(presented, data.secret);
 }
 
 
@@ -61,7 +80,7 @@ export const Route = createFileRoute("/api/public/cron/import-studies")({
 });
 
 async function runCronImport(request: Request) {
-  if (!authorized(request)) return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!(await authorized(request))) return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const url = new URL(request.url);

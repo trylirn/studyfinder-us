@@ -79,7 +79,7 @@ function RecruitingPage() {
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {isLoading && Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-36 animate-pulse rounded-xl border border-border bg-card" />)}
-        {!isLoading && (data?.studies ?? []).map((s: any) => <StudyCard key={s.nct_id} study={s} />)}
+        {!isLoading && (data?.studies ?? []).map((s: any) => <StudyCard key={s.nct_id} study={s} source="recruiting_page" />)}
         {!isLoading && (data?.studies.length ?? 0) === 0 && (
           <p className="text-sm text-muted-foreground">No recruiting studies match these filters.</p>
         )}

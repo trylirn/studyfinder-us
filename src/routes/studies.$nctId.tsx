@@ -283,6 +283,7 @@ function StudyPage() {
         nctId={study.nct_id}
         trialTitle={study.title}
         conditions={study.conditions ?? []}
+        conditionSlugs={study.condition_slugs ?? []}
         eligibilitySnippet={eligibility.criteria}
       />
     </article>
