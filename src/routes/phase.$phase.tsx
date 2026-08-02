@@ -24,7 +24,7 @@ export const Route = createFileRoute("/phase/$phase")({
         <h1 className="text-3xl font-semibold tracking-tight">Phase {phase} Clinical Trials</h1>
         <p className="mt-2 text-muted-foreground">{data.total.toLocaleString()} Phase {phase} studies across the United States.</p>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {data.studies.map((s) => <StudyCard key={s.nct_id} study={s} />)}
+          {data.studies.map((s) => <StudyCard key={s.nct_id} study={s} source="phase_page" />)}
         </div>
       </div>
     );

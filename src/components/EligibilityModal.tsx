@@ -11,6 +11,7 @@ type Props = {
   nctId: string;
   trialTitle: string;
   conditions: string[];
+  conditionSlugs?: string[];
   eligibilitySnippet?: string | null;
 };
 
@@ -19,7 +20,7 @@ type Result =
   | { ok: true; delivered: boolean; channel: string }
   | { ok: false; reason: string };
 
-export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions, eligibilitySnippet }: Props) {
+export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions, conditionSlugs = [], eligibilitySnippet }: Props) {
   const fn = useServerFn(submitEligibilityLead);
   const [step, setStep] = useState(0);
   const [age, setAge] = useState<string>("");
@@ -83,7 +84,8 @@ export function EligibilityModal({ open, onClose, nctId, trialTitle, conditions,
       if (res.ok) {
         track("lead_eligibility", {
           nct_id: nctId,
-          meta: { condition: conditions[0] ?? null, delivered: res.delivered },
+          condition_slug: conditionSlugs[0] ?? null,
+          meta: { delivered: res.delivered },
         });
       }
     } catch (e) {

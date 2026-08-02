@@ -75,7 +75,7 @@ function CityPage() {
 
       <div className="mt-8 grid gap-8 md:grid-cols-3">
         <div className="md:col-span-2 space-y-4">
-          {studies.map((s) => <StudyCard key={s.nct_id} study={s} />)}
+          {studies.map((s) => <StudyCard key={s.nct_id} study={s} source="city_page" />)}
         </div>
         <aside>
           {nearby.length > 0 && (
