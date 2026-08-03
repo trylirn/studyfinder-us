@@ -108,7 +108,9 @@ export function LocationsList({
           const slug = resolveSlug(l);
           const facility = l.facility || "Research site";
           const address = [l.city, l.state, l.zip, l.country].filter(Boolean).join(", ");
-          const contacts = (l.contacts ?? []).filter((c) => c.name || c.phone || c.email);
+          const contacts = (Array.isArray(l.contacts) ? (l.contacts as SiteContact[]) : []).filter(
+            (c) => c && (c.name || c.phone || c.email),
+          );
 
           return (
             <li key={l.id} className="py-3">
