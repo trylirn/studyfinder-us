@@ -78,12 +78,12 @@ export const getStudy = createServerFn({ method: "GET" })
     const sb = publicClient();
     const nctId = data.nctId.toUpperCase();
     const STUDY_COLS =
-      "nct_id,title,brief_summary,detailed_description,phase,overall_status,study_type,conditions,condition_slugs,interventions,eligibility,min_age_years,max_age_years,gender,sponsor_name,sponsor_slug,collaborators,start_date,completion_date,last_update_posted,enrollment,state_slugs,city_slugs,imported_at,updated_at";
+      "nct_id,title,brief_summary,detailed_description,phase,overall_status,study_type,conditions,condition_slugs,interventions,eligibility,min_age_years,max_age_years,gender,sponsor_name,sponsor_slug,collaborators,start_date,completion_date,last_update_posted,enrollment,state_slugs,city_slugs,central_contacts,overall_officials,imported_at,updated_at";
     const [{ data: study, error: e1 }, { data: locations, error: e2 }] = await Promise.all([
       sb.from("studies").select(STUDY_COLS).eq("nct_id", nctId).maybeSingle(),
       sb
         .from("locations")
-        .select("id,nct_id,facility,city,city_slug,state,state_slug,country,zip,status,lat,lng,clinic_id")
+        .select("id,nct_id,facility,city,city_slug,state,state_slug,country,zip,status,lat,lng,clinic_id,contacts")
         .eq("nct_id", nctId),
     ]);
     if (e1) throw new Error(e1.message);
