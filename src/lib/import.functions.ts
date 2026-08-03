@@ -28,6 +28,8 @@ type CTGStudy = {
       stdAges?: string[];
     };
     contactsLocationsModule?: {
+      centralContacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
+      overallOfficials?: { name?: string; affiliation?: string; role?: string }[];
       locations?: {
         facility?: string;
         city?: string;
@@ -35,11 +37,13 @@ type CTGStudy = {
         country?: string;
         zip?: string;
         status?: string;
+        contacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
         geoPoint?: { lat?: number; lon?: number };
       }[];
     };
   };
 };
+
 
 function ageToYears(input?: string): number | null {
   if (!input) return null;
