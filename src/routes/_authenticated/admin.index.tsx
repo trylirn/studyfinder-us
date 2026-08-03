@@ -1,10 +1,8 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminStats, runStudyImport, refreshDirectoryCounts } from "@/lib/import.functions";
-import { listPendingClaims, decideClinicClaim, getClaimProofUrls } from "@/lib/clinics.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, ExternalLink } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
