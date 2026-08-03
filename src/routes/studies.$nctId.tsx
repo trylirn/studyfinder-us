@@ -8,6 +8,7 @@ import { Building2, Calendar, Users, ExternalLink, ClipboardCheck, FlaskConical,
 import { EligibilityModal } from "@/components/EligibilityModal";
 import { AiSimplify } from "@/components/AiSimplify";
 import { LocationsList } from "@/components/LocationsList";
+import { StudyContacts } from "@/components/StudyContacts";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
 import { TrialMap } from "@/components/TrialMap";
 
@@ -202,6 +203,12 @@ function StudyPage() {
               </>
             )}
           </Card>
+
+          <StudyContacts
+            contacts={study.central_contacts}
+            officials={study.overall_officials}
+          />
+
 
           <section id="research-locations" className="rounded-xl border border-border bg-card p-5">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">

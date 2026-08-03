@@ -35,16 +35,18 @@ function AuthPage() {
       .eq("role", "admin")
       .maybeSingle();
     setBusy(false);
-    navigate({ to: adminRow ? "/admin" : "/portal" });
+    if (!adminRow) {
+      await supabase.auth.signOut();
+      return setMsg("This account is not an administrator.");
+    }
+    navigate({ to: "/admin" });
   }
 
   return (
     <div className="container mx-auto max-w-sm px-4 py-16">
       <h1 className="text-2xl font-semibold tracking-tight">Admin sign in</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Platform administrators only. Clinic operators should use the{" "}
-        <a href="/clinics/auth" className="text-primary hover:underline">clinic portal</a>.
-      </p>
+      <p className="mt-1 text-sm text-muted-foreground">Platform administrators only.</p>
+
       <form onSubmit={submit} className="mt-6 space-y-3">
         <div>
           <label className="text-xs uppercase tracking-wider text-muted-foreground">Email</label>

@@ -28,6 +28,8 @@ type CTGStudy = {
       stdAges?: string[];
     };
     contactsLocationsModule?: {
+      centralContacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
+      overallOfficials?: { name?: string; affiliation?: string; role?: string }[];
       locations?: {
         facility?: string;
         city?: string;
@@ -35,11 +37,13 @@ type CTGStudy = {
         country?: string;
         zip?: string;
         status?: string;
+        contacts?: { name?: string; role?: string; phone?: string; phoneExt?: string; email?: string }[];
         geoPoint?: { lat?: number; lon?: number };
       }[];
     };
   };
 };
+
 
 function ageToYears(input?: string): number | null {
   if (!input) return null;
@@ -201,9 +205,17 @@ export const runStudyImport = createServerFn({ method: "POST" })
               country: l.country ?? null,
               zip: l.zip ?? null,
               status: l.status ?? null,
+              contacts: (l.contacts ?? []).map((c) => ({
+                name: c.name ?? null,
+                role: c.role ?? null,
+                phone: c.phone ?? null,
+                phoneExt: c.phoneExt ?? null,
+                email: c.email ?? null,
+              })),
               lat: typeof l.geoPoint?.lat === "number" ? l.geoPoint.lat : null,
               lng: typeof l.geoPoint?.lon === "number" ? l.geoPoint.lon : null,
             });
+
           }
 
           rows.push({
@@ -236,6 +248,18 @@ export const runStudyImport = createServerFn({ method: "POST" })
             enrollment: ps.designModule?.enrollmentInfo?.count ?? null,
             state_slugs: [...stateSlugSet],
             city_slugs: [...citySlugSet],
+            central_contacts: (ps.contactsLocationsModule?.centralContacts ?? []).map((c) => ({
+              name: c.name ?? null,
+              role: c.role ?? null,
+              phone: c.phone ?? null,
+              phoneExt: c.phoneExt ?? null,
+              email: c.email ?? null,
+            })) as unknown as object,
+            overall_officials: (ps.contactsLocationsModule?.overallOfficials ?? []).map((o) => ({
+              name: o.name ?? null,
+              role: o.role ?? null,
+              affiliation: o.affiliation ?? null,
+            })) as unknown as object,
           });
           for (const li of locInsert) locationRows.push({ ...li, nct_id: id });
         }

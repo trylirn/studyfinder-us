@@ -107,22 +107,9 @@ function ClinicPage() {
             <span className="rounded-md bg-success/10 px-2 py-1 text-xs font-medium text-success">
               {clinic.recruiting_count} recruiting trial{clinic.recruiting_count === 1 ? "" : "s"}
             </span>
-            {clinic.claim_status !== "claimed" && (
-              <span className="ml-2 rounded-md border border-border bg-card px-2 py-1 text-xs text-muted-foreground">
-                Unclaimed profile
-              </span>
-            )}
           </p>
         </div>
-        {clinic.claim_status !== "claimed" && (
-          <Link
-            to="/clinics/auth"
-            search={{ mode: "signup", next: `/portal/claim?clinic=${clinic.slug}` }}
-            className="rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10"
-          >
-            Claim this clinic
-          </Link>
-        )}
+
       </div>
 
       {/* Quick contact */}

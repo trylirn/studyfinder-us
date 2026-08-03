@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, Search, ArrowRight } from "lucide-react";
+import { MapPin, Search, ArrowRight, Phone, Mail } from "lucide-react";
+
+type SiteContact = {
+  name?: string | null;
+  role?: string | null;
+  phone?: string | null;
+  phoneExt?: string | null;
+  email?: string | null;
+};
 
 type Location = {
   id: string | number;
@@ -13,6 +21,7 @@ type Location = {
   status: string | null;
   clinic_id?: string | null;
   clinic_slug?: string | null;
+  contacts?: unknown;
 };
 
 type ClinicMap = Record<string, { slug: string; name: string }>;
@@ -99,15 +108,18 @@ export function LocationsList({
           const slug = resolveSlug(l);
           const facility = l.facility || "Research site";
           const address = [l.city, l.state, l.zip, l.country].filter(Boolean).join(", ");
+          const contacts = (Array.isArray(l.contacts) ? (l.contacts as SiteContact[]) : []).filter(
+            (c) => c && (c.name || c.phone || c.email),
+          );
 
-          if (slug) {
-            return (
-              <li key={l.id}>
+          return (
+            <li key={l.id} className="py-3">
+              {slug ? (
                 <Link
                   to="/clinics/$slug"
                   params={{ slug }}
                   aria-label={`View clinic profile for ${facility}`}
-                  className="group flex items-start gap-3 py-3 text-sm transition hover:bg-muted/40 -mx-2 px-2 rounded-md"
+                  className="group flex items-start gap-3 text-sm transition hover:bg-muted/40 -mx-2 px-2 py-1 rounded-md"
                 >
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <div className="min-w-0 flex-1">
@@ -121,20 +133,49 @@ export function LocationsList({
                     View profile <ArrowRight className="h-3 w-3" />
                   </span>
                 </Link>
-              </li>
-            );
-          }
-
-          return (
-            <li key={l.id} className="flex items-start gap-3 py-3 text-sm">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <div className="min-w-0">
-                <p className="font-medium">{facility}</p>
-                <p className="text-muted-foreground">{address}</p>
-                {l.status && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">Status: {l.status}</p>
-                )}
-              </div>
+              ) : (
+                <div className="flex items-start gap-3 text-sm">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div className="min-w-0">
+                    <p className="font-medium">{facility}</p>
+                    <p className="text-muted-foreground">{address}</p>
+                    {l.status && (
+                      <p className="mt-0.5 text-xs text-muted-foreground">Status: {l.status}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {contacts.length > 0 && (
+                <ul className="mt-1.5 space-y-1 pl-7 text-xs text-muted-foreground">
+                  {contacts.slice(0, 3).map((c, i) => (
+                    <li key={i} className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                      <span className="font-medium text-foreground/80">
+                        {c.name ?? "Site contact"}
+                        {c.role ? ` · ${c.role}` : ""}
+                      </span>
+                      {c.phone && (
+                        <a
+                          href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          <Phone className="h-3 w-3" />
+                          {c.phone}
+                          {c.phoneExt ? ` ext ${c.phoneExt}` : ""}
+                        </a>
+                      )}
+                      {c.email && (
+                        <a
+                          href={`mailto:${c.email}`}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          <Mail className="h-3 w-3" />
+                          {c.email}
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           );
         })}

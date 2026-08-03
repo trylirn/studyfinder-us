@@ -1,10 +1,8 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAdminStats, runStudyImport, refreshDirectoryCounts } from "@/lib/import.functions";
-import { listPendingClaims, decideClinicClaim, getClaimProofUrls } from "@/lib/clinics.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, ExternalLink } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -20,17 +18,10 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 function AdminPage() {
   const stats = Route.useLoaderData();
   const navigate = useNavigate();
-  const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const latestAutomated = (stats.runs as Array<any>).find((run) => run.params?.automated === true);
 
-  const { data: claims } = useQuery({ queryKey: ["pending-claims"], queryFn: () => listPendingClaims() });
-  const decide = useMutation({
-    mutationFn: (input: { claimId: string; decision: "approved" | "rejected" }) =>
-      decideClinicClaim({ data: input }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-claims"] }),
-  });
 
   async function runImport(pages: number, recruitingOnly: boolean) {
     setBusy(true);
@@ -41,8 +32,8 @@ function AdminPage() {
       setLog((l) => [`Error: ${(e as Error).message}`, ...l]);
     } finally {
       setBusy(false);
-      qc.invalidateQueries();
     }
+
   }
 
   async function regenerate() {
@@ -114,19 +105,8 @@ function AdminPage() {
         )}
       </section>
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-6">
-        <h2 className="text-lg font-semibold">Clinic claim queue</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Approve clinic operator requests. Approval grants the user a clinic_admin role and ownership of the clinic profile.
-          Review each claimant's proof documents before deciding.
-        </p>
-        <ul className="mt-4 space-y-3 text-sm">
-          {(claims ?? []).map((c: any) => (
-            <ClaimRow key={c.id} claim={c} decide={decide} />
-          ))}
-          {(claims ?? []).length === 0 && <li className="text-muted-foreground">No pending claims.</li>}
-        </ul>
-      </section>
+
+
 
       <section className="mt-8 rounded-xl border border-border bg-card p-6">
         <h2 className="text-lg font-semibold">Recent import runs</h2>
@@ -174,93 +154,6 @@ function AdminPage() {
   );
 }
 
-function ClaimRow({ claim: c, decide }: { claim: any; decide: any }) {
-  const [showProof, setShowProof] = useState(false);
-  const { data: proofs } = useQuery({
-    queryKey: ["claim-proof", c.id],
-    queryFn: () => getClaimProofUrls({ data: { paths: c.proof_paths ?? [] } }),
-    enabled: showProof && Array.isArray(c.proof_paths) && c.proof_paths.length > 0,
-  });
-
-  return (
-    <li className="rounded-md border border-border bg-background p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="font-medium">{c.clinics?.name ?? c.clinic_id}</p>
-          <p className="text-xs text-muted-foreground">
-            {[c.clinics?.city, c.clinics?.state].filter(Boolean).join(", ")}
-          </p>
-          <div className="mt-2 grid gap-1 text-xs sm:grid-cols-2">
-            <p><span className="text-muted-foreground">Contact:</span> {c.contact_name} ({c.contact_email})</p>
-            {c.contact_phone && <p><span className="text-muted-foreground">Phone:</span> {c.contact_phone}</p>}
-            {c.role && <p><span className="text-muted-foreground">Role:</span> {c.role}</p>}
-            {c.relationship && <p><span className="text-muted-foreground">Relationship:</span> {c.relationship}</p>}
-            {c.npi && <p><span className="text-muted-foreground">NPI:</span> {c.npi}</p>}
-            {c.work_website && /^https?:\/\//i.test(c.work_website) && (
-              <p>
-                <span className="text-muted-foreground">Website:</span>{" "}
-                <a href={c.work_website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  {c.work_website}
-                </a>
-              </p>
-            )}
-
-            <p><span className="text-muted-foreground">Attested:</span> {c.attested ? "Yes" : "No"}</p>
-          </div>
-          {c.note && <p className="mt-2 rounded border border-border bg-muted/40 p-2 text-xs italic">"{c.note}"</p>}
-
-          {Array.isArray(c.proof_paths) && c.proof_paths.length > 0 && (
-            <div className="mt-3">
-              <button
-                type="button"
-                onClick={() => setShowProof((s) => !s)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-              >
-                <FileText className="h-3 w-3" />
-                {showProof ? "Hide" : "View"} {c.proof_paths.length} proof document{c.proof_paths.length === 1 ? "" : "s"}
-              </button>
-              {showProof && (
-                <ul className="mt-2 space-y-1">
-                  {(proofs ?? []).map((p: any) => (
-                    <li key={p.path} className="text-xs">
-                      {p.url ? (
-                        <a href={p.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
-                          <ExternalLink className="h-3 w-3" />
-                          {p.path.split("/").pop()}
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">{p.path} (unavailable)</span>
-                      )}
-                    </li>
-                  ))}
-                  {(!proofs || proofs.length === 0) && (
-                    <li className="text-xs text-muted-foreground">Generating signed URLs…</li>
-                  )}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="flex flex-shrink-0 gap-2">
-          <button
-            disabled={decide.isPending}
-            onClick={() => decide.mutate({ claimId: c.id, decision: "approved" })}
-            className="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-success-foreground disabled:opacity-50"
-          >
-            Approve
-          </button>
-          <button
-            disabled={decide.isPending}
-            onClick={() => decide.mutate({ claimId: c.id, decision: "rejected" })}
-            className="rounded-md border border-border px-3 py-1.5 text-xs disabled:opacity-50"
-          >
-            Reject
-          </button>
-        </div>
-      </div>
-    </li>
-  );
-}
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
