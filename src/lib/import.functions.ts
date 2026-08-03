@@ -248,6 +248,18 @@ export const runStudyImport = createServerFn({ method: "POST" })
             enrollment: ps.designModule?.enrollmentInfo?.count ?? null,
             state_slugs: [...stateSlugSet],
             city_slugs: [...citySlugSet],
+            central_contacts: (ps.contactsLocationsModule?.centralContacts ?? []).map((c) => ({
+              name: c.name ?? null,
+              role: c.role ?? null,
+              phone: c.phone ?? null,
+              phoneExt: c.phoneExt ?? null,
+              email: c.email ?? null,
+            })) as unknown as object,
+            overall_officials: (ps.contactsLocationsModule?.overallOfficials ?? []).map((o) => ({
+              name: o.name ?? null,
+              role: o.role ?? null,
+              affiliation: o.affiliation ?? null,
+            })) as unknown as object,
           });
           for (const li of locInsert) locationRows.push({ ...li, nct_id: id });
         }
