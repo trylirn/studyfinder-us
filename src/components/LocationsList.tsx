@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, Search, ArrowRight } from "lucide-react";
+import { MapPin, Search, ArrowRight, Phone, Mail } from "lucide-react";
+
+type SiteContact = {
+  name?: string | null;
+  role?: string | null;
+  phone?: string | null;
+  phoneExt?: string | null;
+  email?: string | null;
+};
 
 type Location = {
   id: string | number;
@@ -13,6 +21,7 @@ type Location = {
   status: string | null;
   clinic_id?: string | null;
   clinic_slug?: string | null;
+  contacts?: SiteContact[] | null;
 };
 
 type ClinicMap = Record<string, { slug: string; name: string }>;
