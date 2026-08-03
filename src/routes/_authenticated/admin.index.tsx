@@ -32,8 +32,8 @@ function AdminPage() {
       setLog((l) => [`Error: ${(e as Error).message}`, ...l]);
     } finally {
       setBusy(false);
-      qc.invalidateQueries();
     }
+
   }
 
   async function regenerate() {
