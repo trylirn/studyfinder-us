@@ -18,17 +18,10 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 function AdminPage() {
   const stats = Route.useLoaderData();
   const navigate = useNavigate();
-  const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const latestAutomated = (stats.runs as Array<any>).find((run) => run.params?.automated === true);
 
-  const { data: claims } = useQuery({ queryKey: ["pending-claims"], queryFn: () => listPendingClaims() });
-  const decide = useMutation({
-    mutationFn: (input: { claimId: string; decision: "approved" | "rejected" }) =>
-      decideClinicClaim({ data: input }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-claims"] }),
-  });
 
   async function runImport(pages: number, recruitingOnly: boolean) {
     setBusy(true);
