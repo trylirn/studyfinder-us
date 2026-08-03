@@ -205,9 +205,17 @@ export const runStudyImport = createServerFn({ method: "POST" })
               country: l.country ?? null,
               zip: l.zip ?? null,
               status: l.status ?? null,
+              contacts: (l.contacts ?? []).map((c) => ({
+                name: c.name ?? null,
+                role: c.role ?? null,
+                phone: c.phone ?? null,
+                phoneExt: c.phoneExt ?? null,
+                email: c.email ?? null,
+              })),
               lat: typeof l.geoPoint?.lat === "number" ? l.geoPoint.lat : null,
               lng: typeof l.geoPoint?.lon === "number" ? l.geoPoint.lon : null,
             });
+
           }
 
           rows.push({
