@@ -21,7 +21,7 @@ type Location = {
   status: string | null;
   clinic_id?: string | null;
   clinic_slug?: string | null;
-  contacts?: SiteContact[] | null;
+  contacts?: unknown;
 };
 
 type ClinicMap = Record<string, { slug: string; name: string }>;
