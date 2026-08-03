@@ -32,17 +32,11 @@ import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
 import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
-import { Route as ClinicsAuthRouteImport } from './routes/clinics.auth'
 import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
 import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
-import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
-import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as AuthenticatedPortalClaimRouteImport } from './routes/_authenticated/portal.claim'
-import { Route as AuthenticatedPortalBillingRouteImport } from './routes/_authenticated/portal.billing'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
-import { Route as AuthenticatedPortalClinicIdRouteImport } from './routes/_authenticated/portal.clinic.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -158,11 +152,6 @@ const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
   path: '/conditions/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClinicsAuthRoute = ClinicsAuthRouteImport.update({
-  id: '/clinics/auth',
-  path: '/clinics/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ClinicsSlugRoute = ClinicsSlugRouteImport.update({
   id: '/clinics/$slug',
   path: '/clinics/$slug',
@@ -173,34 +162,11 @@ const CitiesCitySlugRoute = CitiesCitySlugRouteImport.update({
   path: '/cities/$citySlug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
-  id: '/portal',
-  path: '/portal',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedPortalIndexRoute =
-  AuthenticatedPortalIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedPortalRoute,
-  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPortalClaimRoute =
-  AuthenticatedPortalClaimRouteImport.update({
-    id: '/claim',
-    path: '/claim',
-    getParentRoute: () => AuthenticatedPortalRoute,
-  } as any)
-const AuthenticatedPortalBillingRoute =
-  AuthenticatedPortalBillingRouteImport.update({
-    id: '/billing',
-    path: '/billing',
-    getParentRoute: () => AuthenticatedPortalRoute,
-  } as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin/analytics',
@@ -213,12 +179,6 @@ const ApiPublicCronImportStudiesRoute =
     path: '/api/public/cron/import-studies',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedPortalClinicIdRoute =
-  AuthenticatedPortalClinicIdRouteImport.update({
-    id: '/clinic/$id',
-    path: '/clinic/$id',
-    getParentRoute: () => AuthenticatedPortalRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -229,10 +189,8 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
-  '/clinics/auth': typeof ClinicsAuthRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -248,11 +206,7 @@ export interface FileRoutesByFullPath {
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
-  '/portal/billing': typeof AuthenticatedPortalBillingRoute
-  '/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
-  '/portal/': typeof AuthenticatedPortalIndexRoute
-  '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
 }
 export interface FileRoutesByTo {
@@ -266,7 +220,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
-  '/clinics/auth': typeof ClinicsAuthRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -282,11 +235,7 @@ export interface FileRoutesByTo {
   '/sponsors': typeof SponsorsIndexRoute
   '/states': typeof StatesIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
-  '/portal/billing': typeof AuthenticatedPortalBillingRoute
-  '/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
-  '/portal': typeof AuthenticatedPortalIndexRoute
-  '/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
 }
 export interface FileRoutesById {
@@ -300,10 +249,8 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/portal': typeof AuthenticatedPortalRouteWithChildren
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
-  '/clinics/auth': typeof ClinicsAuthRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
   '/learn/$slug': typeof LearnSlugRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -319,11 +266,7 @@ export interface FileRoutesById {
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
-  '/_authenticated/portal/billing': typeof AuthenticatedPortalBillingRoute
-  '/_authenticated/portal/claim': typeof AuthenticatedPortalClaimRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
-  '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
-  '/_authenticated/portal/clinic/$id': typeof AuthenticatedPortalClinicIdRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
 }
 export interface FileRouteTypes {
@@ -337,10 +280,8 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/search'
     | '/sitemap.xml'
-    | '/portal'
     | '/cities/$citySlug'
     | '/clinics/$slug'
-    | '/clinics/auth'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -356,11 +297,7 @@ export interface FileRouteTypes {
     | '/sponsors/'
     | '/states/'
     | '/admin/analytics'
-    | '/portal/billing'
-    | '/portal/claim'
     | '/admin/'
-    | '/portal/'
-    | '/portal/clinic/$id'
     | '/api/public/cron/import-studies'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -374,7 +311,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/cities/$citySlug'
     | '/clinics/$slug'
-    | '/clinics/auth'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -390,11 +326,7 @@ export interface FileRouteTypes {
     | '/sponsors'
     | '/states'
     | '/admin/analytics'
-    | '/portal/billing'
-    | '/portal/claim'
     | '/admin'
-    | '/portal'
-    | '/portal/clinic/$id'
     | '/api/public/cron/import-studies'
   id:
     | '__root__'
@@ -407,10 +339,8 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/search'
     | '/sitemap.xml'
-    | '/_authenticated/portal'
     | '/cities/$citySlug'
     | '/clinics/$slug'
-    | '/clinics/auth'
     | '/conditions/$slug'
     | '/learn/$slug'
     | '/legal/disclaimer'
@@ -426,11 +356,7 @@ export interface FileRouteTypes {
     | '/sponsors/'
     | '/states/'
     | '/_authenticated/admin/analytics'
-    | '/_authenticated/portal/billing'
-    | '/_authenticated/portal/claim'
     | '/_authenticated/admin/'
-    | '/_authenticated/portal/'
-    | '/_authenticated/portal/clinic/$id'
     | '/api/public/cron/import-studies'
   fileRoutesById: FileRoutesById
 }
@@ -446,7 +372,6 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CitiesCitySlugRoute: typeof CitiesCitySlugRoute
   ClinicsSlugRoute: typeof ClinicsSlugRoute
-  ClinicsAuthRoute: typeof ClinicsAuthRoute
   ConditionsSlugRoute: typeof ConditionsSlugRoute
   LearnSlugRoute: typeof LearnSlugRoute
   LegalDisclaimerRoute: typeof LegalDisclaimerRoute
@@ -627,13 +552,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConditionsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/clinics/auth': {
-      id: '/clinics/auth'
-      path: '/clinics/auth'
-      fullPath: '/clinics/auth'
-      preLoaderRoute: typeof ClinicsAuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/clinics/$slug': {
       id: '/clinics/$slug'
       path: '/clinics/$slug'
@@ -648,40 +566,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CitiesCitySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/portal': {
-      id: '/_authenticated/portal'
-      path: '/portal'
-      fullPath: '/portal'
-      preLoaderRoute: typeof AuthenticatedPortalRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/portal/': {
-      id: '/_authenticated/portal/'
-      path: '/'
-      fullPath: '/portal/'
-      preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
-    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/portal/claim': {
-      id: '/_authenticated/portal/claim'
-      path: '/claim'
-      fullPath: '/portal/claim'
-      preLoaderRoute: typeof AuthenticatedPortalClaimRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
-    }
-    '/_authenticated/portal/billing': {
-      id: '/_authenticated/portal/billing'
-      path: '/billing'
-      fullPath: '/portal/billing'
-      preLoaderRoute: typeof AuthenticatedPortalBillingRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
     }
     '/_authenticated/admin/analytics': {
       id: '/_authenticated/admin/analytics'
@@ -697,41 +587,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronImportStudiesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/portal/clinic/$id': {
-      id: '/_authenticated/portal/clinic/$id'
-      path: '/clinic/$id'
-      fullPath: '/portal/clinic/$id'
-      preLoaderRoute: typeof AuthenticatedPortalClinicIdRouteImport
-      parentRoute: typeof AuthenticatedPortalRoute
-    }
   }
 }
 
-interface AuthenticatedPortalRouteChildren {
-  AuthenticatedPortalBillingRoute: typeof AuthenticatedPortalBillingRoute
-  AuthenticatedPortalClaimRoute: typeof AuthenticatedPortalClaimRoute
-  AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
-  AuthenticatedPortalClinicIdRoute: typeof AuthenticatedPortalClinicIdRoute
-}
-
-const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
-  AuthenticatedPortalBillingRoute: AuthenticatedPortalBillingRoute,
-  AuthenticatedPortalClaimRoute: AuthenticatedPortalClaimRoute,
-  AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
-  AuthenticatedPortalClinicIdRoute: AuthenticatedPortalClinicIdRoute,
-}
-
-const AuthenticatedPortalRouteWithChildren =
-  AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren)
-
 interface AuthenticatedRouteChildren {
-  AuthenticatedPortalRoute: typeof AuthenticatedPortalRouteWithChildren
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedPortalRoute: AuthenticatedPortalRouteWithChildren,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
@@ -752,7 +616,6 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CitiesCitySlugRoute: CitiesCitySlugRoute,
   ClinicsSlugRoute: ClinicsSlugRoute,
-  ClinicsAuthRoute: ClinicsAuthRoute,
   ConditionsSlugRoute: ConditionsSlugRoute,
   LearnSlugRoute: LearnSlugRoute,
   LegalDisclaimerRoute: LegalDisclaimerRoute,
