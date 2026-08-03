@@ -43,30 +43,13 @@ export function SiteHeader() {
             <Search className="h-4 w-4" />
             Find a trial
           </Link>
-          {signedIn ? (
-            <Link
-              to="/portal"
-              className="inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Clinic portal
-            </Link>
-          ) : (
-            <>
-              <Link
-                to="/clinics/auth"
-                className="hidden sm:inline-flex h-9 items-center rounded-md border border-input bg-card px-3 text-sm text-foreground hover:bg-accent"
-              >
-                Clinic sign in
-              </Link>
-              <Link
-                to="/clinics/auth"
-                search={{ mode: "signup" }}
-                className="inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
+          <Link
+            to="/get-matched"
+            className="inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Get matched
+          </Link>
+
         </div>
       </div>
     </header>
