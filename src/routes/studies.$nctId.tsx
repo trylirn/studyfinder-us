@@ -203,6 +203,12 @@ function StudyPage() {
             )}
           </Card>
 
+          <StudyContacts
+            contacts={study.central_contacts}
+            officials={study.overall_officials}
+          />
+
+
           <section id="research-locations" className="rounded-xl border border-border bg-card p-5">
             <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               <Hospital className="h-4 w-4" /> Research locations
