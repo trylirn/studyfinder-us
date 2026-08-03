@@ -114,19 +114,8 @@ function AdminPage() {
         )}
       </section>
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-6">
-        <h2 className="text-lg font-semibold">Clinic claim queue</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Approve clinic operator requests. Approval grants the user a clinic_admin role and ownership of the clinic profile.
-          Review each claimant's proof documents before deciding.
-        </p>
-        <ul className="mt-4 space-y-3 text-sm">
-          {(claims ?? []).map((c: any) => (
-            <ClaimRow key={c.id} claim={c} decide={decide} />
-          ))}
-          {(claims ?? []).length === 0 && <li className="text-muted-foreground">No pending claims.</li>}
-        </ul>
-      </section>
+
+
 
       <section className="mt-8 rounded-xl border border-border bg-card p-6">
         <h2 className="text-lg font-semibold">Recent import runs</h2>
