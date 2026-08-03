@@ -8,6 +8,7 @@ import { Building2, Calendar, Users, ExternalLink, ClipboardCheck, FlaskConical,
 import { EligibilityModal } from "@/components/EligibilityModal";
 import { AiSimplify } from "@/components/AiSimplify";
 import { LocationsList } from "@/components/LocationsList";
+import { StudyContacts } from "@/components/StudyContacts";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
 import { TrialMap } from "@/components/TrialMap";
 
