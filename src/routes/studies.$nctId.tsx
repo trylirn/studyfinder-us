@@ -281,13 +281,15 @@ function StudyPage() {
                 {study.study_type ?? "—"}
               </SideItem>
             </ul>
-            <button
-              type="button"
-              onClick={() => setModalOpen(true)}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-            >
-              <ClipboardCheck className="h-4 w-4" /> Check eligibility
-            </button>
+            {isRecruiting && (
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+              >
+                <ClipboardCheck className="h-4 w-4" /> Check eligibility
+              </button>
+            )}
           </Card>
 
           {(study.conditions ?? []).length > 0 && (
