@@ -20,7 +20,14 @@ function AdminPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<string[]>([]);
-  const latestAutomated = (stats.runs as Array<any>).find((run) => run.params?.automated === true);
+  const runs = stats.runs as Array<any>;
+  const latestAutomated = runs.find((run) => run.params?.automated === true && run.params?.mode !== "status_refresh");
+  const latestStatusRefresh = runs.find((run) => run.params?.mode === "status_refresh");
+  const lastAutomatedAgeHours = latestAutomated
+    ? (Date.now() - new Date(latestAutomated.started_at).getTime()) / 3600000
+    : null;
+  const automationHealthy =
+    latestAutomated?.status === "ok" && lastAutomatedAgeHours !== null && lastAutomatedAgeHours < 6;
 
 
   async function runImport(pages: number, recruitingOnly: boolean) {
