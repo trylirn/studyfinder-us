@@ -20,7 +20,14 @@ function AdminPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<string[]>([]);
-  const latestAutomated = (stats.runs as Array<any>).find((run) => run.params?.automated === true);
+  const runs = stats.runs as Array<any>;
+  const latestAutomated = runs.find((run) => run.params?.automated === true && run.params?.mode !== "status_refresh");
+  const latestStatusRefresh = runs.find((run) => run.params?.mode === "status_refresh");
+  const lastAutomatedAgeHours = latestAutomated
+    ? (Date.now() - new Date(latestAutomated.started_at).getTime()) / 3600000
+    : null;
+  const automationHealthy =
+    latestAutomated?.status === "ok" && lastAutomatedAgeHours !== null && lastAutomatedAgeHours < 6;
 
 
   async function runImport(pages: number, recruitingOnly: boolean) {
@@ -73,15 +80,51 @@ function AdminPage() {
       </div>
 
       <section className="mt-8 rounded-xl border border-border bg-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">Automation status</h2>
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+              automationHealthy ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+            }`}
+          >
+            {automationHealthy ? "Healthy" : "Needs attention"}
+          </span>
+        </div>
+        <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">Cadence</dt>
+            <dd className="mt-1">Study import every 2 hours; status refresh on the alternate hour; counts nightly.</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">Last automatic import</dt>
+            <dd className="mt-1">
+              {latestAutomated
+                ? `${new Date(latestAutomated.started_at).toLocaleString()} — ${latestAutomated.status} (+${latestAutomated.inserted ?? 0} new, ${latestAutomated.updated ?? 0} updated)`
+                : "No automated import has completed yet."}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">Last status refresh</dt>
+            <dd className="mt-1">
+              {latestStatusRefresh
+                ? `${new Date(latestStatusRefresh.started_at).toLocaleString()} — ${latestStatusRefresh.status} (${latestStatusRefresh.updated ?? 0} status changes)`
+                : "No status refresh has completed yet."}
+            </dd>
+          </div>
+        </dl>
+        {!automationHealthy && (
+          <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+            {latestAutomated
+              ? `The most recent automatic import ${latestAutomated.status === "error" ? "failed" : `ran ${Math.round(lastAutomatedAgeHours ?? 0)} hours ago`}. Run a manual sync below and check the scheduled job.`
+              : "No automatic import has completed yet. Run a manual sync below and check the scheduled job."}
+          </p>
+        )}
+      </section>
+
+      <section className="mt-8 rounded-xl border border-border bg-card p-6">
         <h2 className="text-lg font-semibold">Import studies from ClinicalTrials.gov</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Fetch the latest studies via the public v2 API. Records are deduplicated by NCT ID and re-indexed for SEO pages.
-        </p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Automatic sync runs every 6 hours; directory counts refresh nightly.
-          {latestAutomated
-            ? ` Last automated run: ${new Date(latestAutomated.started_at).toLocaleString()} (${latestAutomated.status}).`
-            : " No automated run has completed yet."}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <button disabled={busy} onClick={() => runImport(5, true)} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">

@@ -36,6 +36,7 @@ import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
 import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
+import { Route as ApiPublicCronRefreshStatusesRouteImport } from './routes/api/public/cron.refresh-statuses'
 import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -173,6 +174,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/admin/analytics',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const ApiPublicCronRefreshStatusesRoute =
+  ApiPublicCronRefreshStatusesRouteImport.update({
+    id: '/api/public/cron/refresh-statuses',
+    path: '/api/public/cron/refresh-statuses',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCronImportStudiesRoute =
   ApiPublicCronImportStudiesRouteImport.update({
     id: '/api/public/cron/import-studies',
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
+  '/api/public/cron/refresh-statuses': typeof ApiPublicCronRefreshStatusesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -237,6 +245,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
+  '/api/public/cron/refresh-statuses': typeof ApiPublicCronRefreshStatusesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -268,6 +277,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
+  '/api/public/cron/refresh-statuses': typeof ApiPublicCronRefreshStatusesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/'
     | '/api/public/cron/import-studies'
+    | '/api/public/cron/refresh-statuses'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin'
     | '/api/public/cron/import-studies'
+    | '/api/public/cron/refresh-statuses'
   id:
     | '__root__'
     | '/'
@@ -358,6 +370,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/'
     | '/api/public/cron/import-studies'
+    | '/api/public/cron/refresh-statuses'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -387,6 +400,7 @@ export interface RootRouteChildren {
   SponsorsIndexRoute: typeof SponsorsIndexRoute
   StatesIndexRoute: typeof StatesIndexRoute
   ApiPublicCronImportStudiesRoute: typeof ApiPublicCronImportStudiesRoute
+  ApiPublicCronRefreshStatusesRoute: typeof ApiPublicCronRefreshStatusesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -580,6 +594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/cron/refresh-statuses': {
+      id: '/api/public/cron/refresh-statuses'
+      path: '/api/public/cron/refresh-statuses'
+      fullPath: '/api/public/cron/refresh-statuses'
+      preLoaderRoute: typeof ApiPublicCronRefreshStatusesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/import-studies': {
       id: '/api/public/cron/import-studies'
       path: '/api/public/cron/import-studies'
@@ -631,17 +652,8 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorsIndexRoute: SponsorsIndexRoute,
   StatesIndexRoute: StatesIndexRoute,
   ApiPublicCronImportStudiesRoute: ApiPublicCronImportStudiesRoute,
+  ApiPublicCronRefreshStatusesRoute: ApiPublicCronRefreshStatusesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
