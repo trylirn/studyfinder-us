@@ -111,25 +111,65 @@ function StudyPage() {
       </div>
       <h1 className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">{study.title}</h1>
 
-      {/* High-contrast CTA */}
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
-        >
-          <ClipboardCheck className="h-4 w-4" />
-          Check My Eligibility
-        </button>
-        <a
-          href={`https://clinicaltrials.gov/study/${study.nct_id}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
-        >
-          View on ClinicalTrials.gov <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      </div>
+      {/* High-contrast CTA — only while the trial is open to new participants */}
+      {isRecruiting ? (
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+          >
+            <ClipboardCheck className="h-4 w-4" />
+            Check My Eligibility
+          </button>
+          <a
+            href={`https://clinicaltrials.gov/study/${study.nct_id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
+          >
+            View on ClinicalTrials.gov <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      ) : (
+        <div className="mt-5 rounded-xl border border-border bg-muted/40 p-4">
+          <p className="text-sm font-semibold">
+            This study is not currently recruiting ({statusLabel(study.overall_status)}).
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {study.completion_date
+              ? `Listed completion date: ${new Date(study.completion_date).toLocaleDateString()}. `
+              : ""}
+            Enrollment is closed, so eligibility screening is unavailable for this record.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            {study.condition_slugs?.[0] ? (
+              <Link
+                to="/conditions/$slug"
+                params={{ slug: study.condition_slugs[0] }}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              >
+                See recruiting trials for {study.conditions?.[0] ?? "this condition"}
+              </Link>
+            ) : (
+              <Link
+                to="/recruiting"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              >
+                Browse recruiting trials
+              </Link>
+            )}
+            <a
+              href={`https://clinicaltrials.gov/study/${study.nct_id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
+            >
+              View on ClinicalTrials.gov <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Sponsor vs Research Sites — clearly separated */}
       <div className="mt-6 grid gap-3 md:grid-cols-2">
