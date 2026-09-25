@@ -15,8 +15,15 @@ export const Route = createFileRoute("/sponsors/")({
     meta: [
       { title: "Top Clinical Trial Sponsors | TrialFinderUS" },
       { name: "description", content: "Browse clinical trials by sponsor — pharma, biotech, NIH, and academic medical centers." },
+      { property: "og:title", content: "Top Clinical Trial Sponsors | TrialFinderUS" },
+      { property: "og:description", content: "Browse clinical trials by sponsor — pharma, biotech, NIH, and academic medical centers." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/sponsors" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Top Clinical Trial Sponsors | TrialFinderUS" },
+      { name: "twitter:description", content: "Browse clinical trials by sponsor — pharma, biotech, NIH, and academic medical centers." },
     ],
-    links: [{ rel: "canonical", href: "/sponsors" }],
+      links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/sponsors" }],
   }),
   component: SponsorsIndex,
 });

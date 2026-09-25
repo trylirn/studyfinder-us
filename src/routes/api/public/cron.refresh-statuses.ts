@@ -55,6 +55,16 @@ type CTGStudy = {
   };
 };
 
+const TERMINAL_STATUSES = new Set([
+  "COMPLETED",
+  "TERMINATED",
+  "WITHDRAWN",
+  "NO_LONGER_AVAILABLE",
+  "APPROVED_FOR_MARKETING",
+  "AVAILABLE",
+  "TEMPORARILY_NOT_AVAILABLE",
+]);
+
 async function runStatusRefresh(request: Request) {
   if (!(await authorized(request))) return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
@@ -105,16 +115,21 @@ async function runStatusRefresh(request: Request) {
         const status = s.protocolSection?.statusModule?.overallStatus ?? null;
         if (!id || !previous.has(id)) continue;
         checked++;
-        const { error: upErr } = await supabaseAdmin
-          .from("studies")
-          .update({
-            overall_status: status,
-            completion_date: parseDate(s.protocolSection?.statusModule?.completionDateStruct?.date),
-            last_update_posted: parseDate(s.protocolSection?.statusModule?.lastUpdatePostDateStruct?.date),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("nct_id", id);
-        if (upErr) throw new Error(`status update: ${upErr.message}`);
+        if (status && TERMINAL_STATUSES.has(status)) {
+          const { error: deleteErr } = await supabaseAdmin.from("studies").delete().eq("nct_id", id);
+          if (deleteErr) throw new Error(`terminal study delete: ${deleteErr.message}`);
+        } else {
+          const { error: upErr } = await supabaseAdmin
+            .from("studies")
+            .update({
+              overall_status: status,
+              completion_date: parseDate(s.protocolSection?.statusModule?.completionDateStruct?.date),
+              last_update_posted: parseDate(s.protocolSection?.statusModule?.lastUpdatePostDateStruct?.date),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("nct_id", id);
+          if (upErr) throw new Error(`status update: ${upErr.message}`);
+        }
         if (status !== previous.get(id)) changed++;
       }
     }

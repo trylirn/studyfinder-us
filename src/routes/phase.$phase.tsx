@@ -9,13 +9,25 @@ const q = (phase: "1" | "2" | "3" | "4") =>
 export const Route = createFileRoute("/phase/$phase")({
   parseParams: (p) => ({ phase: p.phase as "1" | "2" | "3" | "4" }),
   loader: ({ context, params }) => context.queryClient.ensureQueryData(q(params.phase)),
-  head: ({ params }) => ({
-    meta: [
-      { title: `Phase ${params.phase} Clinical Trials in the U.S. | TrialFinderUS` },
-      { name: "description", content: `Browse Phase ${params.phase} clinical trials and research studies recruiting across the United States.` },
-    ],
-    links: [{ rel: "canonical", href: `/phase/${params.phase}` }],
-  }),
+  head: ({ params }) => {
+    const title = `Phase ${params.phase} Clinical Trials in the U.S. | TrialFinderUS`;
+    const description = `Browse Phase ${params.phase} clinical trials and research studies recruiting across the United States.`;
+    const url = `https://studyfinder-us.lovable.app/phase/${params.phase}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: () => {
     const { phase } = Route.useParams();
     const { data } = useSuspenseQuery(q(phase as "1" | "2" | "3" | "4"));

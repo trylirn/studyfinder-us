@@ -52,12 +52,25 @@ export const Route = createFileRoute("/learn/$slug")({
     if (!a) throw notFound();
     return a;
   },
-  head: ({ loaderData, params }) => ({
-    meta: [
-      { title: `${loaderData?.title ?? params.slug} | TrialFinderUS` },
-      { name: "description", content: loaderData?.body.slice(0, 160) ?? "" },
-    ],
-    links: [{ rel: "canonical", href: `/learn/${params.slug}` }],
+  head: ({ loaderData, params }) => {
+    const title = `${loaderData?.title ?? params.slug} | TrialFinderUS`;
+    const description = loaderData?.body.slice(0, 160) ?? "Learn about clinical trials and research studies.";
+    const url = `https://studyfinder-us.lovable.app/learn/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Article", headline: loaderData?.title ?? params.slug, description, url }) }],
+    };
   }),
   component: () => {
     const data = Route.useLoaderData();

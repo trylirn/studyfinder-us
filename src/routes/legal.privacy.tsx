@@ -5,8 +5,15 @@ export const Route = createFileRoute("/legal/privacy")({
     meta: [
       { title: "Privacy Policy | TrialFinderUS" },
       { name: "description", content: "How TrialFinderUS collects, uses, and shares information — and why we do not retain patient health data submitted through the eligibility tool." },
+      { property: "og:title", content: "Privacy Policy | TrialFinderUS" },
+      { property: "og:description", content: "How TrialFinderUS collects, uses, and shares information — and why we do not retain patient health data submitted through the eligibility tool." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/legal/privacy" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Privacy Policy | TrialFinderUS" },
+      { name: "twitter:description", content: "How TrialFinderUS collects, uses, and shares information — and why we do not retain patient health data submitted through the eligibility tool." },
     ],
-    links: [{ rel: "canonical", href: "/legal/privacy" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/legal/privacy" }],
   }),
   component: Page,
 });

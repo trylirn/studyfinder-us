@@ -11,8 +11,15 @@ export const Route = createFileRoute("/states/")({
     meta: [
       { title: "Clinical Trials by State — All 50 U.S. States | TrialFinderUS" },
       { name: "description", content: "Browse clinical trials and research studies in every U.S. state." },
+      { property: "og:title", content: "Clinical Trials by State — All 50 U.S. States | TrialFinderUS" },
+      { property: "og:description", content: "Browse clinical trials and research studies in every U.S. state." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/states" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Clinical Trials by State — All 50 U.S. States | TrialFinderUS" },
+      { name: "twitter:description", content: "Browse clinical trials and research studies in every U.S. state." },
     ],
-    links: [{ rel: "canonical", href: "/states" }],
+      links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/states" }],
   }),
   component: StatesIndex,
 });
