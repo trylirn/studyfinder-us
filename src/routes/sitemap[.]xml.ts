@@ -7,7 +7,9 @@ export const Route = createFileRoute("/sitemap.xml")({
         const { createClient } = await import("@supabase/supabase-js");
         const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!);
         const origin = new URL(request.url).origin;
-        const urls: { loc: string; priority?: number }[] = [
+        const escapeXml = (value: string) =>
+          value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
+        const urls: { loc: string; priority?: number; lastmod?: string | null }[] = [
           { loc: "/", priority: 1.0 },
           { loc: "/conditions", priority: 0.9 },
           { loc: "/states", priority: 0.9 },
@@ -24,21 +26,26 @@ export const Route = createFileRoute("/sitemap.xml")({
           sb.from("states").select("slug"),
           sb.from("cities").select("slug").order("study_count", { ascending: false }).limit(2000),
           sb.from("sponsors").select("slug").order("study_count", { ascending: false }).limit(2000),
-          sb.from("studies").select("nct_id").order("last_update_posted", { ascending: false, nullsFirst: false }).limit(40000),
+          sb.from("studies").select("nct_id,last_update_posted").order("last_update_posted", { ascending: false, nullsFirst: false }).limit(40000),
         ]);
         for (const c of conds.data ?? []) urls.push({ loc: `/conditions/${c.slug}`, priority: 0.7 });
         for (const s of states.data ?? []) urls.push({ loc: `/states/${s.slug}`, priority: 0.7 });
         for (const c of cities.data ?? []) urls.push({ loc: `/cities/${c.slug}`, priority: 0.6 });
         for (const s of sponsors.data ?? []) urls.push({ loc: `/sponsors/${s.slug}`, priority: 0.6 });
-        for (const s of studies.data ?? []) urls.push({ loc: `/studies/${s.nct_id}`, priority: 0.5 });
+        for (const s of studies.data ?? []) urls.push({ loc: `/studies/${s.nct_id}`, priority: 0.5, lastmod: s.last_update_posted });
 
         const body =
           `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
           urls
-            .map((u) => `<url><loc>${origin}${u.loc}</loc>${u.priority ? `<priority>${u.priority}</priority>` : ""}</url>`)
+            .map((u) => `<url><loc>${escapeXml(origin + u.loc)}</loc>${u.lastmod ? `<lastmod>${escapeXml(u.lastmod)}</lastmod>` : ""}${u.priority ? `<priority>${u.priority}</priority>` : ""}</url>`)
             .join("\n") +
           `\n</urlset>`;
-        return new Response(body, { headers: { "content-type": "application/xml" } });
+        return new Response(body, {
+          headers: {
+            "content-type": "application/xml; charset=utf-8",
+            "cache-control": "public, max-age=300, s-maxage=900, stale-while-revalidate=3600",
+          },
+        });
       },
     },
   },
