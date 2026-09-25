@@ -5,8 +5,15 @@ export const Route = createFileRoute("/legal/disclaimer")({
     meta: [
       { title: "Medical Disclaimer | TrialFinderUS" },
       { name: "description", content: "Important medical, informational, and liability disclaimers for users of TrialFinderUS." },
+      { property: "og:title", content: "Medical Disclaimer | TrialFinderUS" },
+      { property: "og:description", content: "Important medical, informational, and liability disclaimers for users of TrialFinderUS." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/legal/disclaimer" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Medical Disclaimer | TrialFinderUS" },
+      { name: "twitter:description", content: "Important medical, informational, and liability disclaimers for users of TrialFinderUS." },
     ],
-    links: [{ rel: "canonical", href: "/legal/disclaimer" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/legal/disclaimer" }],
   }),
   component: Page,
 });

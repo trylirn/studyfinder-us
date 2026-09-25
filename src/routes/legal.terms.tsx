@@ -5,8 +5,15 @@ export const Route = createFileRoute("/legal/terms")({
     meta: [
       { title: "Terms of Service | TrialFinderUS" },
       { name: "description", content: "The terms governing your use of TrialFinderUS, an independent informational directory of clinical trials and research studies in the United States." },
+      { property: "og:title", content: "Terms of Service | TrialFinderUS" },
+      { property: "og:description", content: "The terms governing your use of TrialFinderUS, an independent informational directory of clinical trials and research studies in the United States." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/legal/terms" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Terms of Service | TrialFinderUS" },
+      { name: "twitter:description", content: "The terms governing your use of TrialFinderUS, an independent informational directory of clinical trials and research studies in the United States." },
     ],
-    links: [{ rel: "canonical", href: "/legal/terms" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/legal/terms" }],
   }),
   component: Page,
 });

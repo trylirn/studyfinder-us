@@ -15,8 +15,15 @@ export const Route = createFileRoute("/learn/")({
     meta: [
       { title: "Learn About Clinical Trials | TrialFinderUS" },
       { name: "description", content: "Plain-English guides about clinical trials: phases, eligibility, risks, benefits, and how to participate." },
+      { property: "og:title", content: "Learn About Clinical Trials | TrialFinderUS" },
+      { property: "og:description", content: "Plain-English guides about clinical trials: phases, eligibility, risks, benefits, and how to participate." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/learn" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Learn About Clinical Trials | TrialFinderUS" },
+      { name: "twitter:description", content: "Plain-English guides about clinical trials: phases, eligibility, risks, benefits, and how to participate." },
     ],
-    links: [{ rel: "canonical", href: "/learn" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/learn" }],
   }),
   component: () => (
     <div className="container mx-auto max-w-3xl px-4 py-10">

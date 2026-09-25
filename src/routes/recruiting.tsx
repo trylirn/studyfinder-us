@@ -18,8 +18,15 @@ export const Route = createFileRoute("/recruiting")({
     meta: [
       { title: "Recruiting Clinical Trials in the U.S. | TrialFinderUS" },
       { name: "description", content: "Currently recruiting clinical trials and open-enrollment research studies across the United States." },
+      { property: "og:title", content: "Recruiting Clinical Trials in the U.S. | TrialFinderUS" },
+      { property: "og:description", content: "Currently recruiting clinical trials and open-enrollment research studies across the United States." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/recruiting" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Recruiting Clinical Trials in the U.S. | TrialFinderUS" },
+      { name: "twitter:description", content: "Currently recruiting clinical trials and open-enrollment research studies across the United States." },
     ],
-    links: [{ rel: "canonical", href: "/recruiting" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/recruiting" }],
   }),
   component: RecruitingPage,
 });

@@ -15,8 +15,15 @@ export const Route = createFileRoute("/conditions/")({
     meta: [
       { title: "All Conditions — Clinical Trials Directory | TrialFinderUS" },
       { name: "description", content: "Browse clinical trials by medical condition. From diabetes and cancer to rare diseases." },
+      { property: "og:title", content: "All Conditions — Clinical Trials Directory | TrialFinderUS" },
+      { property: "og:description", content: "Browse clinical trials by medical condition. From diabetes and cancer to rare diseases." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/conditions" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "All Conditions — Clinical Trials Directory | TrialFinderUS" },
+      { name: "twitter:description", content: "Browse clinical trials by medical condition. From diabetes and cancer to rare diseases." },
     ],
-    links: [{ rel: "canonical", href: "/conditions" }],
+      links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/conditions" }],
   }),
   component: ConditionsIndex,
 });

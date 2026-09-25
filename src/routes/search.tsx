@@ -22,6 +22,13 @@ export const Route = createFileRoute("/search")({
     meta: [
       { title: "Search Clinical Trials | TrialFinderUS" },
       { name: "description", content: "Search recruiting clinical trials by condition, treatment, city, state, sponsor, or NCT ID." },
+      { property: "og:title", content: "Search Clinical Trials | TrialFinderUS" },
+      { property: "og:description", content: "Search recruiting clinical trials by condition, treatment, city, state, sponsor, or NCT ID." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/search" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Search Clinical Trials | TrialFinderUS" },
+      { name: "twitter:description", content: "Search recruiting clinical trials by condition, treatment, city, state, sponsor, or NCT ID." },
       { name: "robots", content: "noindex,follow" },
     ],
   }),

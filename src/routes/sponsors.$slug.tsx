@@ -12,13 +12,26 @@ export const Route = createFileRoute("/sponsors/$slug")({
     if (!d) throw notFound();
     return d;
   },
-  head: ({ loaderData, params }) => ({
-    meta: [
-      { title: `${loaderData?.sponsor?.name ?? params.slug} Clinical Trials | TrialFinderUS` },
-      { name: "description", content: `Browse ${loaderData?.total ?? 0} clinical trials sponsored by ${loaderData?.sponsor?.name ?? ""} in the United States.` },
-    ],
-    links: [{ rel: "canonical", href: `/sponsors/${params.slug}` }],
-  }),
+  head: ({ loaderData, params }) => {
+    const sponsor = loaderData?.sponsor?.name ?? params.slug;
+    const title = `${sponsor} Clinical Trials | TrialFinderUS`;
+    const description = `Browse ${loaderData?.total ?? 0} clinical trials sponsored by ${sponsor} in the United States.`;
+    const url = `https://studyfinder-us.lovable.app/sponsors/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: () => {
     const { slug } = Route.useParams();
     const { data } = useSuspenseQuery(q(slug));

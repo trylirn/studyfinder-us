@@ -17,8 +17,15 @@ export const Route = createFileRoute("/clinics/")({
     meta: [
       { title: "Clinical Research Sites & Clinics in the U.S. | TrialFinderUS" },
       { name: "description", content: "Browse clinical research sites and trial-running clinics across the United States. Find recruiting facilities near you." },
+      { property: "og:title", content: "Clinical Research Sites & Clinics in the U.S. | TrialFinderUS" },
+      { property: "og:description", content: "Browse clinical research sites and trial-running clinics across the United States. Find recruiting facilities near you." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://studyfinder-us.lovable.app/clinics" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Clinical Research Sites & Clinics in the U.S. | TrialFinderUS" },
+      { name: "twitter:description", content: "Browse clinical research sites and trial-running clinics across the United States. Find recruiting facilities near you." },
     ],
-    links: [{ rel: "canonical", href: "/clinics" }],
+    links: [{ rel: "canonical", href: "https://studyfinder-us.lovable.app/clinics" }],
   }),
   component: ClinicsIndex,
 });

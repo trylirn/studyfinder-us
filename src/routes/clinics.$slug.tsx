@@ -31,6 +31,9 @@ export const Route = createFileRoute("/clinics/$slug")({
         { property: "og:description", content: desc },
         { property: "og:type", content: "profile" },
         { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
       ],
       links: [{ rel: "canonical", href: url }],
     };
