@@ -71,7 +71,7 @@ export const Route = createFileRoute("/learn/$slug")({
       links: [{ rel: "canonical", href: url }],
       scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Article", headline: loaderData?.title ?? params.slug, description, url }) }],
     };
-  }),
+  },
   component: () => {
     const data = Route.useLoaderData();
     return (
