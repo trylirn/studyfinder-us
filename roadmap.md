@@ -1,0 +1,5 @@
+- [ ] Remove all public visitor contact collection and lead delivery paths
+- [ ] Make matching and directory analytics non-persistent for visitors
+- [ ] Reduce redundant scheduled database refresh work and add targeted indexes only where justified
+- [ ] Complete SEO foundations audit and correct current findings
+- [ ] Verify build and public flows
