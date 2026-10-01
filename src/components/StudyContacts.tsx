@@ -36,7 +36,7 @@ export function StudyContacts({
         <UserRound className="h-4 w-4" /> Study contacts
       </h2>
       <p className="mb-4 text-xs text-muted-foreground">
-        People who can answer questions about joining this study, as published by the study sponsor.
+         Public contact details published by the study sponsor. TrialFinderUS does not collect messages or contact requests.
       </p>
 
       {people.length > 0 && (

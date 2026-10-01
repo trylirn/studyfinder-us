@@ -6,8 +6,7 @@ export function LegalDisclaimer({ variant = "block" }: { variant?: "block" | "in
       <p className="text-xs leading-5 text-muted-foreground">
         Informational only — not medical advice. We do not recommend specific treatments, diagnose, or
         provide a doctor-patient relationship. Always consult a licensed physician before making
-        medical decisions. By submitting your information you consent to share it with the selected
-        research site for the sole purpose of pre-screening for this trial.
+        medical decisions. This anonymous browser-only check does not send or save your answers.
       </p>
     );
   }

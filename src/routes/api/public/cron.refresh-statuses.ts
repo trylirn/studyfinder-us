@@ -134,7 +134,6 @@ async function runStatusRefresh(request: Request) {
       }
     }
 
-    await supabaseAdmin.rpc("refresh_directory_counts");
     await supabaseAdmin
       .from("import_runs")
       .update({ status: "ok", finished_at: new Date().toISOString(), inserted: 0, updated: changed, pages: batches })

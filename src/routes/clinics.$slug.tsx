@@ -5,7 +5,6 @@ import { getClinicPage } from "@/lib/directory.functions";
 import { StudyCard } from "@/components/StudyCard";
 import { TrialMap } from "@/components/TrialMap";
 import { Hospital, MapPin, Building2, Phone, Globe, Navigation, Stethoscope, FlaskConical } from "lucide-react";
-import { track } from "@/lib/track";
 
 const q = (slug: string) =>
   queryOptions({ queryKey: ["clinic", slug], queryFn: () => getClinicPage({ data: { slug } }) });
@@ -85,12 +84,6 @@ function ClinicPage() {
     },
     url: `/clinics/${clinic.slug}`,
   };
-  const leadContext = {
-    clinic_id: clinic.id,
-    city_slug: clinic.city_slug ?? null,
-    state_slug: clinic.state_slug ?? null,
-  };
-
   return (
     <article className="container mx-auto max-w-5xl px-4 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
@@ -118,12 +111,12 @@ function ClinicPage() {
       {/* Quick contact */}
       <section className="mt-6 grid gap-3 sm:grid-cols-3">
         {clinic.phone && (
-          <a href={`tel:${clinic.phone}`} onClick={() => track("lead_call", leadContext)} className="flex items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm hover:border-primary/60">
+          <a href={`tel:${clinic.phone}`} className="flex items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm hover:border-primary/60">
             <Phone className="h-4 w-4 text-primary" /> {clinic.phone}
           </a>
         )}
         {clinic.website && /^https?:\/\//i.test(clinic.website) && (
-          <a href={clinic.website} target="_blank" rel="noopener noreferrer" onClick={() => track("lead_website", leadContext)} className="flex items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm hover:border-primary/60">
+          <a href={clinic.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm hover:border-primary/60">
             <Globe className="h-4 w-4 text-primary" /> <span className="truncate">Website</span>
           </a>
         )}
@@ -133,7 +126,6 @@ function ClinicPage() {
             href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent([clinic.name, clinic.address_line1, clinic.city, clinic.state, clinic.zip].filter(Boolean).join(", "))}`}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => track("lead_directions", leadContext)}
             className="flex items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm hover:border-primary/60"
           >
             <Navigation className="h-4 w-4 text-primary" /> Get directions
