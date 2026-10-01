@@ -332,11 +332,14 @@ function StudyPage() {
       <EligibilityModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        nctId={study.nct_id}
         trialTitle={study.title}
         conditions={study.conditions ?? []}
-        conditionSlugs={study.condition_slugs ?? []}
         eligibilitySnippet={eligibility.criteria}
+        minAgeYears={study.min_age_years}
+        maxAgeYears={study.max_age_years}
+        gender={study.gender}
+        overallStatus={study.overall_status}
+        locations={locations}
       />
     </article>
   );

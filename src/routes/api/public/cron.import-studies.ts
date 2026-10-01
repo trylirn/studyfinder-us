@@ -246,8 +246,6 @@ async function runCronImport(request: Request) {
     if (sponsorUpserts.length) await supabaseAdmin.from("sponsors").upsert(sponsorUpserts, { onConflict: "slug" });
     if (cityUpserts.length) await supabaseAdmin.from("cities").upsert(cityUpserts, { onConflict: "slug" });
 
-    await supabaseAdmin.rpc("generate_clinics_from_locations");
-    await supabaseAdmin.rpc("refresh_directory_counts");
     await supabaseAdmin.from("import_runs").update({ status: "ok", finished_at: new Date().toISOString(), inserted, updated, pages: importedPages }).eq("id", runRow.id);
     return Response.json({ ok: true, inserted, updated, pages: importedPages });
   } catch (e) {

@@ -15,7 +15,6 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { initTracking, resetImpressionCache, track } from "@/lib/track";
 
 function NotFoundComponent() {
   return (
@@ -96,7 +95,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "TrialFinderUS — U.S. Clinical Trials Directory" },
       { name: "twitter:description", content: "Discover US clinical trials, research studies, and paid opportunities." },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+    ],
     scripts: [
       {
         type: "application/ld+json",
@@ -149,13 +151,6 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const location = useLocation();
-
-  useEffect(() => initTracking(), []);
-
-  useEffect(() => {
-    resetImpressionCache();
-    track("page_view", { path: location.href });
-  }, [location.href]);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {

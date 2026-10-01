@@ -4,9 +4,9 @@ export const Route = createFileRoute("/legal/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Policy | TrialFinderUS" },
-      { name: "description", content: "How TrialFinderUS collects, uses, and shares information — and why we do not retain patient health data submitted through the eligibility tool." },
+      { name: "description", content: "How TrialFinderUS protects privacy in an informational clinical-trial directory with anonymous, browser-only matching." },
       { property: "og:title", content: "Privacy Policy | TrialFinderUS" },
-      { property: "og:description", content: "How TrialFinderUS collects, uses, and shares information — and why we do not retain patient health data submitted through the eligibility tool." },
+      { property: "og:description", content: "How TrialFinderUS protects privacy in an informational clinical-trial directory with anonymous, browser-only matching." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://studyfinder-us.lovable.app/legal/privacy" },
       { name: "twitter:card", content: "summary" },
@@ -52,64 +52,56 @@ function Page() {
       <h3>3.1 Information collected automatically</h3>
       <ul>
         <li><strong>Server access logs</strong>: IP address, user-agent, referring URL, requested URL, HTTP status, timestamp.</li>
-        <li><strong>Cookies and similar technologies</strong> that are strictly necessary for the Service to function and, where consented to, privacy-preserving aggregate analytics.</li>
-        <li><strong>Aggregate, de-identified usage metrics</strong> such as page views and popular conditions.</li>
+         <li><strong>Cookies and similar technologies</strong> that are strictly necessary for the Service to function.</li>
+         <li>We do not persist visitor identifiers, browsing histories, search histories, or behavioral analytics.</li>
       </ul>
 
       <h3>3.2 Information you provide</h3>
       <ul>
         <li><strong>Administrator and clinic-operator account credentials</strong> (email, securely hashed password) and clinic operator profile fields you choose to provide.</li>
-        <li><strong>Eligibility Tool submissions</strong> — see Section 4 for the special handling that applies to this category.</li>
         <li><strong>Inbound communications</strong> (e.g., emails you send us).</li>
       </ul>
 
       <h3>3.3 What we do NOT collect</h3>
       <p>
-        TrialFinderUS does <strong>not</strong> require you to disclose health information to browse the Service.
-        We do not knowingly collect or store on our servers: protected health information (PHI) as defined under
-        HIPAA; diagnoses; lab results; medications; insurance details; genetic information; or any other clinical
-        records, except as expressly described in Section 4 (and in that case only in transit, not at rest).
+         TrialFinderUS does <strong>not</strong> require you to disclose health information to browse the Service.
+         We do not knowingly collect or store on our servers: protected health information (PHI) as defined under
+         HIPAA; diagnoses; lab results; medications; insurance details; genetic information; or any other clinical
+         records. The optional eligibility check runs only in your browser and is not submitted to us.
       </p>
 
-      <h2>4. Eligibility Tool — Stateless Data Flow</h2>
+      <h2>4. Eligibility Tool — Browser-Only Matching</h2>
       <p>
-        The "Check My Eligibility" tool is intentionally engineered so that <strong>TrialFinderUS does not retain
-        your responses or contact information on our servers</strong>. The flow is as follows:
+         The "Check My Eligibility" tool is intentionally engineered so that <strong>TrialFinderUS does not receive,
+         retain, or share your responses or contact information</strong>. The flow is as follows:
       </p>
       <ol>
         <li>You complete the questionnaire in your browser.</li>
-        <li>Your answers (age, gender, ZIP code, diagnosis confirmations) and contact info (name, email, phone) are sent to our backend in memory.</li>
-        <li>Our backend assembles a single delivery payload and immediately delivers it to the research site associated with the selected trial (by email or secure webhook).</li>
-        <li>Once delivery completes, the response payload is <strong>discarded from memory and is never written to our database</strong>.</li>
-        <li>We retain only <strong>delivery metadata</strong>: trial NCT ID, timestamp, delivery channel, and delivery status (success/failure). Delivery metadata does <strong>not</strong> include your name, contact information, diagnosis, or any other answer.</li>
+         <li>You enter optional answers in your browser.</li>
+         <li>Your browser compares them with the public trial details and listed research locations already loaded on the page.</li>
+         <li>The result is shown in your browser; nothing is sent to or written by TrialFinderUS.</li>
       </ol>
       <p>
-        Because TrialFinderUS does not retain Eligibility Tool submissions, we generally cannot retrieve, export,
-        or delete the contents of a past submission on your behalf. Once delivered, the receiving research site
-        is solely responsible for handling your information under its own privacy practices.
+         Because TrialFinderUS does not receive Eligibility Tool submissions, there is no submission record for us to retrieve, export, or delete.
       </p>
 
       <h2>5. How We Use Information</h2>
       <ul>
         <li>To operate, maintain, secure, and improve the Service.</li>
-        <li>To deliver Eligibility Tool submissions to the research site you selected (in memory only; see Section 4).</li>
         <li>To prevent abuse, fraud, and security incidents.</li>
-        <li>To produce aggregate, de-identified analytics that help us understand which trials and conditions are most useful to users.</li>
         <li>To comply with law, lawful requests, and our legal obligations.</li>
       </ul>
 
       <h2>6. Legal Bases (where applicable)</h2>
       <ul>
         <li><strong>Legitimate interests</strong> in operating, securing, and improving the Service.</li>
-        <li><strong>Consent</strong> for Eligibility Tool submissions and for non-essential analytics where required.</li>
-        <li><strong>Performance of a contract</strong> with clinic operators who hold accounts.</li>
+         <li><strong>Performance of a contract</strong> with platform administrators.</li>
         <li><strong>Compliance with legal obligations</strong>.</li>
       </ul>
 
       <h2>7. How We Share Information</h2>
       <ul>
-        <li><strong>Research sites</strong>: We forward Eligibility Tool submissions to the research site for the selected trial, for the sole purpose of pre-screening you for that trial.</li>
-        <li><strong>Service providers</strong>: We use vetted vendors for hosting, email delivery, security, and analytics. These vendors are bound by contract to process information only on our instructions and in line with this Policy.</li>
+         <li><strong>Service providers</strong>: We use vendors for hosting and security. They are bound by contract to process information only on our instructions and in line with this Policy.</li>
         <li><strong>Legal and safety</strong>: We may disclose information if required by law, subpoena, or court order, or if we believe in good faith that disclosure is necessary to protect rights, property, or safety.</li>
         <li><strong>Business transfers</strong>: In a merger, acquisition, financing, reorganization, or sale of assets, information may be transferred subject to standard confidentiality protections and continuation of this Policy.</li>
       </ul>
@@ -121,28 +113,21 @@ function Page() {
 
       <h2>8. HIPAA Notice</h2>
       <p>
-        TrialFinderUS is <strong>not a HIPAA-covered entity or business associate</strong>. Information you
-        voluntarily submit through the Eligibility Tool is processed outside HIPAA's framework on our end. Once
-        delivered, the receiving research site (which may itself be a HIPAA-covered entity) is solely responsible
-        for handling the information in accordance with its own legal obligations. If you do not wish to share
-        information outside HIPAA's framework on our end, do not use the Eligibility Tool and contact the
-        research site directly.
+         TrialFinderUS is <strong>not a HIPAA-covered entity or business associate</strong>. The Eligibility Tool
+         does not receive or transmit your answers, so it is not a channel for submitting health information to us or a research site.
       </p>
 
       <h2>9. Cookies and Tracking</h2>
       <p>
-        We use first-party cookies that are strictly necessary for the Service to function (for example, to keep
-        an authenticated clinic operator signed in). Where we use analytics, we configure them in a
-        privacy-preserving manner (IP truncation, no cross-site tracking, no advertising cookies). We honor the
-        <strong> Global Privacy Control (GPC)</strong> signal where applicable.
+         We use first-party cookies that are strictly necessary for the Service to function, such as keeping an
+         administrator signed in. We do not use advertising cookies or persistent visitor analytics. We honor the
+         <strong> Global Privacy Control (GPC)</strong> signal where applicable.
       </p>
 
       <h2>10. Data Retention</h2>
       <ul>
         <li><strong>Server access logs</strong>: up to 90 days for security and operations.</li>
-        <li><strong>Eligibility Tool delivery metadata</strong>: up to 24 months for anti-abuse, analytics, and dispute resolution. (Reminder: this excludes your answers and contact information.)</li>
         <li><strong>Account data</strong>: for the life of the account and a reasonable period after closure for legal, tax, and audit purposes.</li>
-        <li><strong>Aggregate/de-identified data</strong>: may be retained indefinitely.</li>
       </ul>
 
       <h2>11. Security</h2>
@@ -177,8 +162,8 @@ function Page() {
         <li>Appeal a denial of a privacy request.</li>
       </ul>
       <p>
-        Because TrialFinderUS does <strong>not retain Eligibility Tool submissions</strong>, there is generally
-        no record of those submissions for us to access, correct, or delete. To exercise other rights, email
+         Because TrialFinderUS does <strong>not receive Eligibility Tool submissions</strong>, there is no record
+         of those submissions for us to access, correct, or delete. To exercise other rights, email
         <strong> privacy@trialfinderus.example</strong> from the email associated with your interaction. We may
         ask for additional information to verify your identity. Authorized agents may submit requests with
         documented authority and reasonable verification.

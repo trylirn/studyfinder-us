@@ -87,10 +87,8 @@ function Page() {
       <ul>
         <li>You are submitting information about yourself or about a person for whom you are the legal guardian or have explicit written authorization to act.</li>
         <li>All answers are truthful and accurate to the best of your knowledge.</li>
-        <li>You <strong>consent</strong> to TrialFinderUS forwarding your responses and contact information directly to the research site associated with the selected trial for the sole purpose of pre-screening you for that trial.</li>
-        <li>You understand that the Eligibility Tool is <strong>not a clinical evaluation, diagnosis, or guarantee of enrollment</strong>. Final eligibility is determined exclusively by the trial's investigators.</li>
-        <li>You understand that TrialFinderUS does not retain your eligibility responses or contact information after delivery (see Privacy Policy for detail).</li>
-        <li>You will not submit any information about a third party without their explicit authorization, and you indemnify TrialFinderUS for any harm caused by your submission of false, unauthorized, or fraudulent information.</li>
+         <li>You understand that the Eligibility Tool runs in your browser and does not send your answers or contact information to TrialFinderUS or a research site.</li>
+         <li>You understand that the Eligibility Tool is <strong>not a clinical evaluation, diagnosis, or guarantee of enrollment</strong>. Final eligibility is determined exclusively by the trial's investigators.</li>
       </ul>
 
       <h2>6. AI-Generated Content</h2>

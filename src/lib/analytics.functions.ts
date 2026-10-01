@@ -32,26 +32,7 @@ const eventSchema = z.object({
 export const trackEvents = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ events: z.array(eventSchema).max(40) }).parse(d))
   .handler(async ({ data }) => {
-    if (data.events.length === 0) return { ok: true, count: 0 };
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const rows = data.events.map((e) => ({
-      event_type: e.event_type,
-      path: e.path ?? null,
-      query: e.query ?? null,
-      city_slug: e.city_slug ?? null,
-      state_slug: e.state_slug ?? null,
-      condition_slug: e.condition_slug ?? null,
-      clinic_id: e.clinic_id ?? null,
-      nct_id: e.nct_id ?? null,
-      referrer: e.referrer ?? null,
-      is_mobile: e.is_mobile ?? null,
-      session_id: e.session_id,
-      visitor_id: e.visitor_id,
-      meta: (e.meta ?? {}) as Record<string, unknown>,
-    }));
-    const { error } = await supabaseAdmin.from("analytics_events").insert(rows as never);
-    if (error) throw new Error(error.message);
-    return { ok: true, count: rows.length };
+    return { ok: true, count: 0, ignored: data.events.length };
   });
 
 async function assertAdmin(context: { supabase: any; userId: string }) {

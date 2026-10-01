@@ -6,7 +6,7 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async ({ request }) => {
         const { createClient } = await import("@supabase/supabase-js");
         const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!);
-        const origin = new URL(request.url).origin;
+         const origin = "https://studyfinder-us.lovable.app";
         const escapeXml = (value: string) =>
           value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
         const urls: { loc: string; priority?: number; lastmod?: string | null }[] = [
