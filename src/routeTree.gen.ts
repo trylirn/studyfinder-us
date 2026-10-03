@@ -23,6 +23,7 @@ import { Route as SponsorsIndexRouteImport } from './routes/sponsors.index'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as ConditionsIndexRouteImport } from './routes/conditions.index'
 import { Route as ClinicsIndexRouteImport } from './routes/clinics.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as StudiesNctIdRouteImport } from './routes/studies.$nctId'
 import { Route as StatesStateSlugRouteImport } from './routes/states.$stateSlug'
 import { Route as SponsorsSlugRouteImport } from './routes/sponsors.$slug'
@@ -34,7 +35,9 @@ import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
 import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
 import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
 import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ApiPublicPostsRouteImport } from './routes/api/public/posts'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as ApiPublicCronRefreshStatusesRouteImport } from './routes/api/public/cron.refresh-statuses'
 import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
@@ -108,6 +111,11 @@ const ClinicsIndexRoute = ClinicsIndexRouteImport.update({
   path: '/clinics/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudiesNctIdRoute = StudiesNctIdRouteImport.update({
   id: '/studies/$nctId',
   path: '/studies/$nctId',
@@ -163,10 +171,20 @@ const CitiesCitySlugRoute = CitiesCitySlugRouteImport.update({
   path: '/cities/$citySlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiPublicPostsRoute = ApiPublicPostsRouteImport.update({
+  id: '/api/public/posts',
+  path: '/api/public/posts',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
@@ -196,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -207,12 +226,14 @@ export interface FileRoutesByFullPath {
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
+  '/blog/': typeof BlogIndexRoute
   '/clinics/': typeof ClinicsIndexRoute
   '/conditions/': typeof ConditionsIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/api/public/posts': typeof ApiPublicPostsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
   '/api/public/cron/refresh-statuses': typeof ApiPublicCronRefreshStatusesRoute
@@ -226,6 +247,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -237,12 +259,14 @@ export interface FileRoutesByTo {
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
+  '/blog': typeof BlogIndexRoute
   '/clinics': typeof ClinicsIndexRoute
   '/conditions': typeof ConditionsIndexRoute
   '/learn': typeof LearnIndexRoute
   '/sponsors': typeof SponsorsIndexRoute
   '/states': typeof StatesIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/api/public/posts': typeof ApiPublicPostsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
   '/api/public/cron/refresh-statuses': typeof ApiPublicCronRefreshStatusesRoute
@@ -258,6 +282,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/cities/$citySlug': typeof CitiesCitySlugRoute
   '/clinics/$slug': typeof ClinicsSlugRoute
   '/conditions/$slug': typeof ConditionsSlugRoute
@@ -269,12 +294,14 @@ export interface FileRoutesById {
   '/sponsors/$slug': typeof SponsorsSlugRoute
   '/states/$stateSlug': typeof StatesStateSlugRoute
   '/studies/$nctId': typeof StudiesNctIdRoute
+  '/blog/': typeof BlogIndexRoute
   '/clinics/': typeof ClinicsIndexRoute
   '/conditions/': typeof ConditionsIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/sponsors/': typeof SponsorsIndexRoute
   '/states/': typeof StatesIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/api/public/posts': typeof ApiPublicPostsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/cron/import-studies': typeof ApiPublicCronImportStudiesRoute
   '/api/public/cron/refresh-statuses': typeof ApiPublicCronRefreshStatusesRoute
@@ -290,6 +317,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/search'
     | '/sitemap.xml'
+    | '/blog/$slug'
     | '/cities/$citySlug'
     | '/clinics/$slug'
     | '/conditions/$slug'
@@ -301,12 +329,14 @@ export interface FileRouteTypes {
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
+    | '/blog/'
     | '/clinics/'
     | '/conditions/'
     | '/learn/'
     | '/sponsors/'
     | '/states/'
     | '/admin/analytics'
+    | '/api/public/posts'
     | '/admin/'
     | '/api/public/cron/import-studies'
     | '/api/public/cron/refresh-statuses'
@@ -320,6 +350,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/search'
     | '/sitemap.xml'
+    | '/blog/$slug'
     | '/cities/$citySlug'
     | '/clinics/$slug'
     | '/conditions/$slug'
@@ -331,12 +362,14 @@ export interface FileRouteTypes {
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
+    | '/blog'
     | '/clinics'
     | '/conditions'
     | '/learn'
     | '/sponsors'
     | '/states'
     | '/admin/analytics'
+    | '/api/public/posts'
     | '/admin'
     | '/api/public/cron/import-studies'
     | '/api/public/cron/refresh-statuses'
@@ -351,6 +384,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/search'
     | '/sitemap.xml'
+    | '/blog/$slug'
     | '/cities/$citySlug'
     | '/clinics/$slug'
     | '/conditions/$slug'
@@ -362,12 +396,14 @@ export interface FileRouteTypes {
     | '/sponsors/$slug'
     | '/states/$stateSlug'
     | '/studies/$nctId'
+    | '/blog/'
     | '/clinics/'
     | '/conditions/'
     | '/learn/'
     | '/sponsors/'
     | '/states/'
     | '/_authenticated/admin/analytics'
+    | '/api/public/posts'
     | '/_authenticated/admin/'
     | '/api/public/cron/import-studies'
     | '/api/public/cron/refresh-statuses'
@@ -383,6 +419,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   CitiesCitySlugRoute: typeof CitiesCitySlugRoute
   ClinicsSlugRoute: typeof ClinicsSlugRoute
   ConditionsSlugRoute: typeof ConditionsSlugRoute
@@ -394,11 +431,13 @@ export interface RootRouteChildren {
   SponsorsSlugRoute: typeof SponsorsSlugRoute
   StatesStateSlugRoute: typeof StatesStateSlugRoute
   StudiesNctIdRoute: typeof StudiesNctIdRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   ClinicsIndexRoute: typeof ClinicsIndexRoute
   ConditionsIndexRoute: typeof ConditionsIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
   SponsorsIndexRoute: typeof SponsorsIndexRoute
   StatesIndexRoute: typeof StatesIndexRoute
+  ApiPublicPostsRoute: typeof ApiPublicPostsRoute
   ApiPublicCronImportStudiesRoute: typeof ApiPublicCronImportStudiesRoute
   ApiPublicCronRefreshStatusesRoute: typeof ApiPublicCronRefreshStatusesRoute
 }
@@ -503,6 +542,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClinicsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/studies/$nctId': {
       id: '/studies/$nctId'
       path: '/studies/$nctId'
@@ -580,12 +626,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CitiesCitySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/public/posts': {
+      id: '/api/public/posts'
+      path: '/api/public/posts'
+      fullPath: '/api/public/posts'
+      preLoaderRoute: typeof ApiPublicPostsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/analytics': {
       id: '/_authenticated/admin/analytics'
@@ -635,6 +695,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  BlogSlugRoute: BlogSlugRoute,
   CitiesCitySlugRoute: CitiesCitySlugRoute,
   ClinicsSlugRoute: ClinicsSlugRoute,
   ConditionsSlugRoute: ConditionsSlugRoute,
@@ -646,11 +707,13 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorsSlugRoute: SponsorsSlugRoute,
   StatesStateSlugRoute: StatesStateSlugRoute,
   StudiesNctIdRoute: StudiesNctIdRoute,
+  BlogIndexRoute: BlogIndexRoute,
   ClinicsIndexRoute: ClinicsIndexRoute,
   ConditionsIndexRoute: ConditionsIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
   SponsorsIndexRoute: SponsorsIndexRoute,
   StatesIndexRoute: StatesIndexRoute,
+  ApiPublicPostsRoute: ApiPublicPostsRoute,
   ApiPublicCronImportStudiesRoute: ApiPublicCronImportStudiesRoute,
   ApiPublicCronRefreshStatusesRoute: ApiPublicCronRefreshStatusesRoute,
 }
