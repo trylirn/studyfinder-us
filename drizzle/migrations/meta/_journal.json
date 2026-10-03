@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791022480031,
+      "tag": "0000_create_posts_and_directory_indexes",
+      "breakpoints": true
+    }
+  ]
+}
