@@ -484,6 +484,63 @@ export type Database = {
           },
         ]
       }
+      posts: {
+        Row: {
+          author: string | null
+          category: string | null
+          citations: Json
+          content_html: string
+          content_markdown: string | null
+          cover_image_prompt: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          meta_description: string | null
+          published_at: string | null
+          seo_title: string | null
+          slug: string
+          source_id: string
+          tags: string[]
+          title: string
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          citations?: Json
+          content_html: string
+          content_markdown?: string | null
+          cover_image_prompt?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          meta_description?: string | null
+          published_at?: string | null
+          seo_title?: string | null
+          slug: string
+          source_id: string
+          tags?: string[]
+          title: string
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          citations?: Json
+          content_html?: string
+          content_markdown?: string | null
+          cover_image_prompt?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          meta_description?: string | null
+          published_at?: string | null
+          seo_title?: string | null
+          slug?: string
+          source_id?: string
+          tags?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
       sponsors: {
         Row: {
           name: string
