@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { listClinics, listStates } from "@/lib/directory.functions";
+import { clinicsQuery } from "@/lib/directory-queries";
 import { Pager } from "@/components/Pager";
 import { Hospital, MapPin } from "lucide-react";
 
@@ -13,6 +14,8 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/clinics/")({
   validateSearch: searchSchema,
+  loaderDeps: ({ search }) => ({ q: search.q ?? "", state: search.state ?? "", page: search.page ?? 1 }),
+  loader: ({ context, deps }) => context.queryClient.ensureQueryData(clinicsQuery(deps.q, deps.state, deps.page)),
   head: () => ({
     meta: [
       { title: "Clinical Research Sites & Clinics in the U.S. | TrialFinderUS" },

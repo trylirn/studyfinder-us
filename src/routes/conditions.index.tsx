@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { listConditions } from "@/lib/directory.functions";
+import { conditionsQuery } from "@/lib/directory-queries";
 import { Pager } from "@/components/Pager";
 
 const searchSchema = z.object({
@@ -11,6 +12,8 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/conditions/")({
   validateSearch: searchSchema,
+  loaderDeps: ({ search }) => ({ q: search.q ?? "", page: search.page ?? 1 }),
+  loader: ({ context, deps }) => context.queryClient.ensureQueryData(conditionsQuery(deps.q, deps.page)),
   head: () => ({
     meta: [
       { title: "All Conditions — Clinical Trials Directory | TrialFinderUS" },
