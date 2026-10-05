@@ -71,8 +71,8 @@ function Page() {
 
       <h2>4. Account Terms</h2>
       <p>
-        Patient accounts are not offered. Accounts on TrialFinderUS are limited to (a) platform administrators and
-        (b) verified clinic operators who have claimed a clinic profile. You are responsible for keeping your
+        Visitors do not need an account. The only account on TrialFinderUS is used by the platform
+        administrator. The administrator is responsible for keeping your
         credentials confidential and for all activity that occurs under your account. You agree to provide
         accurate information, maintain it, and notify us promptly of any unauthorized use. We may suspend or
         terminate any account at any time, with or without notice, for any reason or no reason.
@@ -100,12 +100,11 @@ function Page() {
         professional before relying on any AI Content.
       </p>
 
-      <h2>7. Paid Placement and Referral Fees</h2>
+      <h2>7. No Referral Fees</h2>
       <p>
-        TrialFinderUS may receive a referral fee from research sites for verified patient introductions, and
-        clinics may purchase featured or premium placement that increases their visibility on certain pages.
-        Where required, paid placement is labeled (for example, "Featured"). Paid placement does not constitute
-        an endorsement and does not affect the medical accuracy of trial data.
+        TrialFinderUS does not receive referral fees for patient introductions and does not pass visitor
+        information to research sites. Any listing order reflects public trial data, not payment, and no
+        listing is an endorsement.
       </p>
 
       <h2>8. Third-Party Sites and Sponsors</h2>

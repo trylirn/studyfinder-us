@@ -58,7 +58,7 @@ function Page() {
 
       <h3>3.2 Information you provide</h3>
       <ul>
-        <li><strong>Administrator and clinic-operator account credentials</strong> (email, securely hashed password) and clinic operator profile fields you choose to provide.</li>
+        <li><strong>Administrator account credentials</strong> (email and securely hashed password) for the single site administrator. Visitors have no accounts.</li>
         <li><strong>Inbound communications</strong> (e.g., emails you send us).</li>
       </ul>
 

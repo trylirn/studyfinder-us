@@ -21,8 +21,7 @@ export function LegalDisclaimer({ variant = "block" }: { variant?: "block" | "in
         educational purposes only and is <strong>not medical advice, diagnosis, or treatment</strong>.
         We do not recommend specific therapies or trials and no doctor-patient relationship is
         created. Always consult a licensed physician before starting, stopping, or changing any
-        medical treatment. TrialFinderUS may receive a referral fee from research sites for verified
-        patient introductions.
+        medical treatment. TrialFinderUS does not receive referral fees or collect visitor contact details.
       </p>
     </div>
   );
