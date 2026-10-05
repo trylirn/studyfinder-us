@@ -9,71 +9,42 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as GetMatchedRouteImport } from './routes/get-matched'
-import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
-import { Route as RecruitingRouteImport } from './routes/recruiting'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as SearchRouteImport } from './routes/search'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as BlogIndexRouteImport } from './routes/blog.index'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
-import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
-import { Route as ClinicsIndexRouteImport } from './routes/clinics.index'
-import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
-import { Route as ConditionsIndexRouteImport } from './routes/conditions.index'
-import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
-import { Route as LearnIndexRouteImport } from './routes/learn.index'
-import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
-import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
-import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
-import { Route as LegalTermsRouteImport } from './routes/legal.terms'
-import { Route as PhasePhaseRouteImport } from './routes/phase.$phase'
-import { Route as SponsorsIndexRouteImport } from './routes/sponsors.index'
-import { Route as SponsorsSlugRouteImport } from './routes/sponsors.$slug'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as RecruitingRouteImport } from './routes/recruiting'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as GetMatchedRouteImport } from './routes/get-matched'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as StatesIndexRouteImport } from './routes/states.index'
-import { Route as StatesStateSlugRouteImport } from './routes/states.$stateSlug'
+import { Route as SponsorsIndexRouteImport } from './routes/sponsors.index'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as ConditionsIndexRouteImport } from './routes/conditions.index'
+import { Route as ClinicsIndexRouteImport } from './routes/clinics.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as StudiesNctIdRouteImport } from './routes/studies.$nctId'
+import { Route as StatesStateSlugRouteImport } from './routes/states.$stateSlug'
+import { Route as SponsorsSlugRouteImport } from './routes/sponsors.$slug'
+import { Route as PhasePhaseRouteImport } from './routes/phase.$phase'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
+import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
+import { Route as ConditionsSlugRouteImport } from './routes/conditions.$slug'
+import { Route as ClinicsSlugRouteImport } from './routes/clinics.$slug'
+import { Route as CitiesCitySlugRouteImport } from './routes/cities.$citySlug'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as ApiPublicPostsRouteImport } from './routes/api/public/posts'
-import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as ApiPublicCronRefreshStatusesRouteImport } from './routes/api/public/cron.refresh-statuses'
+import { Route as ApiPublicCronImportStudiesRouteImport } from './routes/api/public/cron.import-studies'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GetMatchedRoute = GetMatchedRouteImport.update({
-  id: '/get-matched',
-  path: '/get-matched',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
-  id: '/llms.txt',
-  path: '/llms.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecruitingRoute = RecruitingRouteImport.update({
-  id: '/recruiting',
-  path: '/recruiting',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -81,84 +52,38 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/blog/',
-  path: '/blog/',
+const RecruitingRoute = RecruitingRouteImport.update({
+  id: '/recruiting',
+  path: '/recruiting',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/blog/$slug',
-  path: '/blog/$slug',
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CitiesCitySlugRoute = CitiesCitySlugRouteImport.update({
-  id: '/cities/$citySlug',
-  path: '/cities/$citySlug',
+const GetMatchedRoute = GetMatchedRouteImport.update({
+  id: '/get-matched',
+  path: '/get-matched',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClinicsIndexRoute = ClinicsIndexRouteImport.update({
-  id: '/clinics/',
-  path: '/clinics/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClinicsSlugRoute = ClinicsSlugRouteImport.update({
-  id: '/clinics/$slug',
-  path: '/clinics/$slug',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConditionsIndexRoute = ConditionsIndexRouteImport.update({
-  id: '/conditions/',
-  path: '/conditions/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
-  id: '/conditions/$slug',
-  path: '/conditions/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearnIndexRoute = LearnIndexRouteImport.update({
-  id: '/learn/',
-  path: '/learn/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearnSlugRoute = LearnSlugRouteImport.update({
-  id: '/learn/$slug',
-  path: '/learn/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LegalDisclaimerRoute = LegalDisclaimerRouteImport.update({
-  id: '/legal/disclaimer',
-  path: '/legal/disclaimer',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
-  id: '/legal/privacy',
-  path: '/legal/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LegalTermsRoute = LegalTermsRouteImport.update({
-  id: '/legal/terms',
-  path: '/legal/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PhasePhaseRoute = PhasePhaseRouteImport.update({
-  id: '/phase/$phase',
-  path: '/phase/$phase',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SponsorsIndexRoute = SponsorsIndexRouteImport.update({
-  id: '/sponsors/',
-  path: '/sponsors/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SponsorsSlugRoute = SponsorsSlugRouteImport.update({
-  id: '/sponsors/$slug',
-  path: '/sponsors/$slug',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StatesIndexRoute = StatesIndexRouteImport.update({
@@ -166,9 +91,29 @@ const StatesIndexRoute = StatesIndexRouteImport.update({
   path: '/states/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StatesStateSlugRoute = StatesStateSlugRouteImport.update({
-  id: '/states/$stateSlug',
-  path: '/states/$stateSlug',
+const SponsorsIndexRoute = SponsorsIndexRouteImport.update({
+  id: '/sponsors/',
+  path: '/sponsors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/learn/',
+  path: '/learn/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsIndexRoute = ConditionsIndexRouteImport.update({
+  id: '/conditions/',
+  path: '/conditions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicsIndexRoute = ClinicsIndexRouteImport.update({
+  id: '/clinics/',
+  path: '/clinics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudiesNctIdRoute = StudiesNctIdRouteImport.update({
@@ -176,10 +121,70 @@ const StudiesNctIdRoute = StudiesNctIdRouteImport.update({
   path: '/studies/$nctId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StatesStateSlugRoute = StatesStateSlugRouteImport.update({
+  id: '/states/$stateSlug',
+  path: '/states/$stateSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorsSlugRoute = SponsorsSlugRouteImport.update({
+  id: '/sponsors/$slug',
+  path: '/sponsors/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhasePhaseRoute = PhasePhaseRouteImport.update({
+  id: '/phase/$phase',
+  path: '/phase/$phase',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/legal/privacy',
+  path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalDisclaimerRoute = LegalDisclaimerRouteImport.update({
+  id: '/legal/disclaimer',
+  path: '/legal/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnSlugRoute = LearnSlugRouteImport.update({
+  id: '/learn/$slug',
+  path: '/learn/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConditionsSlugRoute = ConditionsSlugRouteImport.update({
+  id: '/conditions/$slug',
+  path: '/conditions/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicsSlugRoute = ClinicsSlugRouteImport.update({
+  id: '/clinics/$slug',
+  path: '/clinics/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CitiesCitySlugRoute = CitiesCitySlugRouteImport.update({
+  id: '/cities/$citySlug',
+  path: '/cities/$citySlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiPublicPostsRoute = ApiPublicPostsRouteImport.update({
+  id: '/api/public/posts',
+  path: '/api/public/posts',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
@@ -187,21 +192,16 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/admin/analytics',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ApiPublicPostsRoute = ApiPublicPostsRouteImport.update({
-  id: '/api/public/posts',
-  path: '/api/public/posts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicCronImportStudiesRoute =
-  ApiPublicCronImportStudiesRouteImport.update({
-    id: '/api/public/cron/import-studies',
-    path: '/api/public/cron/import-studies',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicCronRefreshStatusesRoute =
   ApiPublicCronRefreshStatusesRouteImport.update({
     id: '/api/public/cron/refresh-statuses',
     path: '/api/public/cron/refresh-statuses',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicCronImportStudiesRoute =
+  ApiPublicCronImportStudiesRouteImport.update({
+    id: '/api/public/cron/import-studies',
+    path: '/api/public/cron/import-studies',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -444,53 +444,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/get-matched': {
-      id: '/get-matched'
-      path: '/get-matched'
-      fullPath: '/get-matched'
-      preLoaderRoute: typeof GetMatchedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/llms.txt': {
-      id: '/llms.txt'
-      path: '/llms.txt'
-      fullPath: '/llms.txt'
-      preLoaderRoute: typeof LlmsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recruiting': {
-      id: '/recruiting'
-      path: '/recruiting'
-      fullPath: '/recruiting'
-      preLoaderRoute: typeof RecruitingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -500,116 +458,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/': {
-      id: '/blog/'
-      path: '/blog'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexRouteImport
+    '/recruiting': {
+      id: '/recruiting'
+      path: '/recruiting'
+      fullPath: '/recruiting'
+      preLoaderRoute: typeof RecruitingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/blog/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cities/$citySlug': {
-      id: '/cities/$citySlug'
-      path: '/cities/$citySlug'
-      fullPath: '/cities/$citySlug'
-      preLoaderRoute: typeof CitiesCitySlugRouteImport
+    '/get-matched': {
+      id: '/get-matched'
+      path: '/get-matched'
+      fullPath: '/get-matched'
+      preLoaderRoute: typeof GetMatchedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/clinics/': {
-      id: '/clinics/'
-      path: '/clinics'
-      fullPath: '/clinics/'
-      preLoaderRoute: typeof ClinicsIndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/clinics/$slug': {
-      id: '/clinics/$slug'
-      path: '/clinics/$slug'
-      fullPath: '/clinics/$slug'
-      preLoaderRoute: typeof ClinicsSlugRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/conditions/': {
-      id: '/conditions/'
-      path: '/conditions'
-      fullPath: '/conditions/'
-      preLoaderRoute: typeof ConditionsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/conditions/$slug': {
-      id: '/conditions/$slug'
-      path: '/conditions/$slug'
-      fullPath: '/conditions/$slug'
-      preLoaderRoute: typeof ConditionsSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learn/': {
-      id: '/learn/'
-      path: '/learn'
-      fullPath: '/learn/'
-      preLoaderRoute: typeof LearnIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learn/$slug': {
-      id: '/learn/$slug'
-      path: '/learn/$slug'
-      fullPath: '/learn/$slug'
-      preLoaderRoute: typeof LearnSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/legal/disclaimer': {
-      id: '/legal/disclaimer'
-      path: '/legal/disclaimer'
-      fullPath: '/legal/disclaimer'
-      preLoaderRoute: typeof LegalDisclaimerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/legal/privacy': {
-      id: '/legal/privacy'
-      path: '/legal/privacy'
-      fullPath: '/legal/privacy'
-      preLoaderRoute: typeof LegalPrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/legal/terms': {
-      id: '/legal/terms'
-      path: '/legal/terms'
-      fullPath: '/legal/terms'
-      preLoaderRoute: typeof LegalTermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/phase/$phase': {
-      id: '/phase/$phase'
-      path: '/phase/$phase'
-      fullPath: '/phase/$phase'
-      preLoaderRoute: typeof PhasePhaseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sponsors/': {
-      id: '/sponsors/'
-      path: '/sponsors'
-      fullPath: '/sponsors/'
-      preLoaderRoute: typeof SponsorsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sponsors/$slug': {
-      id: '/sponsors/$slug'
-      path: '/sponsors/$slug'
-      fullPath: '/sponsors/$slug'
-      preLoaderRoute: typeof SponsorsSlugRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/states/': {
@@ -619,11 +514,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/states/$stateSlug': {
-      id: '/states/$stateSlug'
-      path: '/states/$stateSlug'
-      fullPath: '/states/$stateSlug'
-      preLoaderRoute: typeof StatesStateSlugRouteImport
+    '/sponsors/': {
+      id: '/sponsors/'
+      path: '/sponsors'
+      fullPath: '/sponsors/'
+      preLoaderRoute: typeof SponsorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/': {
+      id: '/learn/'
+      path: '/learn'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions/': {
+      id: '/conditions/'
+      path: '/conditions'
+      fullPath: '/conditions/'
+      preLoaderRoute: typeof ConditionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinics/': {
+      id: '/clinics/'
+      path: '/clinics'
+      fullPath: '/clinics/'
+      preLoaderRoute: typeof ClinicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studies/$nctId': {
@@ -633,18 +556,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudiesNctIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/states/$stateSlug': {
+      id: '/states/$stateSlug'
+      path: '/states/$stateSlug'
+      fullPath: '/states/$stateSlug'
+      preLoaderRoute: typeof StatesStateSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sponsors/$slug': {
+      id: '/sponsors/$slug'
+      path: '/sponsors/$slug'
+      fullPath: '/sponsors/$slug'
+      preLoaderRoute: typeof SponsorsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/phase/$phase': {
+      id: '/phase/$phase'
+      path: '/phase/$phase'
+      fullPath: '/phase/$phase'
+      preLoaderRoute: typeof PhasePhaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/legal/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/disclaimer': {
+      id: '/legal/disclaimer'
+      path: '/legal/disclaimer'
+      fullPath: '/legal/disclaimer'
+      preLoaderRoute: typeof LegalDisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/$slug': {
+      id: '/learn/$slug'
+      path: '/learn/$slug'
+      fullPath: '/learn/$slug'
+      preLoaderRoute: typeof LearnSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conditions/$slug': {
+      id: '/conditions/$slug'
+      path: '/conditions/$slug'
+      fullPath: '/conditions/$slug'
+      preLoaderRoute: typeof ConditionsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinics/$slug': {
+      id: '/clinics/$slug'
+      path: '/clinics/$slug'
+      fullPath: '/clinics/$slug'
+      preLoaderRoute: typeof ClinicsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cities/$citySlug': {
+      id: '/cities/$citySlug'
+      path: '/cities/$citySlug'
+      fullPath: '/cities/$citySlug'
+      preLoaderRoute: typeof CitiesCitySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/admin/analytics': {
-      id: '/_authenticated/admin/analytics'
-      path: '/admin/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/api/public/posts': {
@@ -654,18 +647,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPostsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/cron/import-studies': {
-      id: '/api/public/cron/import-studies'
-      path: '/api/public/cron/import-studies'
-      fullPath: '/api/public/cron/import-studies'
-      preLoaderRoute: typeof ApiPublicCronImportStudiesRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/api/public/cron/refresh-statuses': {
       id: '/api/public/cron/refresh-statuses'
       path: '/api/public/cron/refresh-statuses'
       fullPath: '/api/public/cron/refresh-statuses'
       preLoaderRoute: typeof ApiPublicCronRefreshStatusesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/cron/import-studies': {
+      id: '/api/public/cron/import-studies'
+      path: '/api/public/cron/import-studies'
+      fullPath: '/api/public/cron/import-studies'
+      preLoaderRoute: typeof ApiPublicCronImportStudiesRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
