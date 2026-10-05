@@ -18,6 +18,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { loc: "/clinics", priority: 0.8 },
           { loc: "/get-matched", priority: 0.8 },
           { loc: "/learn", priority: 0.6 },
+          { loc: "/blog", priority: 0.6 },
         ];
         for (const p of ["1", "2", "3", "4"]) urls.push({ loc: `/phase/${p}`, priority: 0.7 });
 
@@ -28,6 +29,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           sb.from("sponsors").select("slug").order("study_count", { ascending: false }).limit(2000),
           sb.from("studies").select("nct_id,last_update_posted").order("last_update_posted", { ascending: false, nullsFirst: false }).limit(40000),
         ]);
+        const posts = await (sb.from("posts" as never) as any).select("slug,published_at").not("published_at", "is", null).lte("published_at", new Date().toISOString());
+        for (const p of (posts.data ?? []) as { slug: string; published_at: string }[]) urls.push({ loc: `/blog/${p.slug}`, priority: 0.6, lastmod: p.published_at.slice(0, 10) });
         for (const c of conds.data ?? []) urls.push({ loc: `/conditions/${c.slug}`, priority: 0.7 });
         for (const s of states.data ?? []) urls.push({ loc: `/states/${s.slug}`, priority: 0.7 });
         for (const c of cities.data ?? []) urls.push({ loc: `/cities/${c.slug}`, priority: 0.6 });

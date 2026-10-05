@@ -37,6 +37,7 @@ export function SiteFooter() {
             <li><Link to="/legal/privacy" className="hover:text-primary">Privacy policy</Link></li>
             <li><Link to="/legal/terms" className="hover:text-primary">Terms of service</Link></li>
             <li><Link to="/learn" className="hover:text-primary">Learn about trials</Link></li>
+            <li><Link to="/blog" className="hover:text-primary">Blog</Link></li>
             <li><Link to="/auth" className="hover:text-primary">Admin</Link></li>
           </ul>
         </div>
@@ -48,8 +49,7 @@ export function SiteFooter() {
             general educational purposes only. Nothing on this site is medical advice, diagnosis, or treatment, and
             no doctor-patient relationship is created. We do not recommend specific trials, therapies, drugs, or
             procedures. Always seek the advice of a licensed physician before starting, stopping, or changing any
-            medical care. TrialFinderUS may receive a referral fee from research sites for verified patient
-            introductions, which never influences which trials we display.
+            medical care. TrialFinderUS does not receive referral fees and does not collect visitor contact details.
           </p>
           <p>© {new Date().getFullYear()} TrialFinderUS. Not affiliated with the U.S. Government or ClinicalTrials.gov.</p>
         </div>

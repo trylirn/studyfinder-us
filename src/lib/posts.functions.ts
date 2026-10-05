@@ -27,7 +27,8 @@ const postShape = z.object({
   published_at: z.string().datetime({ offset: true }).nullable().optional(),
 });
 
-export type Post = z.infer<typeof postShape> & { id: string; created_at: string };
+type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
+export type Post = Omit<z.infer<typeof postShape>, "citations" | "tags"> & { id: string; created_at: string; tags: string[]; citations: Json };
 
 export const listPosts = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();

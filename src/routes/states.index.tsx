@@ -2,11 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { listStates } from "@/lib/directory.functions";
+import { statesQuery } from "@/lib/directory-queries";
 
 const searchSchema = z.object({ q: z.string().optional() });
 
 export const Route = createFileRoute("/states/")({
   validateSearch: searchSchema,
+  loaderDeps: ({ search }) => ({ q: search.q ?? "" }),
+  loader: ({ context, deps }) => context.queryClient.ensureQueryData(statesQuery(deps.q)),
   head: () => ({
     meta: [
       { title: "Clinical Trials by State — All 50 U.S. States | TrialFinderUS" },
