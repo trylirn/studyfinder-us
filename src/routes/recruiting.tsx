@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { listRecruiting, listStates } from "@/lib/directory.functions";
+import { recruitingQuery, statesQuery } from "@/lib/directory-queries";
 import { StudyCard } from "@/components/StudyCard";
 import { Pager } from "@/components/Pager";
 
@@ -14,6 +14,9 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/recruiting")({
   validateSearch: searchSchema,
+  loaderDeps: ({ search }) => ({ q: search.q ?? "", state: search.state ?? "", phase: search.phase ?? "", page: search.page ?? 1 }),
+  loader: ({ context, deps }) =>
+    context.queryClient.ensureQueryData(recruitingQuery(deps.q, deps.state, deps.phase, deps.page)),
   head: () => ({
     meta: [
       { title: "Recruiting Clinical Trials in the U.S. | TrialFinderUS" },
@@ -35,19 +38,13 @@ function RecruitingPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const page = search.page ?? 1;
-  const { data, isLoading } = useQuery({
-    queryKey: ["recruiting", search],
-    queryFn: () =>
-      listRecruiting({
-        data: { q: search.q ?? "", state: search.state ?? "", phase: search.phase ?? "", page },
-      }),
-  });
-  const { data: states } = useQuery({ queryKey: ["states", ""], queryFn: () => listStates({ data: { q: "" } }) });
+  const { data } = useSuspenseQuery(recruitingQuery(search.q ?? "", search.state ?? "", search.phase ?? "", page));
+  const { data: states } = useQuery(statesQuery(""));
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-3xl font-semibold tracking-tight">Currently Recruiting Studies</h1>
-      <p className="mt-2 text-muted-foreground">{data?.total?.toLocaleString() ?? "—"} recruiting studies in the United States.</p>
+      <p className="mt-2 text-muted-foreground">{data.total?.toLocaleString() ?? "—"} recruiting studies in the United States.</p>
 
       <div className="mt-5 flex flex-wrap gap-2">
         <input
@@ -65,7 +62,7 @@ function RecruitingPage() {
           className="rounded-md border border-border bg-card px-2 py-2 text-sm"
         >
           <option value="">All states</option>
-          {(states ?? []).map((st: any) => (
+          {((states ?? []) as any[]).map((st) => (
             <option key={st.slug} value={st.slug}>{st.name}</option>
           ))}
         </select>
@@ -83,23 +80,14 @@ function RecruitingPage() {
         </select>
       </div>
 
-
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {isLoading && Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-36 animate-pulse rounded-xl border border-border bg-card" />)}
-        {!isLoading && (data?.studies ?? []).map((s: any) => <StudyCard key={s.nct_id} study={s} source="recruiting_page" />)}
-        {!isLoading && (data?.studies.length ?? 0) === 0 && (
+        {(data.studies ?? []).map((s: any) => <StudyCard key={s.nct_id} study={s} source="recruiting_page" />)}
+        {(data.studies?.length ?? 0) === 0 && (
           <p className="text-sm text-muted-foreground">No recruiting studies match these filters.</p>
         )}
       </div>
 
-      {data && (
-        <Pager
-          page={page}
-          total={data.total}
-          pageSize={data.pageSize}
-          onChange={(p) => navigate({ search: (s: any) => ({ ...s, page: p }) })}
-        />
-      )}
+      <Pager page={page} total={data.total} pageSize={data.pageSize} onChange={(p) => navigate({ search: (s: any) => ({ ...s, page: p }) })} />
     </div>
   );
 }
