@@ -372,7 +372,7 @@ export const listClinics = createServerFn({ method: "GET" })
     z
       .object({
         q: z.string().optional().default(""),
-        state: z.string().optional().default(""),
+        state: z.string().trim().max(100).optional().default(""),
         page: z.coerce.number().int().min(1).max(500).optional().default(1),
       })
       .parse(d ?? {}),
@@ -386,17 +386,21 @@ export const listClinics = createServerFn({ method: "GET" })
 
     if (data.q.trim()) q = q.ilike("name", `%${data.q.trim()}%`);
     if (data.state) {
-      const raw = data.state.trim();
-      const { data: st } = await sb
+      const requestedState = data.state.toLocaleLowerCase("en-US");
+      const { data: stateRows, error: stateError } = await sb
         .from("states")
         .select("name,abbr,slug")
-        .or(`slug.eq.${raw.toLowerCase()},abbr.ilike.${raw},name.ilike.${raw}`)
-        .maybeSingle();
-      if (st) {
-        q = q.or(`state.ilike.${st.name},state.ilike.${st.abbr}`);
-      } else {
-        q = q.or(`state.ilike.${raw},state.ilike.${raw.toUpperCase()}`);
+      if (stateError) throw new Error("Unable to apply the state filter.");
+      const st = (stateRows ?? []).find((row) =>
+        [row.slug, row.abbr, row.name].some(
+          (value) => value.toLocaleLowerCase("en-US") === requestedState,
+        ),
+      );
+      if (!st) {
+        return { rows: [], total: 0, page: data.page, pageSize: LIST_PAGE_SIZE };
       }
+      // These values come from the trusted states directory, not caller text.
+      q = q.in("state", [st.name, st.abbr, st.name.toUpperCase(), st.abbr.toUpperCase()]);
     }
 
     const from = (data.page - 1) * LIST_PAGE_SIZE;

@@ -20,7 +20,7 @@ export const matchTrialSites = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
     z
       .object({
-        condition: z.string().min(1).max(120),
+        condition: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/i).max(120),
         conditionName: z.string().max(200).optional().default(""),
         zip: z.string().regex(/^\d{5}$/),
         radius: z.coerce.number().min(5).max(500).default(50),
@@ -38,6 +38,7 @@ export const matchTrialSites = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const sb = publicClient();
+    const conditionSlug = data.condition.toLowerCase();
 
     // Resolve ZIP -> lat/lng
     const res = await fetch(`https://api.zippopotam.us/us/${data.zip}`);
@@ -59,12 +60,12 @@ export const matchTrialSites = createServerFn({ method: "GET" })
       const safe = data.conditionName.replace(/[^\w\s-]/g, " ").replace(/\s+/g, " ").trim();
       if (safe) {
         // plfts = plainto_tsquery — accepts plain multi-word phrases safely
-        sq = sq.or(`condition_slugs.cs.{${data.condition}},search_tsv.plfts.${safe}`);
+        sq = sq.or(`condition_slugs.cs.{${conditionSlug}},search_tsv.plfts.${safe}`);
       } else {
-        sq = sq.contains("condition_slugs", [data.condition]);
+        sq = sq.contains("condition_slugs", [conditionSlug]);
       }
     } else {
-      sq = sq.contains("condition_slugs", [data.condition]);
+      sq = sq.contains("condition_slugs", [conditionSlug]);
     }
 
     if (data.recruitingOnly) sq = sq.eq("overall_status", "RECRUITING");
@@ -161,7 +162,7 @@ export const matchTrialSites = createServerFn({ method: "GET" })
       const { data: broadStudies } = await sb
         .from("studies")
         .select("nct_id,title,overall_status,phase,sponsor_name")
-        .contains("condition_slugs", [data.condition])
+        .contains("condition_slugs", [conditionSlug])
         .not("brief_summary", "is", null)
         .limit(1000);
       const broadIds = new Set((broadStudies ?? []).map((s: any) => s.nct_id));
