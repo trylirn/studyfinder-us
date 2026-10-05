@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getPost } from "@/lib/posts.functions";
 
-const postQuery = (slug: string) => ({ queryKey: ["post", slug] as const, queryFn: () => getPost({ data: { slug } }) });
+const postQuery = (slug: string) => queryOptions({ queryKey: ["post", slug] as const, queryFn: () => getPost({ data: { slug } }) });
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ context, params }) => {

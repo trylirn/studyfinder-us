@@ -34,6 +34,7 @@ export function SiteHeader() {
           <Link to="/clinics" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Clinics</Link>
           <Link to="/recruiting" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Recruiting</Link>
           <Link to="/learn" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Learn</Link>
+          <Link to="/blog" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Blog</Link>
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <Link

@@ -37,6 +37,7 @@ export function SiteFooter() {
             <li><Link to="/legal/privacy" className="hover:text-primary">Privacy policy</Link></li>
             <li><Link to="/legal/terms" className="hover:text-primary">Terms of service</Link></li>
             <li><Link to="/learn" className="hover:text-primary">Learn about trials</Link></li>
+            <li><Link to="/blog" className="hover:text-primary">Blog</Link></li>
             <li><Link to="/auth" className="hover:text-primary">Admin</Link></li>
           </ul>
         </div>
