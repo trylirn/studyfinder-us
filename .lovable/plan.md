@@ -3,12 +3,12 @@
 ## What will change
 - Replace the current pin favicon with the same teal rounded-square and white Activity pulse mark used in the site header.
 - In a positive eligibility result, show a link to the suggested research clinic’s directory profile when available, and a link to the trial’s condition page when available.
-- Replace diagnosis checkboxes with plain-language yes/no questions tailored to that study’s published eligibility criteria. Generate and reuse questions for the study; keep every answer in the visitor’s browser and never send or save answers.
+- Replace diagnosis checkboxes with AI-led, plain-language questions tailored to the study’s published eligibility criteria. Generate and reuse study-specific questions; keep every answer in the visitor’s browser and never send or save answers.
 - Keep the existing age, gender, recruiting-status, ZIP, and medical-disclaimer checks. Clearly describe the result as preliminary, not medical advice or a medical decision.
 
 ## Technical approach
 - Extend the current study detail data passed into the eligibility modal with condition and clinic slugs/names, without adding visitor data collection or tracking.
-- Generate a small structured question set from the study’s eligibility text through the existing server-side Lovable AI setup, and reuse cached study-only question text to limit repeat calls. The AI receives no visitor answers; local matching evaluates answers in the browser.
+- Generate a small structured question set from the study’s eligibility text through the existing server-side Lovable AI setup, and reuse cached study-only questions to limit repeat calls. The AI generates questions only and never receives visitor answers; local matching evaluates answers in the browser.
 - Update only the favicon, eligibility modal, study detail page, and the narrow server-function changes needed for question generation/cache reuse.
 
 ## Verification
