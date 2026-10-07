@@ -3,3 +3,4 @@
 - [ ] Reduce redundant scheduled database refresh work and add targeted indexes only where justified
 - [ ] Complete SEO foundations audit and correct current findings
 - [ ] Verify build and public flows
+- [ ] Match favicon to homepage logo and add AI-generated, study-specific eligibility questions with browser-only answers and result links
