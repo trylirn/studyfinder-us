@@ -404,8 +404,6 @@ High-converting search experience
 
 The final product should be capable of supporting hundreds of thousands of studies, millions of SEO pages, advanced filtering, AI-powered explanations, and a best-in-class clinical trial discovery experience.
 
-Theres should be only one admin account: nokunato@gmail.com, password: Hppavilion1.
-
 There should be no user account. Only admin account. Get the data and populate the directory from now
 
 This project was built with [Lovable](https://lovable.dev).
